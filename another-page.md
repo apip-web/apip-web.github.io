@@ -22,5 +22,11 @@ document.getElementById("btn").addEventListener("click", () => {
 
 ### Tes ol li start
 
+<ol start="5">
+  <li>Item pertama</li>
+  <li>Item kedua</li>
+  <li>Item ketiga</li>
+</ol>
+
 5. Item pertama
 6. Item kedua
