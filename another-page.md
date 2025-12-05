@@ -30,3 +30,19 @@ document.getElementById("btn").addEventListener("click", () => {
 
 5. Item pertama
 6. Item kedua
+
+---
+layout: default
+---
+
+### Tes CSS di Markdown
+
+<style>
+  .highlight {
+    background: yellow;
+    font-weight: bold;
+    padding: 2px 4px;
+  }
+</style>
+
+Ini teks biasa, dan <span class="highlight">ini teks yang di-highlight</span>.
