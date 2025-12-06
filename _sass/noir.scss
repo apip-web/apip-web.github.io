@@ -339,6 +339,23 @@ nav.scrolled {
 	align-items: center;
 }
 
+/* ===== FIX NAVBAR LIST ===== */
+.nav-links {
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.nav-links li::before {
+  content: none !important;
+}
+/* ===== FIX END ===== */
+
 .nav-links a {
 	color: var(--text-light);
 	text-decoration: none;
@@ -2103,6 +2120,7 @@ footer {
 	}
 
 }
+
 
 
 
