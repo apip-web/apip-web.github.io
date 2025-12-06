@@ -21,6 +21,5 @@ Saya seorang pengembang web yang suka eksperimen dengan Jekyll dan HTML/CSS.
 
 ### Pages
 
-[Link to another page](./another-page.html).
-
-[Link to About Minimal Jekyll Theme](./about-minimal-theme-jekyll.html).
+- [Link to another page](./another-page.html).
+- [Link to About Minimal Jekyll Theme](./about-minimal-theme-jekyll.html).
