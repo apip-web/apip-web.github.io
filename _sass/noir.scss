@@ -58,7 +58,7 @@ a:hover {
 	text-decoration: underline;
 }
 
-p, ul, ol, table, pre, dl {
+p, ul, ol, pre {
   margin:0 0 20px;
 }
 
@@ -74,20 +74,70 @@ pre {
   overflow-x: auto;
 }
 
-table {
-  width:100%;
-  border-collapse:collapse;
+/* ===== Tables ===== */
+.table_component {
+  overflow: auto;
+  width: 100%;
 }
 
-th, td {
-  text-align:left;
-  padding:5px 10px;
-  border-bottom:1px solid #e5e5e5;
+table {
+  font-size: 13px;
+  margin: 20px auto;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  width: auto;
+  table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0px;
+  text-align: left;
 }
 
 th {
-  color:#444;
+  background-color: #eceff1;
+  color: #000000;
+  border: 1px solid #eee;
+  padding: 5px 10px;
+  white-space: nowrap;
 }
+
+td {
+  border: 1px solid #eee;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+tr {
+  background-color: #ffffff;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+tr:hover, tr:focus {
+  background-color: #f1f5ff;
+}
+
+/* 1. th paling kiri */
+table th:first-child {
+  border-top-left-radius: 9px;
+}
+
+/* 2. th paling kanan */
+table th:last-child {
+  border-top-right-radius: 9px;
+}
+
+/* 3. td bawah paling kiri */
+table tr:last-child td:first-child {
+  border-bottom-left-radius: 9px;
+}
+
+/* 4. td bawah paling kanan */
+table tr:last-child td:last-child {
+  border-bottom-right-radius: 9px;
+}
+/* ―――――――――――――――――――――――― */
 
 img {
   max-width:100%;
@@ -1918,6 +1968,7 @@ footer {
 	}
 
 }
+
 
 
 
