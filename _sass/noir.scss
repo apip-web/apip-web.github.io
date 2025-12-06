@@ -340,18 +340,18 @@ nav.scrolled {
 }
 
 /* ===== FIX NAVBAR LIST ===== */
-.nav-links {
+.nav-links, .mobile-nav-links {
   margin: 0;
   padding: 0;
 }
 
-.nav-links li {
+.nav-links li, .mobile-nav-links li {
   background: none !important;
   padding: 0 !important;
   margin: 0 !important;
 }
 
-.nav-links li::before {
+.nav-links li::before, .mobile-nav-links li::before {
   content: none !important;
 }
 /* ===== FIX END ===== */
@@ -2120,6 +2120,7 @@ footer {
 	}
 
 }
+
 
 
 
