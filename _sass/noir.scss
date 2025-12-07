@@ -70,7 +70,6 @@ code, pre {
 pre {
   padding:8px 15px;
   background: #f8f8f8;
-  border-radius:8px;
   overflow-x: auto;
 }
 
@@ -210,7 +209,6 @@ blockquote:before {
 table {
   margin: 20px auto;
   border: 1px solid #333;
-  border-radius: 10px;
   width: auto;
   table-layout: auto;
   border-collapse: separate;
@@ -249,27 +247,7 @@ tr:focus {
   background-color: rgba(255, 51, 102, 0.3);
 }
 
-/* 1. th paling kiri */
-table th:first-child {
-  border-top-left-radius: 9px;
-}
-
-/* 2. th paling kanan */
-table th:last-child {
-  border-top-right-radius: 9px;
-}
-
-/* 3. td bawah paling kiri */
-table tr:last-child td:first-child {
-  border-bottom-left-radius: 9px;
-}
-
-/* 4. td bawah paling kanan */
-table tr:last-child td:last-child {
-  border-bottom-right-radius: 9px;
-}
 /* ―――――――――――――――――――――――― */
-
 img {
   max-width:100%;
 }
@@ -2116,6 +2094,7 @@ footer {
 	}
 
 }
+
 
 
 
