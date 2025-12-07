@@ -75,14 +75,14 @@ end
 3.  This is an ordered list following a header.
 
 ###### Header 6
-
+<div class="table_component">
 | head1        | head two          | three | head1        | head two          | three |
 |:-------------|:------------------|:------|:-------------|:------------------|:------|
 | ok           | good swedish fish | nice  | ok           | good swedish fish | nice  |
 | out of stock | good and plenty   | nice  | out of stock | good and plenty   | nice  |
 | ok           | good `oreos`      | hmm   | ok           | good `oreos`      | hmm   |
 | ok           | good `zoute` drop | yumm  | ok           | good `zoute` drop | yumm  |
-
+</div>
 ### There's a horizontal rule below this.
 
 * * *
