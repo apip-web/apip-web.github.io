@@ -36,12 +36,15 @@ section {
 }
 
 section>ul>li {
-	margin-left: 0;
 	background: none;
 }
 
 .wrapper>section {
 	padding: 120px 20px 20px 20px;
+}
+
+.wrapper>section>ul {
+	margin-left: 0;
 }
 
 body {
@@ -2111,6 +2114,7 @@ footer {
 	}
 
 }
+
 
 
 
