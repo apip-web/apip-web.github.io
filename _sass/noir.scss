@@ -249,7 +249,7 @@ tr:nth-child(even) {
 
 tr:hover,
 tr:focus {
-  background-color: #222831; /* dark hover highlight */
+  background-color: rgba(255, 51, 102, 0.3);
 }
 
 /* 1. th paling kiri */
@@ -2119,6 +2119,7 @@ footer {
 	}
 
 }
+
 
 
 
