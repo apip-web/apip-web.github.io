@@ -77,13 +77,17 @@ end
 1.  Item three
 1.  Item four
 
+### A button
+
+<button>button</button>
+
 ### Small image
 
 ![Octocat](https://github.githubassets.com/images/icons/emoji/octocat.png)
 
 ### Large image
 
-![Branching]((https://img.freepik.com/free-vector/black-background-with-focus-spot-light_1017-27230.jpg))
+![Branching]((https://img.freepik.com/free-vector/black-background-with-focus-spot-light_1017-27230.jpg?semt=ais_hybrid&w=740&q=80))
 
 ### Definition lists can be used with HTML syntax.
 
