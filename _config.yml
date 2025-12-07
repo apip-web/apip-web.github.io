@@ -9,10 +9,3 @@ collections:
   pages:
     output: true
     permalink: /page/:name/
-
-defaults:
-  - scope:
-      path: "page"
-      type: pages
-    values:
-      layout: default
