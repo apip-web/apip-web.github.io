@@ -75,14 +75,63 @@ end
 3.  This is an ordered list following a header.
 
 ###### Header 6
-<div class="table_component">
+
 | head1        | head two          | three | head1        | head two          | three |
 |:-------------|:------------------|:------|:-------------|:------------------|:------|
 | ok           | good swedish fish | nice  | ok           | good swedish fish | nice  |
 | out of stock | good and plenty   | nice  | out of stock | good and plenty   | nice  |
 | ok           | good `oreos`      | hmm   | ok           | good `oreos`      | hmm   |
 | ok           | good `zoute` drop | yumm  | ok           | good `zoute` drop | yumm  |
+
+<div class="table_component">
+  <table>
+    <thead>
+      <tr>
+        <th>head1</th>
+        <th>head two</th>
+        <th>three</th>
+        <th>head1</th>
+        <th>head two</th>
+        <th>three</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ok</td>
+        <td>good swedish fish</td>
+        <td>nice</td>
+        <td>ok</td>
+        <td>good swedish fish</td>
+        <td>nice</td>
+      </tr>
+      <tr>
+        <td>out of stock</td>
+        <td>good and plenty</td>
+        <td>nice</td>
+        <td>out of stock</td>
+        <td>good and plenty</td>
+        <td>nice</td>
+      </tr>
+      <tr>
+        <td>ok</td>
+        <td>good <code>oreos</code></td>
+        <td>hmm</td>
+        <td>ok</td>
+        <td>good <code>oreos</code></td>
+        <td>hmm</td>
+      </tr>
+      <tr>
+        <td>ok</td>
+        <td>good <code>zoute</code> drop</td>
+        <td>yumm</td>
+        <td>ok</td>
+        <td>good <code>zoute</code> drop</td>
+        <td>yumm</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+
 ### There's a horizontal rule below this.
 
 * * *
