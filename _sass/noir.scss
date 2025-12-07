@@ -858,12 +858,12 @@ nav.scrolled {
 	display: inline-block;
 }
 
-.cta-button.primary {
+.cta-button.primary, button {
 	background: var(--accent);
 	color: white;
 }
 
-.cta-button.primary::before {
+.cta-button.primary::before, button::before {
 	content: '';
 	position: absolute;
 	top: 50%;
@@ -876,12 +876,12 @@ nav.scrolled {
 	transition: width 0.6s, height 0.6s;
 }
 
-.cta-button.primary:hover::before {
+.cta-button.primary:hover::before, button:hover::before {
 	width: 300px;
 	height: 300px;
 }
 
-.cta-button.primary:hover {
+.cta-button.primary:hover, button:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 20px 40px rgba(255, 51, 102, 0.3);
 }
@@ -2073,6 +2073,7 @@ footer {
 	}
 
 }
+
 
 
 
