@@ -35,6 +35,11 @@ section {
 	scroll-margin-top: 70px;
 }
 
+section>ul>li {
+	margin-left: 0;
+	background: none;
+}
+
 .wrapper>section {
 	padding: 120px 20px 20px 20px;
 }
@@ -2106,6 +2111,7 @@ footer {
 	}
 
 }
+
 
 
 
