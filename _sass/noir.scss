@@ -44,7 +44,7 @@ section {
 }
 
 .wrapper>section>ul>li::before {
-	content: none;
+	content: none !important;
 }
 
 body {
@@ -2114,6 +2114,7 @@ footer {
 	}
 
 }
+
 
 
 
