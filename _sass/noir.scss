@@ -111,38 +111,6 @@ h6 {
 }
 
 /* ===== Modern Lists (Pitch Black Theme) ===== */
-ol {
-  counter-reset: my-counter;
-  list-style: none;
-  margin: 0 0 0 40px;
-  padding: 0;
-}
-
-ol li {
-  font-size: 13px;
-  counter-increment: my-counter;
-  margin-bottom: 0.8em;
-  background: #0d0d0d; /* kotak item */
-  padding: 5px 10px;
-  border-radius: 9px;
-  color: #e8e8e8; /* teks */
-}
-
-ol li::before {
-  content: counter(my-counter);
-  color: #ffffff;
-  background: #222; /* bulatan angka */
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  margin: 0 26px 0 -50px;
-}
-
 ul {
   list-style: none;
   margin: 0 0 0 40px;
@@ -2094,6 +2062,7 @@ footer {
 	}
 
 }
+
 
 
 
