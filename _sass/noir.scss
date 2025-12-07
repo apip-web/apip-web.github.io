@@ -85,6 +85,17 @@ hr {
 }
 
 /* ===== Headings ===== */
+/* atur tinggi navbar nyata jika mau, atau biarkan default */
+:root {
+  --navbar-height: 70px; /* ganti sesuai tinggi navbarmu */
+  --anchor-offset: calc(var(--navbar-height) + 12px);
+}
+
+/* Terapkan pada heading/section yang jadi target anchor */
+h1[id], h2[id], h3[id], h4[id], h5[id], h6[id], section[id] {
+  scroll-margin-top: var(--anchor-offset);
+}
+
 .anchorjs-link {
   color: #ff3366;
   text-decoration: none;
@@ -2066,6 +2077,7 @@ footer {
 	}
 
 }
+
 
 
 
