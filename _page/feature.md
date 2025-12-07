@@ -93,7 +93,7 @@ document.getElementById("btn").addEventListener("click", () => {
 
 ### Large image
 
-![Branching]((https://img.freepik.com/free-vector/black-background-with-focus-spot-light_1017-27230.jpg?semt=ais_hybrid&w=740&q=80))
+![Branching](https://i.postimg.cc/VvnwvXZ9/premium-photo-1700752853984-d3d1574aabd2.jpg)
 
 ### Definition lists can be used with HTML syntax.
 
