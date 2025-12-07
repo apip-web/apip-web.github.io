@@ -27,7 +27,7 @@ layout: default
 
 <h3>Pages otoma</h3>
 <ul>
-  {% for p in site.pages %}
+  {% for p in site.page %}
     <li>
       <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
     </li>
@@ -37,7 +37,7 @@ layout: default
 2.
 
 <ul>
-  {% for p in site.collections.pages.docs %}
+  {% for p in site.collections.page.docs %}
     <li>
       <a href="{{ p.url | relative_url }}">{{ p.data.title }}</a>
     </li>
