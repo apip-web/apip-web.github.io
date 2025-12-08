@@ -71,38 +71,30 @@ code, pre {
   color: #f8f8f2;
 }
 
-/* Wrapper untuk membuat 2 kolom */
-.pre-wrapper {
-  display: grid;
-  grid-template-columns: auto 1fr;
+.code-block {
   position: relative;
   background: #1e1e1e;
   border-radius: 6px;
-  overflow: hidden;
-}
-
-/* Line number */
-.line-numbers {
-  text-align: right;
-  padding: 10px 10px 10px 0;
-  user-select: none;
-  font-family: monospace;
-  color: #888;
-  border-right: 1px solid #333;
-
-  /* Sticky */
-  position: sticky;
-  left: 0;
-  background: #1e1e1e;
-  z-index: 2;
-}
-
-/* Code block */
-.pre-wrapper pre {
-  margin: 0;
-  padding: 10px;
   overflow: auto;
-  white-space: pre;
+  padding-left: 50px; /* ruang untuk line number */
+}
+
+/* posisi line number */
+.code-block .line-numbers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40px;
+  padding: 10px 5px;
+  text-align: right;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.5em;
+  color: #777;
+  border-right: 1px solid #333;
+  user-select: none;
+  pointer-events: none; /* biar text bisa diseleksi normal */
+  background: #1e1e1e;
 }
 
 hr {
@@ -2101,6 +2093,7 @@ footer {
 	}
 
 }
+
 
 
 
