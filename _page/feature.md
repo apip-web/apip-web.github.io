@@ -39,30 +39,29 @@ end
 ```
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("pre").forEach(pre => {
-    const code = pre.querySelector("code");
-    if (!code) return;
-
-    const lines = code.innerHTML.split("\n").length;
-
-    // Generate line numbers
-    let nums = "";
-    for (let i = 1; i <= lines; i++) {
-      nums += i + "<br>";
-    }
-
-    // Create wrapper
+    
+    // Bungkus pre
     const wrapper = document.createElement("div");
-    wrapper.className = "pre-wrapper";
+    wrapper.className = "code-block";
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    // Hitung baris dari CSS computed height
+    const code = pre.querySelector("code") || pre;
+    const lines = code.textContent.split("\n").length;
 
     const ln = document.createElement("div");
     ln.className = "line-numbers";
-    ln.innerHTML = nums;
 
-    pre.parentNode.insertBefore(wrapper, pre);
+    let html = "";
+    for (let i = 1; i <= lines; i++) {
+      html += i + "<br>";
+    }
+    ln.innerHTML = html;
+
     wrapper.appendChild(ln);
-    wrapper.appendChild(pre);
   });
 });
 </script>
