@@ -38,23 +38,66 @@ GitHubPages::Dependencies.gems.each do |gem, version|
 end
 ```
 
-<!-- CSS (taruh di stylesheet utama) -->
+<!-- CSS: letakkan di head / stylesheet utama -->
 <style>
-/* wrapper */
-.pre-wrapper {
-  display: grid;
-  grid-template-columns: auto 1fr;
+/* container (kotak kode lengkap dengan header) */
+.code-box {
   background: #1e1e1e;
   border: 1px solid #444;
   border-radius: 8px;
-  overflow: auto;
+  overflow: hidden;
+  margin: 24px 0;
   font-size: 14px;
-  line-height: 1.5;         /* PENTING: pakai angka tetap */
-  margin: 20px 0;
+  line-height: 1.5;
 }
 
-/* line numbers column */
-.pre-wrapper .line-numbers {
+/* header sticky */
+.code-box .code-header {
+  position: sticky;
+  top: 0;
+  background: #202020;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  z-index: 5;
+  gap: 12px;
+}
+
+/* language label */
+.code-box .code-header .lang {
+  font-size: 12px;
+  color: #87c1ff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* copy button */
+.code-box .copy-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border: 1px solid #333;
+  background: #2a2a2a;
+  color: #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.code-box .copy-btn:hover { background:#2f2f2f; color:#fff; }
+.code-box .copy-btn.copied { background:#3a3a3a; color:#e6e6e6; }
+
+/* inner grid: line numbers + code */
+.code-box .code-inner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background: #1e1e1e;
+}
+
+/* line numbers */
+.code-box .line-numbers {
   background: #252526;
   color: #858585;
   text-align: right;
@@ -63,75 +106,173 @@ end
   border-right: 1px solid #444;
   position: sticky;
   left: 0;
-  z-index: 10;
+  z-index: 4;
   font-family: Consolas, Monaco, 'Courier New', monospace;
   font-size: 14px;
-  line-height: 1.5;         /* HARUS SAMA dengan .pre-wrapper */
+  line-height: 1.5;
 }
+.code-box .line-numbers span { display:block; line-height:1.5; }
 
-/* each number */
-.pre-wrapper .line-numbers span {
-  display: block;
-  line-height: 1.5;         /* HARUS SAMA */
-}
-
-/* code area: keep highlighter markup intact */
-.pre-wrapper pre {
+/* code area */
+.code-box pre {
   margin: 0;
   padding: 12px;
   overflow: auto;
+  background: transparent;
 }
-
-/* Ensure code preserves whitespace, no wrapping */
-.pre-wrapper pre code {
-  display: block;           /* important so code is block-level inside pre */
-  white-space: pre;         /* prevent wrapping and preserve line breaks */
+.code-box pre code {
+  display: block;
+  white-space: pre;
   font-family: Consolas, Monaco, 'Courier New', monospace;
   font-size: 14px;
-  line-height: 1.5;         /* MATCH semua line-height di atas */
+  line-height: 1.5;
 }
+/* keep tokens intact */
+.code-box pre code * { white-space: pre; }
 
-/* If highlight engine inserted spans, do not change display of those */
-.pre-wrapper pre code * {
-  white-space: pre;         /* keep tokens from collapsing */
-}
-
-/* optional hover highlight for corresponding line (visual only) */
-.pre-wrapper pre code span:hover { background: rgba(255,255,255,0.03); }
+/* optional hover highlight */
+.code-box pre code span:hover { background: rgba(255,255,255,0.02); }
 </style>
 
-<!-- JS (taruh sebelum </body>) -->
+<!-- JS: taruh sebelum </body> -->
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Select only top-level code inside pre (the standard Markdown output)
-  document.querySelectorAll("pre > code").forEach(code => {
-    const pre = code.parentElement;
+(function() {
+  // helper: detect language from code class or data-lang
+  function detectLang(codeEl) {
+    if (!codeEl) return 'code';
+    const m = (codeEl.className || '').match(/language-([a-z0-9_+-]+)/i);
+    if (m) return m[1].toLowerCase();
+    // fallback: data-lang on pre or code
+    if (codeEl.dataset && codeEl.dataset.lang) return codeEl.dataset.lang;
+    const pre = codeEl.parentElement;
+    if (pre && pre.dataset && pre.dataset.lang) return pre.dataset.lang;
+    return 'code';
+  }
 
-    // safety: skip if already wrapped
-    if (pre.parentElement && pre.parentElement.classList.contains('pre-wrapper')) return;
+  function createHeader(lang) {
+    const header = document.createElement('div');
+    header.className = 'code-header';
 
-    // Get raw text lines (use textContent to preserve highlight spans in innerHTML)
-    const raw = code.textContent.replace(/\r/g,'').replace(/\n$/, ""); // remove trailing newline only
-    const lines = raw === "" ? [] : raw.split("\n");
+    const left = document.createElement('div');
+    left.className = 'lang';
+    left.textContent = lang;
 
-    // Build wrapper and numbers column
-    const wrapper = document.createElement("div");
-    wrapper.className = "pre-wrapper";
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'copy-btn';
+    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><rect x="3" y="3" width="12" height="12" rx="2"></rect></svg><span>Copy</span>';
 
-    const nums = document.createElement("div");
-    nums.className = "line-numbers";
-    // create one <span> per visual line
-    nums.innerHTML = lines.map((_, i) => `<span>${i+1}</span>`).join("");
+    // copy handler
+    copyBtn.addEventListener('click', function() {
+      const box = this.closest('.code-box');
+      const codeEl = box && box.querySelector('pre');
+      if (!codeEl) return;
+      const text = codeEl.innerText.replace(/\r/g,'');
+      navigator.clipboard.writeText(text).then(() => {
+        const old = this.innerHTML;
+        this.classList.add('copied');
+        this.innerHTML = '✓ Copied';
+        setTimeout(() => {
+          this.classList.remove('copied');
+          this.innerHTML = old;
+        }, 1600);
+      }).catch(()=> {
+        // fallback: select & alert
+        try {
+          const range = document.createRange();
+          range.selectNodeContents(codeEl);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch(e){}
+        alert('Copy failed — select and copy manually');
+      });
+    });
 
-    // Insert wrapper in DOM and move pre inside it (do NOT change code.innerHTML)
-    pre.replaceWith(wrapper);
-    wrapper.appendChild(nums);
-    wrapper.appendChild(pre);
+    header.appendChild(left);
+    header.appendChild(copyBtn);
+    return header;
+  }
 
-    // Note: we intentionally do NOT modify code.innerHTML so any server-side
-    // syntax highlighting (Rouge) remains intact.
+  // wrap a single pre element into code-box with header + numbers
+  function wrapPre(pre) {
+    if (!pre || !pre.parentNode) return false;
+    // if already wrapped, skip
+    if (pre.closest('.code-box')) return false;
+    // skip empty
+    const rawText = (pre.textContent || '').replace(/\r/g,'').replace(/\n$/,'');
+    if (!rawText) return false;
+
+    const lines = rawText.split('\n');
+
+    // Build DOM
+    const box = document.createElement('div');
+    box.className = 'code-box';
+
+    // header
+    const codeEl = pre.querySelector('code') || pre;
+    const lang = detectLang(codeEl);
+    const header = createHeader(lang);
+
+    // inner (line numbers + pre)
+    const inner = document.createElement('div');
+    inner.className = 'code-inner';
+
+    const nums = document.createElement('div');
+    nums.className = 'line-numbers';
+    nums.innerHTML = lines.map((_, i) => '<span>' + (i+1) + '</span>').join('');
+
+    // insert box in place of pre
+    pre.parentNode.insertBefore(box, pre);
+    box.appendChild(header);
+    box.appendChild(inner);
+    inner.appendChild(nums);
+    inner.appendChild(pre);
+
+    return true;
+  }
+
+  // process existing pres
+  function processAll() {
+    const pres = Array.from(document.querySelectorAll('pre'));
+    let wrapped = 0;
+    pres.forEach(pre => {
+      if (wrapPre(pre)) wrapped++;
+    });
+    if (wrapped) console.log('code-box: wrapped', wrapped, 'blocks');
+    return wrapped;
+  }
+
+  // initial runs
+  document.addEventListener('DOMContentLoaded', () => {
+    try { processAll(); } catch(e){ console.error(e); }
   });
-});
+  window.addEventListener('load', () => {
+    try { processAll(); } catch(e){ console.error(e); }
+  });
+
+  // observe future additions (Prism / lazy content)
+  const mo = new MutationObserver(muts => {
+    let any = false;
+    muts.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (!(node instanceof Element)) return;
+        if (node.matches && node.matches('pre')) {
+          if (wrapPre(node)) any = true;
+        } else {
+          const pres = node.querySelectorAll && node.querySelectorAll('pre');
+          pres && pres.forEach(p => { if (wrapPre(p)) any = true; });
+        }
+      });
+    });
+    if (any) console.log('code-box: mutation wrapped new blocks');
+  });
+  mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+  // expose functions for debugging
+  window.__codeBoxProcessAll = processAll;
+  window.__codeBoxWrapPre = wrapPre;
+})();
 </script>
 
 #### Header 4
