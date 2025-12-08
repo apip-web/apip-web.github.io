@@ -1,14 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata');
 
-.inconsolata-<uniquifier> {
-  font-family: "Inconsolata", monospace;
-  font-optical-sizing: auto;
-  font-weight: <weight>;
-  font-style: normal;
-  font-variation-settings:
-    "wdth" 100;
-}
-
 :root {
   --code-bg: #1e1e1e;
   --code-border: #444;
