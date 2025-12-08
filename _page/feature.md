@@ -38,7 +38,7 @@ GitHubPages::Dependencies.gems.each do |gem, version|
 end
 ```
 
-<!-- CSS -->
+<!-- CSS (taruh di stylesheet utama) -->
 <style>
 /* wrapper */
 .pre-wrapper {
@@ -48,7 +48,7 @@ end
   border: 1px solid #444;
   border-radius: 8px;
   overflow: auto;
-  font-size: 14px;          /* pastikan nilai tetap */
+  font-size: 14px;
   line-height: 1.5;         /* PENTING: pakai angka tetap */
   margin: 20px 0;
 }
@@ -96,24 +96,23 @@ end
   white-space: pre;         /* keep tokens from collapsing */
 }
 
-/* optional hover highlight for corresponding line number (CSS-only best-effort) */
+/* optional hover highlight for corresponding line (visual only) */
 .pre-wrapper pre code span:hover { background: rgba(255,255,255,0.03); }
 </style>
 
-<!-- JS -->
+<!-- JS (taruh sebelum </body>) -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  // Select only top-level code inside pre (the standard Markdown output)
   document.querySelectorAll("pre > code").forEach(code => {
     const pre = code.parentElement;
 
-    // Get raw text lines (preserve highlight in innerHTML)
-    // remove trailing newline so we don't create an extra empty line
-    const text = code.textContent.replace(/\n$/, "");
-    const lines = text.split("\n");
-    const count = lines.length;
+    // safety: skip if already wrapped
+    if (pre.parentElement && pre.parentElement.classList.contains('pre-wrapper')) return;
 
-    // If already wrapped (avoid double-wrapping)
-    if (pre.parentElement.classList.contains('pre-wrapper')) return;
+    // Get raw text lines (use textContent to preserve highlight spans in innerHTML)
+    const raw = code.textContent.replace(/\r/g,'').replace(/\n$/, ""); // remove trailing newline only
+    const lines = raw === "" ? [] : raw.split("\n");
 
     // Build wrapper and numbers column
     const wrapper = document.createElement("div");
@@ -121,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const nums = document.createElement("div");
     nums.className = "line-numbers";
+    // create one <span> per visual line
     nums.innerHTML = lines.map((_, i) => `<span>${i+1}</span>`).join("");
 
     // Insert wrapper in DOM and move pre inside it (do NOT change code.innerHTML)
@@ -128,8 +128,8 @@ document.addEventListener("DOMContentLoaded", () => {
     wrapper.appendChild(nums);
     wrapper.appendChild(pre);
 
-    // IMPORTANT: ensure code element is block and preserves whitespace (CSS handles it)
-    // Do not modify code.innerHTML — leave highlight spans untouched
+    // Note: we intentionally do NOT modify code.innerHTML so any server-side
+    // syntax highlighting (Rouge) remains intact.
   });
 });
 </script>
