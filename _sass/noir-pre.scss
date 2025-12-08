@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata');
+
+.inconsolata-<uniquifier> {
+  font-family: "Inconsolata", monospace;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+:root {
+  --code-bg: #1e1e1e;
+  --code-border: #444;
+  --header-bg: #202020;
+  --header-border: #333;
+  --line-numbers-bg: #252526;
+  --line-numbers-color: #858585;
+  --copy-bg: #2a2a2a;
+  --copy-hover-bg: #2f2f2f;
+  --copy-active-bg: #3a3a3a;
+  --accent-lang: #ff3366;
+  --font-mono: Inconsolata, Monaco, "Courier New", monospace;
+
+  --code-font-size: 16px;
+  --code-line-height: 1.5;
+  --code-padding: 12px;
+  --radius: 8px;
+  --gap: 12px;
+}
+
+/* Outer container (wraps header + inner grid) */
+.code-box {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 24px 0;
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+}
+
+/* -------- Header (sticky) -------- */
+.code-box .code-header {
+  position: sticky;
+  top: 0;
+  background: var(--header-bg);
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--header-border);
+  z-index: 5;
+  gap: var(--gap);
+  animation: neonPulse 2s infinite alternate;
+}
+
+@keyframes neonPulse {
+  0% { box-shadow: 0 0 5px #ff3366; }
+  100% { box-shadow: 0 0 20px #ff3366; }
+}
+
+/* language label (left) */
+.code-box .code-header .lang {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--accent-lang);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* copy button (right) */
+.code-box .copy-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border: 1px solid var(--code-border);
+  background: var(--copy-bg);
+  color: #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .15s, color .15s;
+}
+
+.code-box .copy-btn:hover {
+  background: var(--copy-hover-bg);
+  color: #fff;
+}
+
+.code-box .copy-btn.copied {
+  background: var(--copy-active-bg);
+  color: #e6e6e6;
+}
+
+/* -------- Inner grid: line numbers + code -------- */
+.code-box .code-inner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  background: var(--code-bg);
+}
+
+/* line numbers column */
+.code-box .line-numbers {
+  background: var(--line-numbers-bg);
+  color: var(--line-numbers-color);
+  text-align: right;
+  padding: var(--code-padding) 10px var(--code-padding) 12px;
+  user-select: none;
+  border-right: 1px solid var(--code-border);
+
+  /* sticky so it stays visible during horizontal scroll of code */
+  position: sticky;
+  left: 0;
+  z-index: 4;
+
+  font-family: var(--font-mono);
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+}
+
+.code-box .line-numbers span {
+  display: block;
+  line-height: var(--code-line-height);
+}
+
+/* -------- Code area -------- */
+.code-box pre {
+  margin: 0;
+  padding: var(--code-padding);
+  overflow: auto;
+  background: transparent;
+  font-family: var(--font-mono);
+}
+
+.code-box pre code {
+  display: block;               /* make code element block-level */
+  white-space: pre;             /* preserve line breaks and spacing */
+  font-family: var(--font-mono);
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+}
+
+/* keep any nested highlight tokens from collapsing whitespace */
+.code-box pre code * {
+  white-space: pre;
+}
+
+/* optional: subtle hover per visual line (if code lines are wrapped into spans) */
+.code-box pre code span:hover {
+  background: rgba(255,255,255,0.02);
+}
