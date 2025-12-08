@@ -39,12 +39,30 @@ end
 ```
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("pre > code").forEach(code => {
-    const lines = code.innerHTML.split(/\n/);
-    code.innerHTML = lines.map(line =>
-      `<span class="line">${line || " "}</span>`
-    ).join("");
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("pre").forEach(pre => {
+    const code = pre.querySelector("code");
+    if (!code) return;
+
+    const lines = code.innerHTML.split("\n").length;
+
+    // Generate line numbers
+    let nums = "";
+    for (let i = 1; i <= lines; i++) {
+      nums += i + "<br>";
+    }
+
+    // Create wrapper
+    const wrapper = document.createElement("div");
+    wrapper.className = "pre-wrapper";
+
+    const ln = document.createElement("div");
+    ln.className = "line-numbers";
+    ln.innerHTML = nums;
+
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(ln);
+    wrapper.appendChild(pre);
   });
 });
 </script>
