@@ -95,7 +95,11 @@ document.getElementById("btn").addEventListener("click", () => {
 
 ![Branching](https://i.postimg.cc/VvnwvXZ9/premium-photo-1700752853984-d3d1574aabd2.jpg)
 
-### Definition lists can be used with HTML syntax.
+### Tag code
+
+<code>head</code>
+
+<code></head></code>
 
 ```
 Long, single-line code blocks should not wrap. They should horizontally scroll if they are too long. This line should be long enough to demonstrate this.
