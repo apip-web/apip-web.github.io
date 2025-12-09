@@ -280,23 +280,6 @@ img {
 }
 
 /* Navigation */
-#navbar {
-    box-shadow: 0 4px 12px rgba(255, 51, 102, 0.35);
-    animation: shadowPulse 2s ease-in-out infinite;
-}
-
-@keyframes shadowPulse {
-    0% {
-        box-shadow: 0 4px 12px rgba(255, 51, 102, 0.35);
-    }
-    50% {
-        box-shadow: 0 8px 20px rgba(255, 51, 102, 0.6);
-    }
-    100% {
-        box-shadow: 0 4px 12px rgba(255, 51, 102, 0.35);
-    }
-}
-
 nav {
 	position: fixed;
 	width: 100%;
@@ -2063,6 +2046,7 @@ footer {
 	}
 
 }
+
 
 
 
