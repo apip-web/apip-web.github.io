@@ -118,6 +118,8 @@
 }
 
 .code-box pre code {
+  padding: 0;
+  background: red;
   display: block;
   white-space: pre;
   font-family: var(--font-mono);
