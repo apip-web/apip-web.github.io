@@ -1,3 +1,6 @@
+---
+layout: default
+---
 <title>HTML Escaper Noir</title>
 <style>
 body {
