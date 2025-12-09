@@ -111,9 +111,9 @@
 /* -------- Code area -------- */
 .code-box pre {
   margin: 0;
-  padding: 0;
+  padding: var(--code-padding);
   overflow: auto;
-  background: red;
+  background: transparent;
   font-family: var(--font-mono);
 }
 
