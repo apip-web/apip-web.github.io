@@ -82,6 +82,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   background: var(--code-bg);
+  padding-right: var(--code-padding);
 }
 
 /* line numbers column */
