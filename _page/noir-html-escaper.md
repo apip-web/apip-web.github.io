@@ -21,6 +21,7 @@ body {
 
 h1 {
   font-size: 28px;
+  font-family: sans-serif;
   letter-spacing: 2px;
   color: #ff3366;
   text-shadow: 0 0 12px #ff3366;
