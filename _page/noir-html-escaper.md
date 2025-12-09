@@ -90,7 +90,7 @@ button:hover {
 </style>
 
 <div class="container">
-  <h1>HTML ESCAPER — NOIR</h1>
+  <h1>HTML ESCAPER</h1>
 
   <textarea id="input" placeholder="Paste HTML here..."></textarea>
 
