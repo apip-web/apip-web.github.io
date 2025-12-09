@@ -25,7 +25,7 @@ h1 {
   letter-spacing: 2px;
   color: #ff3366;
   text-shadow: 0 0 12px #ff3366;
-  margin-bottom: 25px;
+  margin: 25px auto;
 }
 
 textarea {
