@@ -54,6 +54,10 @@ body {
   line-height: 1.4;
 }
 
+.noir-bullet {
+  display: none;
+}
+
 .section-title {
   margin-top: 35px;
   font-size: 20px;
