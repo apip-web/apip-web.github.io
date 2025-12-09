@@ -5,8 +5,6 @@ title: About Me
 
 <style>
 body {
-  margin: 10px;
-  padding: 0;
   font-family: sans-serif;
   background: #0d0d0d;
   color: #e8e8e8;
