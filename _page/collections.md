@@ -1,9 +1,11 @@
 ---
 layout: default
-title: HTML ESCAPER — NOIR
+title: Collections
 ---
 
-# This page shows all posts and pages in this site
+# Collections
+
+## This page shows all posts and pages in this site
 
 ## Pages
 <ul>
@@ -15,3 +17,11 @@ title: HTML ESCAPER — NOIR
 </ul>
 
 ## Posts
+<h3>Posts</h3>
+  <ul>
+    {% for post in site.posts %}
+      <li>
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a> — {{ post.date | date: "%d %b %Y" }}
+      </li>
+    {% endfor %}
+  </ul>
