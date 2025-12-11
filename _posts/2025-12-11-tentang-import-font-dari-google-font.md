@@ -5,8 +5,6 @@ author: Apip
 tags: tutorial
 ---
 
-## Tentang import font dari Google Font
-
 ```css
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap');
 ```
