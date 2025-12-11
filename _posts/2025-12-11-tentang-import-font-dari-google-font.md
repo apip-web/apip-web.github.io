@@ -24,7 +24,7 @@ tags: tutorial
 ## Perbedaan
 
   <div class="font-primary">
-    ###### Font Arial 15px
+    <h5>Font Arial 15px</h5>
     <p>
       Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
       accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
@@ -36,7 +36,7 @@ tags: tutorial
   </div>
 
   <div class="font-secondary">
-    ###### Font Roboto Flex 16px
+    <h5>Font Roboto Flex 16px</h5>
     <p>
       Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
       accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
@@ -48,7 +48,7 @@ tags: tutorial
   </div>
 
   <div class="font-third">
-    ###### Font Google Sans Code 14px
+    <h5>Font Google Sans Code 14px</h5>
     <p>
       Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
       accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
