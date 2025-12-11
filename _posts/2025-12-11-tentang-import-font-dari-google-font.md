@@ -49,6 +49,18 @@ tags: tutorial
 
   </div>
 
+  <div class="font-third">
+    <h3>Font Google Sans Code</h3>
+    <p>
+      Sed ut perspiciatis unde omnis iste natus error sit voluptatem 
+      accusantium doloremque laudantium, totam rem aperiam, eaque ipsa 
+      quae ab illo inventore veritatis et quasi architecto beatae vitae 
+      dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas 
+      sit aspernatur aut odit aut fugit.
+    </p>
+
+  </div>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap');
 
@@ -63,5 +75,11 @@ tags: tutorial
   font-family: Roboto Flex, Courier;
   color: #888;
   font-size: 14px;
+}
+
+.font-third {
+  font-family: Google Sans Code, Courier;
+  color: #888;
+  font-size: 16px;
 }
 </style>
