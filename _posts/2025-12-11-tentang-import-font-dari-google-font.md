@@ -54,9 +54,11 @@ tags: tutorial
 
 .font-primary {
   font-family: Arial, Courier;
+  color: #888;
 }
 
 .font-secondary {
   font-family: Roboto Flex, Courier;
+  color: #888;
 }
 </style>
