@@ -52,6 +52,8 @@ tags: tutorial
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code');
+
 .font-primary {
   font-family: Arial, Courier;
   color: #888;
@@ -60,5 +62,6 @@ tags: tutorial
 .font-secondary {
   font-family: Roboto Flex, Courier;
   color: #888;
+  font-size: 14px;
 }
 </style>
