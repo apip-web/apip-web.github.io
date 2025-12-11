@@ -12,14 +12,14 @@ tags: tutorial
 ## Keterangan
 
 | Bagian | Artinya |
-|--------|------------------------------------------------------------|
-| `@import url(...)` | Cara lama untuk memasukkan Google Fonts (bisa juga pakai <link> di <head>) |
+|--------|---------|
+| `@import url(...)` | Cara lama untuk memasukkan Google Fonts <br> (bisa juga pakai `<link>` di `<head>`) |
 | `family=Roboto+Flex` | Nama fontnya: Roboto Flex (spasi diganti +) |
-| `opsz,wght,XOPQ,...` | Ini semua adalah “variable axes” (sumbu variabel) dari Roboto Flex. Font ini termasuk variable font paling canggih saat ini. |
-| `8..144` | Optical Size (opsz): dari 8 sampai 144 pt |
-| `100..1000` | Weight (wght): dari tipis banget (100) sampai tebal banget (1000) |
-| Sisanya (XOPQ, XTRA, dst) | Sumbu-sumbu eksperimental lain untuk mengatur bentuk huruf secara halus |
-| `display=swap` | Font langsung muncul pakai fallback dulu, baru ganti ke Roboto Flex setelah selesai download (biar web tidak blank lama) |
+| `opsz,wght,XOPQ,...` | Ini semua adalah “variable axes” <br> (sumbu variabel) dari Roboto Flex. |
+| `8..144` | Optical Size (opsz) dari 8 sampai 144 pt |
+| `100..1000` | Weight (wght): dari tipis (100) sampai tebal (1000) |
+| Sumbu lain | XOPQ, XTRA, dst = pengaturan bentuk huruf tingkat lanjut |
+| `display=swap` | Font langsung pakai fallback dulu, <br> lalu ganti ke Roboto Flex setelah download |
 
 ## Perbedaan
 
