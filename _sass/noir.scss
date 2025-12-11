@@ -26,6 +26,7 @@ https://templatemo.com/tm-599-noir-fashion
 	--text-muted: #777;
 	--bg-dark: #000;
 	--bg-section: #0a0a0a;
+	--font-size: 15px;
 }
 
 html {
@@ -40,7 +41,7 @@ body {
 	overflow-x: hidden;
 	height: 100%;
 	line-height: 1.4;
-	font-size: 15px;
+	font-size: var(--font-size);
 }
 
 .wrapper {
@@ -198,7 +199,8 @@ table {
   border-collapse: separate;
   border-spacing: 0px;
   text-align: left;
-  background: #000; /* pitch black */
+  font-size: var(--font-size);
+  background: #000;
   overflow-x: auto;
   display: block;
 }
@@ -207,13 +209,13 @@ th {
   background-color: rgba(255, 51, 102, 0.3);
   color: #ffffff;
   border: none;
-  padding: 5px 10px;
+  padding: 10px 20px;
   white-space: nowrap;
 }
 
 td {
   border: none;
-  padding: 5px 10px;
+  padding: 10px 20px;
   white-space: nowrap;
   color: #dddddd;
 }
@@ -412,4 +414,5 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
