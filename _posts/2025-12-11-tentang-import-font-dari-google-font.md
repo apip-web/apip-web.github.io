@@ -21,6 +21,18 @@ tags: tutorial
 | Sumbu lain | XOPQ, XTRA, dst = pengaturan bentuk huruf tingkat lanjut |
 | `display=swap` | Font langsung pakai fallback dulu, <br> lalu ganti ke Roboto Flex setelah download |
 
+| Axis | Nilai     | Arti                                 |
+|------|-----------|--------------------------------------|
+| opsz | 8..144    | Bisa berubah dari ukuran optik 8–144 |
+| wght | 100..1000 | Ketebalan 100–1000                   |
+| XOPQ | 96        | Nilai spesifik 96                    |
+| XTRA | 468       | Nilai spesifik 468                   |
+| YOPQ | 79        | Nilai spesifik 79                    |
+| YTDE | -203      | Nilai descent                        |
+| YTFI | 738       | Figure height                        |
+| YTLC | 514       | Lowercase height                     |
+| YTUC | 712       | Uppercase height                     |
+
 ## Perbedaan
 
   <div class="font-primary">
