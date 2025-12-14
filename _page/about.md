@@ -44,7 +44,7 @@ body {
 }
 
 .header li {
-  font-size: 12px;
+  font-size: 15px;
   color: #bcbcbc;
   margin-bottom: 5px;
   line-height: 1;
@@ -62,7 +62,6 @@ body {
 }
 
 p {
-  font-size: 15px;
   color: #d0d0d0;
 }
 
@@ -78,7 +77,7 @@ p {
   color: #fff;
   padding: 7px 14px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 15px;
   box-shadow: 0 0 10px rgba(255,51,102,0.3);
 }
 </style>
