@@ -35,6 +35,8 @@ body {
   margin: 0 0 6px 0;
   font-size: 28px;
   color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 20px;
 }
 
 .header ul {
