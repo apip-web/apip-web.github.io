@@ -108,7 +108,7 @@ h6 { font-size: 1em; margin: 0.6em 0; }
 /* BUTTON */
 button {
   margin-top: 15px;
-  background: #ff3366;
+  color: var(--accent);
   border: none;
   padding: 10px 16px;
   border-radius: 6px;
@@ -123,7 +123,7 @@ button {
 }
 
 button:hover {
-  background: #ff4d80;
+  color: var(--accent-hover);
   box-shadow: 0 0 20px #ff3366;
 }
 
@@ -447,6 +447,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
