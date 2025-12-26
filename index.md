@@ -26,43 +26,7 @@ layout: default
       </li>
     {% endfor %}
   </ul>
-
 </div>
-
-<style>
-.lcd-container {
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  flex-wrap:wrap;
-}
-
-.lcd-box {
-  background:#111;
-  border-radius:8px;
-  padding:15px 20px;
-  width: 100px;
-  text-align:center;
-  box-shadow: inset 0 0 5px #000, 0 0 5px #555;
-}
-
-.lcd-box .number {
-  font-size:36px;
-  font-weight:bold;
-  color:#0f0;
-  background:#030;
-  padding:5px 10px;
-  border-radius:4px;
-  box-shadow: inset 0 0 10px #0f0;
-}
-
-.lcd-box .label {
-  font-size:12px;
-  color:#0f0;
-  margin-top:5px;
-}
-
-</style>
 
 <script>
 const lcdBoxes = document.querySelectorAll('.lcd-box .number');
