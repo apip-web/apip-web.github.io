@@ -5,7 +5,7 @@ layout: default
 
 Text can be **bold**, _italic_, or ~~strikethrough~~.
 
-[Link to another page](/page/another-page).
+[Link to another page](/page/collections).
 
 There should be whitespace between paragraphs.
 
