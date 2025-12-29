@@ -1,33 +1,30 @@
-  <!-- Tanggal -->
-  <small class="post-date">
-    {{ page.date | date: "%-d %B %Y" }}
-  </small>
+<small class="post-date">
+  {{ include.post.date | date: "%-d %B %Y" }}
+</small>
 
-  <!-- Judul -->
-  <h1 class="post-title">{{ page.title }}</h1>
+<h1 class="post-title">
+  {{ include.post.title }}
+</h1>
 
-  <!-- Tags -->
-  {% if page.tags %}
-  <div class="post-tags">
-{% for tag in page.tags %}
-  <a class="tag" href="/tags/#{{ tag }}">#{{ tag }}</a>
-{% endfor %}
-  </div>
-  {% endif %}
+{% if include.post.tags %}
+<div class="post-tags">
+  {% for tag in include.post.tags %}
+    <a class="tag" href="/tags/#{{ tag }}">#{{ tag }}</a>
+  {% endfor %}
+</div>
+{% endif %}
 
-  <!-- Author -->
-  <div class="post-author">
-    <img
-      src="{{ '/assets/img/profile.webp' | relative_url }}"
-      alt="Author"
-      class="author-avatar"
-    >
-    <span class="author-name">
-      {{ page.author | default: site.author }}
-    </span>
-  </div>
+<div class="post-author">
+  <img
+    src="{{ '/assets/img/profile.webp' | relative_url }}"
+    class="author-avatar"
+    alt="Author"
+  >
+  <span class="author-name">
+    {{ site.author }}
+  </span>
+</div>
 
-  <!-- Konten -->
-  <div class="post-content">
-    {{ content }}
-  </div>
+<div class="post-body">
+  {{ include.post.content }}
+</div>
