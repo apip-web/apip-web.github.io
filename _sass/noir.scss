@@ -81,6 +81,10 @@ body::before {
 	margin-left: 0;
 }
 
+.highlight {
+	overflow: auto;
+}
+
 a {
 	color: var(--accent);
 	text-decoration: none;
@@ -500,4 +504,5 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
