@@ -18,6 +18,8 @@ layout: default
   </div>
 </div>
 
+</div>
+
 <hr>
 
 # Blog:
@@ -114,8 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   margin-bottom: 1em;
 }
 </style>
-
-</div>
 
 <script>
 const lcdBoxes = document.querySelectorAll('.lcd-box .number');
