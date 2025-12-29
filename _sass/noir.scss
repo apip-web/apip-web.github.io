@@ -82,9 +82,13 @@ body::before {
 }
 
 pre {
+  padding 15px;
   margin: 15px 0;
-  border-radius:6px;
   overflow-x: auto;
+}
+
+.highlight {
+	border-radius:6px;
 }
 
 a {
@@ -506,6 +510,7 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
 
 
