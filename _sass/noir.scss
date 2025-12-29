@@ -82,7 +82,10 @@ body::before {
 }
 
 .highlight {
-	overflow: auto;
+  padding:8px 15px;
+  border-radius:6px;
+  border:1px solid #e5e5e5;
+  overflow-x: auto;
 }
 
 a {
@@ -504,5 +507,6 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
 
