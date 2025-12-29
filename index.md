@@ -36,7 +36,7 @@ layout: default
       {{ post.excerpt }}
     </div>
 
-    <!-- FULL POST (instant mode) -->
+    <!-- FULL POST -->
     <div class="post-content" style="display:none;">
       {% include post-meta.html post=post %}
     </div>
