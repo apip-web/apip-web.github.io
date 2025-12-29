@@ -20,6 +20,8 @@ layout: default
 
 <hr>
 
+# Blog:
+
 <div id="posts">
   {% for post in site.posts %}
     <article class="post" data-url="{{ post.url | relative_url }}" data-tags="{{ post.tags | join: ',' }}">
@@ -42,41 +44,56 @@ layout: default
 </div>
 
 <script>
-document.addEventListener('click', function(e) {
-  const link = e.target.closest('.post-title a');
-  if (!link) return;
+document.addEventListener('DOMContentLoaded', () => {
+  const posts = document.querySelectorAll('.post');
 
-  e.preventDefault(); // cegah reload
-
-  const article = link.closest('article');
-  const content = article.querySelector('.post-content');
-  const excerpt = article.querySelector('.post-excerpt');
-
-  // toggle konten
-  if (content.style.display === 'none') {
-    content.style.display = '';
-    excerpt.style.display = 'none';
-    history.pushState(null, '', link.getAttribute('href'));
-  } else {
-    content.style.display = 'none';
-    excerpt.style.display = '';
-  }
-});
-
-// handle back/forward browser
-window.addEventListener('popstate', () => {
-  document.querySelectorAll('.post').forEach(post => {
-    const url = post.dataset.url;
+  posts.forEach(post => {
+    const link = post.querySelector('.post-title a');
     const content = post.querySelector('.post-content');
     const excerpt = post.querySelector('.post-excerpt');
 
-    if (location.pathname === url) {
-      content.style.display = '';
-      excerpt.style.display = 'none';
-    } else {
-      content.style.display = 'none';
-      excerpt.style.display = '';
-    }
+    // pastikan awalnya hanya excerpt yang tampil
+    content.style.display = 'none';
+    excerpt.style.display = '';
+
+    link.addEventListener('click', (e) => {
+      e.preventDefault(); // cegah reload
+      const url = link.getAttribute('href');
+
+      posts.forEach(p => {
+        const c = p.querySelector('.post-content');
+        const ex = p.querySelector('.post-excerpt');
+
+        if (p === post) {
+          c.style.display = '';
+          ex.style.display = 'none';
+        } else {
+          c.style.display = 'none';
+          ex.style.display = '';
+        }
+      });
+
+      // update URL tapi tanpa reload
+      history.pushState(null, '', url);
+    });
+  });
+
+  // Tangani tombol back / forward
+  window.addEventListener('popstate', () => {
+    const path = location.pathname;
+    posts.forEach(post => {
+      const url = post.querySelector('.post-title a').getAttribute('href');
+      const content = post.querySelector('.post-content');
+      const excerpt = post.querySelector('.post-excerpt');
+
+      if (url === path) {
+        content.style.display = '';
+        excerpt.style.display = 'none';
+      } else {
+        content.style.display = 'none';
+        excerpt.style.display = '';
+      }
+    });
   });
 });
 </script>
