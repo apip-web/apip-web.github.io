@@ -22,45 +22,35 @@ layout: default
 
 <hr>
 
-<button id="show-blog">Lihat Blog</button>
+<button id="show-blog">Lihat blog</button>
 
-<div id="posts" hidden>
+<div id="blog" hidden>
   {% for post in site.posts %}
-  <article class="post" data-url="{{ post.url | relative_url }}">
-    <h2 class="post-title">
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </h2>
+    <article class="post" data-url="{{ post.url | relative_url }}">
+      <h2 class="post-title">
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      </h2>
 
-    <div class="post-excerpt">
-      {{ post.excerpt }}
-    </div>
+      <div class="post-excerpt">
+        {{ post.excerpt }}
+      </div>
 
-    <div class="post-content" hidden>
-      {{ post.content }}
-    </div>
-  </article>
+      <div class="post-content" hidden>
+        {{ post.content }}
+      </div>
+    </article>
   {% endfor %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('show-blog');
-  const postsWrap = document.getElementById('posts');
+  const blog = document.getElementById('blog');
   const posts = document.querySelectorAll('.post');
 
-  function showButton() {
+  function showHome() {
     btn.hidden = false;
-    postsWrap.hidden = true;
-    posts.forEach(p => {
-      p.hidden = true;
-      p.querySelector('.post-content').hidden = true;
-      p.querySelector('.post-excerpt').hidden = false;
-    });
-  }
-
-  function showList() {
-    btn.hidden = true;
-    postsWrap.hidden = false;
+    blog.hidden = true;
     posts.forEach(p => {
       p.hidden = false;
       p.querySelector('.post-content').hidden = true;
@@ -68,26 +58,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function showPost(targetUrl) {
+  function showList() {
     btn.hidden = true;
-    postsWrap.hidden = false;
+    blog.hidden = false;
+    posts.forEach(p => {
+      p.hidden = false;
+      p.querySelector('.post-content').hidden = true;
+      p.querySelector('.post-excerpt').hidden = false;
+    });
+  }
+
+  function showPost(url) {
+    btn.hidden = true;
+    blog.hidden = false;
 
     posts.forEach(p => {
-      const isTarget = p.dataset.url === targetUrl;
+      const isTarget = p.dataset.url === url;
       p.hidden = !isTarget;
       p.querySelector('.post-content').hidden = !isTarget;
       p.querySelector('.post-excerpt').hidden = isTarget;
     });
   }
 
-  // INIT
-  showButton();
-  history.replaceState({ view: 'button' }, '', location.pathname);
-
   // Klik tombol
   btn.addEventListener('click', () => {
+    history.pushState({ page: 'list' }, '', '#blog');
     showList();
-    history.pushState({ view: 'list' }, '', '/');
   });
 
   // Klik judul post
@@ -95,23 +91,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const link = post.querySelector('.post-title a');
     link.addEventListener('click', e => {
       e.preventDefault();
-      const url = post.dataset.url;
-      showPost(url);
-      history.pushState({ view: 'post', url }, '', url);
+      history.pushState(
+        { page: 'post', url: post.dataset.url },
+        '',
+        post.dataset.url
+      );
+      showPost(post.dataset.url);
     });
   });
 
   // BACK / FORWARD
   window.addEventListener('popstate', e => {
-    const state = e.state;
-    if (!state || state.view === 'button') {
-      showButton();
-    } else if (state.view === 'list') {
-      showList();
-    } else if (state.view === 'post') {
-      showPost(state.url);
-    }
+    if (!e.state) return showHome();
+    if (e.state.page === 'list') return showList();
+    if (e.state.page === 'post') return showPost(e.state.url);
   });
+
+  // INITIAL STATE
+  history.replaceState({ page: 'home' }, '', location.pathname);
+  showHome();
 });
 </script>
 
