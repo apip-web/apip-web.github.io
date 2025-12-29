@@ -22,81 +22,86 @@ layout: default
 
 <hr>
 
-# Blog:
+<!-- Tombol untuk tampilkan blog -->
+<button id="show-blog">Lihat Blog</button>
 
-<div id="posts">
+<!-- Container untuk post (awalnya disembunyikan) -->
+<div id="posts" style="display:none;">
   {% for post in site.posts %}
-    <article class="post" data-url="{{ post.url | relative_url }}" data-tags="{{ post.tags | join: ',' }}">
-      <!-- Judul -->
-      <h2 class="post-title">
-        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-      </h2>
+  <article class="post" data-url="{{ post.url | relative_url }}">
+    <h2 class="post-title">
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    </h2>
 
-      <!-- Excerpt -->
-      <div class="post-excerpt">
-        {{ post.excerpt }}
-      </div>
+    <!-- Excerpt -->
+    <div class="post-excerpt">
+      {{ post.excerpt }}
+    </div>
 
-      <!-- Konten penuh (disembunyikan) -->
-      <div class="post-content" style="display:none;">
-        {{ post.content }}
-      </div>
-    </article>
+    <!-- Konten penuh (disembunyikan) -->
+    <div class="post-content" style="display:none;">
+      {{ post.content }}
+    </div>
+  </article>
   {% endfor %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('show-blog');
+  const postsContainer = document.getElementById('posts');
   const posts = document.querySelectorAll('.post');
 
+  // Tombol "Lihat Blog"
+  btn.addEventListener('click', () => {
+    postsContainer.style.display = '';
+    btn.style.display = 'none'; // sembunyikan tombol
+  });
+
+  // Setup tiap post
   posts.forEach(post => {
     const link = post.querySelector('.post-title a');
     const content = post.querySelector('.post-content');
     const excerpt = post.querySelector('.post-excerpt');
 
-    // awalnya hanya excerpt yang tampil
-    posts.forEach(p => {
-      p.querySelector('.post-content').style.display = 'none';
-      p.querySelector('.post-excerpt').style.display = '';
-      p.style.display = ''; // pastikan semua post terlihat
-    });
+    // Awal: hanya excerpt
+    content.style.display = 'none';
+    excerpt.style.display = '';
 
+    // Klik judul post
     link.addEventListener('click', (e) => {
       e.preventDefault();
+      const url = link.getAttribute('href');
 
       posts.forEach(p => {
         const c = p.querySelector('.post-content');
         const ex = p.querySelector('.post-excerpt');
 
         if (p === post) {
-          p.style.display = ''; // tampilkan post yang diklik
-          c.style.display = ''; // tampilkan full content
-          ex.style.display = 'none'; // sembunyikan excerpt
+          c.style.display = '';
+          ex.style.display = 'none';
         } else {
-          p.style.display = 'none'; // sembunyikan post lain
           c.style.display = 'none';
           ex.style.display = '';
         }
       });
 
-      history.pushState(null, '', link.getAttribute('href'));
+      history.pushState(null, '', url);
     });
   });
 
+  // Tangani tombol back / forward
   window.addEventListener('popstate', () => {
     const path = location.pathname;
-
     posts.forEach(post => {
       const url = post.querySelector('.post-title a').getAttribute('href');
       const content = post.querySelector('.post-content');
       const excerpt = post.querySelector('.post-excerpt');
 
       if (url === path) {
-        post.style.display = '';
         content.style.display = '';
         excerpt.style.display = 'none';
       } else {
-        post.style.display = '';
         content.style.display = 'none';
         excerpt.style.display = '';
       }
