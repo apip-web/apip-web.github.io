@@ -1,16 +1,37 @@
-<small class="post-date">
-  {{ post.date | date: "%-d %B %Y" }}
-</small>
-
-{% if post.tags %}
-<div class="post-tags">
-  {% for tag in post.tags %}
-    <a class="tag" href="/tags/#{{ tag }}">#{{ tag }}</a>
-  {% endfor %}
-</div>
-{% endif %}
-
-<div class="post-author">
-  <img src="{{ '/assets/img/profile.webp' | relative_url }}" class="author-avatar">
-  <span>{{ site.author }}</span>
-</div>
+<article class="post">  
+  
+  <!-- Tanggal -->  
+  <small class="post-date">  
+    {{ page.date | date: "%-d %B %Y" }}  
+  </small>  
+  
+  <!-- Judul -->  
+  <h1 class="post-title">{{ page.title }}</h1>  
+  
+  <!-- Tags -->  
+  {% if page.tags %}  
+  <div class="post-tags">  
+{% for tag in page.tags %}  
+  <a class="tag" href="/tags/#{{ tag }}">#{{ tag }}</a>  
+{% endfor %}  
+  </div>  
+  {% endif %}  
+  
+  <!-- Author -->  
+  <div class="post-author">  
+    <img  
+      src="{{ '/assets/img/profile.webp' | relative_url }}"  
+      alt="Author"  
+      class="author-avatar"  
+    >  
+    <span class="author-name">  
+      {{ page.author | default: site.author }}  
+    </span>  
+  </div>  
+  
+  <!-- Konten -->  
+  <div class="post-content">  
+    {{ content }}  
+  </div>  
+  
+</article>
