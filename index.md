@@ -87,9 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }  
   
   // tombol lihat blog  
-  btn.addEventListener('click', () => {  
-    location.hash = 'blog';  
-  });  
+btn.addEventListener('click', () => {
+  history.pushState({ view: 'list' }, '', '#blog');
+  showList();
+});  
   
   // klik judul post  
   posts.forEach(post => {  
@@ -102,23 +103,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });  
   
   // router ringan  
-  function router() {  
-    const path = location.pathname;  
-    const hash = location.hash;  
-  
-    if (hash === '#blog') {  
-      showList();  
-      return;  
-    }  
-  
-    const post = [...posts].find(p => p.dataset.url === path);  
-    if (post) {  
-      showPost(path);  
-      return;  
-    }  
-  
-    showHome();  
-  }  
+function router() {
+  const state = history.state;
+  const path = location.pathname;
+  const hash = location.hash;
+
+  if (state?.view === 'post') {
+    showPost(state.url);
+    return;
+  }
+
+  if (state?.view === 'list' || hash === '#blog') {
+    showList();
+    return;
+  }
+
+  const post = [...posts].find(p => p.dataset.url === path);
+  if (post) {
+    showPost(path);
+    return;
+  }
+
+  showHome();
+}  
   
   window.addEventListener('popstate', router);  
   window.addEventListener('hashchange', router);  
