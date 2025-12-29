@@ -46,16 +46,16 @@ body {
 	font-size: var(--font-size);
 	font-variation-settings: "wght" 450, "opsz" 38;
 }
-
+/*
 body::before {
   content: "";
-  position: fixed;  /* Tetap di layar saat scroll */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  pointer-events: none; /* Tidak menghalangi interaksi */
-  z-index: -1;         /* Di belakang semua konten */
+  pointer-events: none;
+  z-index: -1;
   
   background:
     radial-gradient(300px 300px at 20% 30%, rgba(255,0,150,.35), transparent 60%),
@@ -66,7 +66,7 @@ body::before {
   background-repeat: no-repeat;
   background-size: cover;
 }
-
+*/
 .wrapper {
   min-height: 100vh;
   display: flex;
@@ -510,6 +510,7 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
 
 
