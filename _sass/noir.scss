@@ -91,8 +91,12 @@ pre {
 	border-radius:6px;
 }
 
+.highlight code {
+  background: transparent;
+}
+
 code {
-  background: #1a1a1a;
+  background: #2a2a2a;
   color: #f8f8f8;
   padding: 2px 6px;
   border-radius: 4px;
@@ -517,6 +521,7 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
 
 
