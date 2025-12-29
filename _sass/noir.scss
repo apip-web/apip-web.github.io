@@ -81,10 +81,9 @@ body::before {
 	margin-left: 0;
 }
 
-.highlight {
-  padding:8px 15px;
+pre {
+  margin: 15px 0;
   border-radius:6px;
-  border:1px solid #e5e5e5;
   overflow-x: auto;
 }
 
@@ -507,6 +506,7 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
 
 
