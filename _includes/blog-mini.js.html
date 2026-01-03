@@ -22,90 +22,112 @@
 {% endfor %}
 </div>
 
-<script>  
-document.addEventListener('DOMContentLoaded', () => {  
-  const btn = document.getElementById('open-blog');  
-  const homepage = document.querySelector('.homepage');  
-  const postsWrap = document.getElementById('posts');  
-  const posts = document.querySelectorAll('.post');  
-  
-  function showHome() {  
-    btn.style.display = '';  
-    homepage.style.display = '';  
-    postsWrap.style.display = 'none';  
-  
-    posts.forEach(p => {  
-      p.style.display = '';  
-      p.querySelector('.post-content').style.display = 'none';  
-      p.querySelector('.post-excerpt').style.display = '';  
-      const titleLink = p.querySelector('.post-title a');  
-      if (titleLink) titleLink.style.display = '';  
-    });  
-  }  
-  
-  function showList() {  
-    btn.style.display = 'none';  
-    homepage.style.display = 'none';  
-    postsWrap.style.display = '';  
-  
-    posts.forEach(p => {  
-      p.style.display = '';  
-      p.querySelector('.post-content').style.display = 'none';  
-      p.querySelector('.post-excerpt').style.display = '';  
-      const titleLink = p.querySelector('.post-title a');  
-      if (titleLink) titleLink.style.display = '';  
-    });  
-  }  
-  
-  function showPost(url) {  
-    showList();  
-    posts.forEach(p => {  
-      const isTarget = p.dataset.url === url;  
-      p.style.display = isTarget ? '' : 'none';  
-      p.querySelector('.post-content').style.display = isTarget ? '' : 'none';  
-      p.querySelector('.post-excerpt').style.display = isTarget ? 'none' : '';  
-      const titleLink = p.querySelector('.post-title a');  
-      if (titleLink) titleLink.style.display = isTarget ? 'none' : '';  
-    });  
-  }  
-  
-  // tombol lihat blog → sembunyikan homepage  
-  btn.addEventListener('click', () => {  
-    location.hash = 'blog';  
-  });  
-  
-  // klik judul post → tampilkan post  
-  posts.forEach(post => {  
-    const link = post.querySelector('.post-title a');  
-    link.addEventListener('click', e => {  
-      e.preventDefault();  
-      history.pushState(null, '', post.dataset.url);  
-      showPost(post.dataset.url);  
-    });  
-  });  
-  
-  // router SPA  
-function router() {  
-    const path = location.pathname;  
-    const hash = location.hash;  
-  
-    if (hash === '#blog') {  
-      showList();  
-      return;  
-    }  
-  
-    const post = [...posts].find(p => p.dataset.url === path);  
-    if (post) {  
-      showPost(path);  
-      return;  
-    }  
-  
-    showHome();  
-  }  
-  
-  window.addEventListener('popstate', router);  
-  window.addEventListener('hashchange', router);  
-  
-  router(); // initial load  
-});  
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Elemen utama
+  const btn = document.getElementById('open-blog');        // tombol "lihat blog"
+  const homepage = document.querySelector('.homepage');   // konten homepage
+  const postsWrap = document.getElementById('posts');     // wrapper semua post
+  const posts = document.querySelectorAll('.post');       // semua post individual
+
+  /* =========================
+     Fungsi tampilkan homepage
+  ========================== */
+  function showHome() {
+    btn.style.display = '';
+    homepage.style.display = '';
+    postsWrap.style.display = 'none';
+
+    posts.forEach(p => {
+      p.style.display = '';
+      p.querySelector('.post-content').style.display = 'none';
+      p.querySelector('.post-excerpt').style.display = '';
+      const titleLink = p.querySelector('.post-title a');
+      if (titleLink) titleLink.style.display = '';
+    });
+  }
+
+  /* =========================
+     Fungsi tampilkan daftar post
+  ========================== */
+  function showList() {
+    btn.style.display = 'none';
+    homepage.style.display = 'none';
+    postsWrap.style.display = '';
+
+    posts.forEach(p => {
+      p.style.display = '';
+      p.querySelector('.post-content').style.display = 'none';
+      p.querySelector('.post-excerpt').style.display = '';
+      const titleLink = p.querySelector('.post-title a');
+      if (titleLink) titleLink.style.display = '';
+    });
+  }
+
+  /* =========================
+     Fungsi tampilkan single post
+  ========================== */
+  function showPost(url) {
+    showList();
+    posts.forEach(p => {
+      const isTarget = p.dataset.url === url;
+      p.style.display = isTarget ? '' : 'none';
+      p.querySelector('.post-content').style.display = isTarget ? '' : 'none';
+      p.querySelector('.post-excerpt').style.display = isTarget ? 'none' : '';
+      const titleLink = p.querySelector('.post-title a');
+      if (titleLink) titleLink.style.display = isTarget ? 'none' : '';
+    });
+  }
+
+  /* =========================
+     Event tombol lihat blog
+  ========================== */
+  btn.addEventListener('click', () => {
+    location.hash = 'blog';
+  });
+
+  /* =========================
+     Event klik judul post → tampilkan post
+  ========================== */
+  posts.forEach(post => {
+    const link = post.querySelector('.post-title a');
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      history.pushState(null, '', post.dataset.url);
+      showPost(post.dataset.url);
+    });
+  });
+
+  /* =========================
+     Router SPA
+  ========================== */
+  function router() {
+    const path = location.pathname;
+    const hash = location.hash;
+
+    if (hash === '#blog') {
+      showList();
+      return;
+    }
+
+    const post = [...posts].find(p => p.dataset.url === path);
+    if (post) {
+      showPost(path);
+      return;
+    }
+
+    showHome();
+  }
+
+  /* =========================
+     Tangani back / forward browser
+  ========================== */
+  window.addEventListener('popstate', router);
+  window.addEventListener('hashchange', router);
+
+  /* =========================
+     Initial load
+  ========================== */
+  router();
+});
 </script>
