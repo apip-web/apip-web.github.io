@@ -24,15 +24,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Elemen utama
-  const btn = document.getElementById('open-blog');        // tombol "lihat blog"
-  const homepage = document.querySelector('.homepage');   // konten homepage
-  const postsWrap = document.getElementById('posts');     // wrapper semua post
-  const posts = document.querySelectorAll('.post');       // semua post individual
+  const btn = document.getElementById('open-blog');
+  const homepage = document.querySelector('.homepage');
+  const postsWrap = document.getElementById('posts');
+  const posts = document.querySelectorAll('.post');
 
-  /* =========================
-     Fungsi tampilkan homepage
-  ========================== */
   function showHome() {
     btn.style.display = '';
     homepage.style.display = '';
@@ -47,9 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* =========================
-     Fungsi tampilkan daftar post
-  ========================== */
   function showList() {
     btn.style.display = 'none';
     homepage.style.display = 'none';
@@ -64,9 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* =========================
-     Fungsi tampilkan single post
-  ========================== */
   function showPost(url) {
     showList();
     posts.forEach(p => {
@@ -79,55 +69,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* =========================
-     Event tombol lihat blog
-  ========================== */
-  btn.addEventListener('click', () => {
-    location.hash = 'blog';
-  });
+  // klik tombol “lihat blog”
+  if (btn) {
+    btn.addEventListener('click', () => {
+      history.pushState({ view: 'list' }, '', '#blog');
+      showList();
+    });
+  }
 
-  /* =========================
-     Event klik judul post → tampilkan post
-  ========================== */
+  // klik judul post
   posts.forEach(post => {
     const link = post.querySelector('.post-title a');
+    if (!link) return;
     link.addEventListener('click', e => {
       e.preventDefault();
-      history.pushState(null, '', post.dataset.url);
-      showPost(post.dataset.url);
+      const url = post.dataset.url;
+      history.pushState({ view: 'post', url }, '', url);
+      showPost(url);
     });
   });
 
-  /* =========================
-     Router SPA
-  ========================== */
+  // router SPA: homepage / daftar post / single post
   function router() {
     const path = location.pathname;
     const hash = location.hash;
 
+    // tombol “lihat blog” → daftar post
     if (hash === '#blog') {
       showList();
       return;
     }
 
+    // single post
     const post = [...posts].find(p => p.dataset.url === path);
     if (post) {
       showPost(path);
       return;
     }
 
+    // default → homepage
     showHome();
   }
 
-  /* =========================
-     Tangani back / forward browser
-  ========================== */
+  // back/forward browser
   window.addEventListener('popstate', router);
   window.addEventListener('hashchange', router);
 
-  /* =========================
-     Initial load
-  ========================== */
+  // initial load
   router();
 });
 </script>
