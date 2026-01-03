@@ -23,61 +23,69 @@
 </div>
 
 <script>
-// 1. Tangkap SEMUA klik link internal
+// Deklarasikan variabel di scope luar
+let btn, homepage, postsWrap, posts;
+
+document.addEventListener('DOMContentLoaded', () => {
+    btn        = document.getElementById('open-blog');
+    homepage   = document.querySelector('.homepage');
+    postsWrap  = document.getElementById('posts');
+    posts      = document.querySelectorAll('.post');     // ← simpan di sini
+
+    // ... (fungsi showHome, showList, showPost tetap sama)
+
+    // Event listener tombol & judul post tetap sama
+    btn.addEventListener('click', () => {
+        location.hash = 'blog';
+    });
+
+    posts.forEach(post => {
+        const link = post.querySelector('.post-title a');
+        if (!link) return;
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const url = post.dataset.url;
+            history.pushState(null, '', url);
+            router();                    // ← panggil router setelah pushState
+        });
+    });
+
+    // Router tetap sama, sekarang bisa akses posts
+    function router() {
+        const path = location.pathname;
+        const hash = location.hash;
+
+        if (hash === '#blog') {
+            showList();
+            return;
+        }
+
+        const post = Array.from(posts).find(p => p.dataset.url === path);
+        if (post) {
+            showPost(path);
+            return;
+        }
+
+        showHome();
+    }
+
+    window.addEventListener('popstate', router);
+    window.addEventListener('hashchange', router);
+
+    router(); // initial call
+});
+
+// Optional: pencegatan link internal (seperti saran sebelumnya)
 document.addEventListener('click', e => {
-    // cari elemen <a> terdekat (bisa dari child element)
-    let a = e.target.closest('a');
+    const a = e.target.closest('a');
     if (!a) return;
 
     const href = a.getAttribute('href');
-    if (!href) return;
+    if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) return;
 
-    // Abaikan link eksternal, download, mailto, javascript:, target=_blank, dll
-    if (
-        a.hasAttribute('download') ||
-        a.hasAttribute('target') && a.target !== '_self' ||
-        href.startsWith('http') && !href.startsWith(location.origin) ||
-        href.startsWith('mailto:') ||
-        href.startsWith('tel:') ||
-        href.startsWith('#') ||           // hash link biasa
-        href.startsWith('javascript:')
-    ) {
-        return;
-    }
-
-    // Ini link internal → intercept
     e.preventDefault();
-    const targetUrl = new URL(href, location.origin).pathname;
-
-    history.pushState(null, '', targetUrl);
-    router();           // panggil router manual setelah pushState
+    const target = new URL(href, location.origin).pathname;
+    history.pushState(null, '', target);
+    router();
 });
-
-// 2. Perbaiki router agar lebih robust
-function router() {
-    const path = location.pathname;
-
-    // Prioritas: cek apakah ini URL post
-    const post = [...posts].find(p => p.dataset.url === path);
-    if (post) {
-        showPost(path);
-        return;
-    }
-
-    // Cek hash (untuk tombol blog)
-    if (location.hash === '#blog') {
-        showList();
-        return;
-    }
-
-    // Default: homepage
-    showHome();
-}
-
-// 3. Panggil router juga saat pushState (sudah ditambahkan di klik handler)
-//    dan tetap dengarkan popstate
-window.addEventListener('popstate', router);
-
-// Panggil sekali saat load
-router();
 </script>
