@@ -23,95 +23,55 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn        = document.getElementById('open-blog');
-  const homepage   = document.querySelector('.homepage');
-  const postsWrap  = document.getElementById('posts');
-  const posts      = document.querySelectorAll('.post');
+// Tombol buka daftar blog
+btn.addEventListener('click', () => {
+    history.pushState({ page: 'list' }, '', '/blog');
+    showList();
+});
 
-  // ── fungsi showHome, showList, showPost tetap sama seperti kode awal Anda ──
-
-  // Router yang lebih toleran terhadap trailing slash
-  function router() {
-    let path = location.pathname.replace(/\/$/, '');  // hapus trailing slash
-
-    if (path === '' || path === '/') {
-      showHome();
-      return;
-    }
-
-    // Halaman daftar blog (bisa diganti sesuai keinginan, misal '/posts')
-    if (path === '/blog') {
-      showList();
-      return;
-    }
-
-    // Cari post (toleran trailing slash)
-    const post = Array.from(posts).find(p => {
-      let postPath = p.dataset.url.replace(/\/$/, '');
-      return postPath === path;
-    });
-
-    if (post) {
-      showPost(post.dataset.url);  // gunakan URL asli dari data-url
-      return;
-    }
-
-    // Jika tidak ditemukan → tampilkan homepage atau 404
-    showHome();
-    // Alternatif: document.getElementById('page-404').style.display = '';
-  }
-
-  // 1. Tangkap SEMUA klik link internal
-  document.addEventListener('click', function (e) {
-    const a = e.target.closest('a');
-    if (!a) return;
-
-    const href = a.getAttribute('href');
-    if (!href) return;
-
-    // Lewati link yang jelas bukan navigasi internal
-    if (
-      href.startsWith('http') && !href.startsWith(location.origin) ||
-      href.startsWith('#') ||
-      href.startsWith('mailto:') ||
-      href.startsWith('tel:') ||
-      a.hasAttribute('target') && a.target !== '_self' ||
-      a.hasAttribute('download')
-    ) {
-      return;
-    }
-
-    e.preventDefault();
-
-    const targetPath = new URL(href, location.origin).pathname;
-    history.pushState(null, '', targetPath);
-    router();
-  });
-
-  // 2. Ganti tombol blog menjadi pushState (bukan hash)
-  if (btn) {
-    btn.addEventListener('click', () => {
-      history.pushState(null, '', '/blog');
-      router();
-    });
-  }
-
-  // 3. Klik judul post (tetap dipertahankan, tapi router dipanggil manual)
-  posts.forEach(post => {
+// Klik judul post
+posts.forEach(post => {
     const link = post.querySelector('.post-title a');
     if (!link) return;
     link.addEventListener('click', e => {
-      e.preventDefault();
-      const url = post.dataset.url;
-      history.pushState(null, '', url);
-      router();           // penting: panggil router, bukan showPost langsung
+        e.preventDefault();
+        const url = post.dataset.url;
+        history.pushState({ page: 'post', url: url }, '', url);
+        showPost(url);
     });
-  });
-
-  window.addEventListener('popstate', router);
-
-  // Initial load
-  router();
 });
+
+// Router hanya untuk back/forward + initial load
+function router() {
+    const state = history.state;
+
+    if (state && state.page === 'list') {
+        showList();
+        return;
+    }
+
+    if (state && state.page === 'post' && state.url) {
+        showPost(state.url);
+        return;
+    }
+
+    // Fallback: cek pathname (untuk direct access / refresh)
+    const path = location.pathname.replace(/\/$/, '');
+
+    if (path === '/blog') {
+        showList();
+        return;
+    }
+
+    const post = Array.from(posts).find(p => p.dataset.url.replace(/\/$/, '') === path);
+    if (post) {
+        showPost(post.dataset.url);
+        return;
+    }
+
+    showHome();
+}
+
+window.addEventListener('popstate', router);
+router(); // initial
 </script>
