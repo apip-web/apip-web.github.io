@@ -79,23 +79,34 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // router SPA
-  function router() {
-    const path = location.pathname;
-    const hash = location.hash;
+function router() {
+  // reset semua state dulu
+  homepage.style.display = '';
+  postsWrap.style.display = 'none';
+  posts.forEach(p => {
+    p.style.display = '';
+    p.querySelector('.post-content').style.display = 'none';
+    p.querySelector('.post-excerpt').style.display = '';
+    const titleLink = p.querySelector('.post-title a');
+    if (titleLink) titleLink.style.display = '';
+  });
 
-    if (hash === '#blog') {
-      showList();
-      return;
-    }
+  const path = location.pathname;
+  const hash = location.hash;
 
-    const post = [...posts].find(p => p.dataset.url === path);
-    if (post) {
-      showPost(path);
-      return;
-    }
-
-    showHome();
+  if (hash === '#blog') {
+    showList();
+    return;
   }
+
+  const post = [...posts].find(p => p.dataset.url === path);
+  if (post) {
+    showPost(path);
+    return;
+  }
+
+  showHome();
+}
 
   window.addEventListener('popstate', router);
   window.addEventListener('hashchange', router);
