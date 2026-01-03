@@ -36,41 +36,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const postsWrap = document.getElementById('posts');    
   const posts = document.querySelectorAll('.post');    
 
-  function updatePostDisplay(p, isTarget) {
-    const excerpt = p.querySelector('.post-excerpt');
-    const content = p.querySelector('.post-content');
-    const titleLink = p.querySelector('.post-title a');
+function updatePostDisplay(p, isTarget, mode) {
+  const excerpt = p.querySelector('.post-excerpt');
+  const content = p.querySelector('.post-content');
+  const titleLink = p.querySelector('.post-title a');
 
+  if (mode === 'post') {           // tampil satu post
     if (isTarget) {
-      p.style.display = '';         // tampilkan post target
+      p.style.display = '';
       if (excerpt) excerpt.style.display = 'none';
       if (content) content.style.display = '';
       if (titleLink) titleLink.style.display = 'none';
     } else {
-      p.style.display = postsWrap.style.display !== 'none' ? '' : 'none'; // tampilkan di list, sembunyikan di post view
-      if (excerpt) excerpt.style.display = '';
-      if (content) content.style.display = 'none';
-      if (titleLink) titleLink.style.display = '';
+      p.style.display = 'none';    // sembunyikan semua selain target
     }
+  } else if (mode === 'list') {    // tampil list
+    p.style.display = '';
+    if (excerpt) excerpt.style.display = '';
+    if (content) content.style.display = 'none';
+    if (titleLink) titleLink.style.display = '';
+  } else {                        // home
+    p.style.display = '';
+    if (excerpt) excerpt.style.display = '';
+    if (content) content.style.display = 'none';
+    if (titleLink) titleLink.style.display = '';
   }
+}
 
-  function showHome() {
-    btn.style.display = '';
-    postsWrap.style.display = 'none';
-    posts.forEach(p => updatePostDisplay(p, false));
-  }
+function showHome() {
+  btn.style.display = '';
+  postsWrap.style.display = 'none';
+  posts.forEach(p => updatePostDisplay(p, false, 'home'));
+}
 
-  function showList() {
-    btn.style.display = 'none';
-    postsWrap.style.display = '';
-    posts.forEach(p => updatePostDisplay(p, false));
-  }
+function showList() {
+  btn.style.display = 'none';
+  postsWrap.style.display = '';
+  posts.forEach(p => updatePostDisplay(p, false, 'list'));
+}
 
-  function showPost(url) {
-    btn.style.display = 'none';
-    postsWrap.style.display = '';
-    posts.forEach(p => updatePostDisplay(p, p.dataset.url === url));
-  }
+function showPost(url) {
+  btn.style.display = 'none';
+  postsWrap.style.display = '';
+  posts.forEach(p => updatePostDisplay(p, p.dataset.url === url, 'post'));
+}
 
   // tombol lihat blog
   btn.addEventListener('click', () => {
