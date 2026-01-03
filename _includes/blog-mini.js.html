@@ -18,99 +18,96 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('open-blog');
-  const homepage = document.querySelector('.homepage');
+  const btnHome = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts = document.querySelectorAll('.post');
+  const homepage = document.querySelector('.homepage');
 
-  function showHome() {
-    btn.style.display = '';
+  // ======================
+  // HELPERS
+  // ======================
+  function showHomepage() {
     homepage.style.display = '';
+    btnHome.style.display = '';
     postsWrap.style.display = 'none';
 
     posts.forEach(p => {
       p.style.display = '';
       p.querySelector('.post-content').style.display = 'none';
       p.querySelector('.post-excerpt').style.display = '';
-      const titleLink = p.querySelector('.post-title a');
-      if (titleLink) titleLink.style.display = '';
     });
   }
 
   function showList() {
-    btn.style.display = 'none';
     homepage.style.display = 'none';
+    btnHome.style.display = 'none';
     postsWrap.style.display = '';
 
     posts.forEach(p => {
       p.style.display = '';
       p.querySelector('.post-content').style.display = 'none';
       p.querySelector('.post-excerpt').style.display = '';
-      const titleLink = p.querySelector('.post-title a');
-      if (titleLink) titleLink.style.display = '';
     });
   }
 
   function showPost(url) {
-    showList();
+    homepage.style.display = 'none';
+    btnHome.style.display = 'none';
+    postsWrap.style.display = '';
+
     posts.forEach(p => {
       const isTarget = p.dataset.url === url;
       p.style.display = isTarget ? '' : 'none';
       p.querySelector('.post-content').style.display = isTarget ? '' : 'none';
       p.querySelector('.post-excerpt').style.display = isTarget ? 'none' : '';
-      const titleLink = p.querySelector('.post-title a');
-      if (titleLink) titleLink.style.display = isTarget ? 'none' : '';
     });
   }
 
-  // tombol lihat blog → sembunyikan homepage
-  btn.addEventListener('click', () => {
-    location.hash = 'blog';
+  // ======================
+  // EVENT LISTENERS
+  // ======================
+  btnHome?.addEventListener('click', () => {
+    history.pushState({ page: 'list' }, '', '#blog');
+    showList();
   });
 
-  // klik judul post → tampilkan post
   posts.forEach(post => {
     const link = post.querySelector('.post-title a');
     link.addEventListener('click', e => {
       e.preventDefault();
-      history.pushState(null, '', post.dataset.url);
+      history.pushState({ page: 'post', url: post.dataset.url }, '', post.dataset.url);
       showPost(post.dataset.url);
     });
   });
 
-  // router SPA
-function router() {
-  // reset semua state dulu
-  homepage.style.display = '';
-  postsWrap.style.display = 'none';
-  posts.forEach(p => {
-    p.style.display = '';
-    p.querySelector('.post-content').style.display = 'none';
-    p.querySelector('.post-excerpt').style.display = '';
-    const titleLink = p.querySelector('.post-title a');
-    if (titleLink) titleLink.style.display = '';
+  // BACK / FORWARD
+  window.addEventListener('popstate', () => {
+    router();
   });
 
-  const path = location.pathname;
-  const hash = location.hash;
+  // ======================
+  // ROUTER
+  // ======================
+  function router() {
+    const path = location.pathname;
+    const hash = location.hash;
 
-  if (hash === '#blog') {
-    showList();
-    return;
+    if (hash === '#blog') {
+      showList();
+      return;
+    }
+
+    const post = [...posts].find(p => p.dataset.url === path);
+    if (post) {
+      showPost(path);
+      return;
+    }
+
+    // default homepage
+    showHomepage();
   }
 
-  const post = [...posts].find(p => p.dataset.url === path);
-  if (post) {
-    showPost(path);
-    return;
-  }
-
-  showHome();
-}
-
-  window.addEventListener('popstate', router);
-  window.addEventListener('hashchange', router);
-
-  router(); // initial load
+  // INITIAL
+  router();
 });
 </script>
