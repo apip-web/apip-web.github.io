@@ -28,13 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const homepage = document.querySelector('.homepage');
   const postsWrap = document.getElementById('posts');
   const posts = document.querySelectorAll('.post');
-  const page404 = document.querySelector('.page-404'); // sudah ada di DOM, awalnya display:none
+  const page404 = document.getElementById('page-404'); // elemen 404
 
   function showHome() {
     btn.style.display = '';
     homepage.style.display = '';
     postsWrap.style.display = 'none';
-    page404?.style.display = 'none';
+    page404.style.display = 'none';
 
     posts.forEach(p => {
       p.style.display = '';
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.style.display = 'none';
     homepage.style.display = 'none';
     postsWrap.style.display = '';
-    page404?.style.display = 'none';
+    page404.style.display = 'none';
 
     posts.forEach(p => {
       p.style.display = '';
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showPost(url) {
     showList();
-    page404?.style.display = 'none';
+    page404.style.display = 'none';
 
     posts.forEach(p => {
       const isTarget = p.dataset.url === url;
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.style.display = 'none';
     homepage.style.display = 'none';
     postsWrap.style.display = 'none';
-    page404?.style.display = '';
+    page404.style.display = '';
   }
 
   // tombol lihat blog
@@ -102,25 +102,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const path = location.pathname;
     const hash = location.hash;
 
+    // homepage
+    if ((path === '/' || path === '/index.html') && hash === '') {
+      showHome();
+      return;
+    }
+
+    // daftar blog
     if (hash === '#blog') {
       showList();
       return;
     }
 
+    // halaman post
     const post = [...posts].find(p => p.dataset.url === path);
     if (post) {
       showPost(path);
       return;
     }
 
-    // jika path tidak ada → 404
+    // jika tidak ada → 404
     show404();
   }
 
   // intercept back/forward
   window.addEventListener('popstate', router);
 
-  // intercept reload / F5
+  // initial load / reload / F5
   router();
 });
 </script>
