@@ -28,20 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const homepage = document.querySelector('.homepage');
   const postsWrap = document.getElementById('posts');
   const posts = document.querySelectorAll('.post');
-  const page404 = document.getElementById('page-404');
+  const page404 = document.getElementById('page-404'); // gunakan ID supaya konsisten
 
-  // ---------- SHOW FUNCTIONS ----------
   function showHome() {
     btn.style.display = '';
     homepage.style.display = '';
     postsWrap.style.display = 'none';
-    page404?.style.display = 'none';
+    if (page404) page404.style.display = 'none';
 
     posts.forEach(p => {
       p.style.display = '';
-      p.querySelector('.post-content').style.display = 'none';
-      p.querySelector('.post-excerpt').style.display = '';
+      const content = p.querySelector('.post-content');
+      const excerpt = p.querySelector('.post-excerpt');
       const titleLink = p.querySelector('.post-title a');
+
+      if (content) content.style.display = 'none';
+      if (excerpt) excerpt.style.display = '';
       if (titleLink) titleLink.style.display = '';
     });
   }
@@ -50,27 +52,34 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.style.display = 'none';
     homepage.style.display = 'none';
     postsWrap.style.display = '';
-    page404?.style.display = 'none';
+    if (page404) page404.style.display = 'none';
 
     posts.forEach(p => {
       p.style.display = '';
-      p.querySelector('.post-content').style.display = 'none';
-      p.querySelector('.post-excerpt').style.display = '';
+      const content = p.querySelector('.post-content');
+      const excerpt = p.querySelector('.post-excerpt');
       const titleLink = p.querySelector('.post-title a');
+
+      if (content) content.style.display = 'none';
+      if (excerpt) excerpt.style.display = '';
       if (titleLink) titleLink.style.display = '';
     });
   }
 
   function showPost(url) {
     showList();
-    page404?.style.display = 'none';
+    if (page404) page404.style.display = 'none';
 
     posts.forEach(p => {
       const isTarget = p.dataset.url === url;
       p.style.display = isTarget ? '' : 'none';
-      p.querySelector('.post-content').style.display = isTarget ? '' : 'none';
-      p.querySelector('.post-excerpt').style.display = isTarget ? 'none' : '';
+
+      const content = p.querySelector('.post-content');
+      const excerpt = p.querySelector('.post-excerpt');
       const titleLink = p.querySelector('.post-title a');
+
+      if (content) content.style.display = isTarget ? '' : 'none';
+      if (excerpt) excerpt.style.display = isTarget ? 'none' : '';
       if (titleLink) titleLink.style.display = isTarget ? 'none' : '';
     });
   }
@@ -79,11 +88,32 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.style.display = 'none';
     homepage.style.display = 'none';
     postsWrap.style.display = 'none';
-    page404?.style.display = '';
+    if (page404) page404.style.display = '';
   }
 
-  // ---------- NAVIGATION ----------
-  function router(url = location.pathname) {
+  // tombol lihat blog
+  if (btn) {
+    btn.addEventListener('click', () => {
+      history.pushState(null, '', '#blog');
+      router();
+    });
+  }
+
+  // klik judul post
+  posts.forEach(post => {
+    const link = post.querySelector('.post-title a');
+    if (link) {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        history.pushState(null, '', post.dataset.url);
+        router();
+      });
+    }
+  });
+
+  // router SPA
+  function router() {
+    const path = location.pathname;
     const hash = location.hash;
 
     if (hash === '#blog') {
@@ -91,63 +121,19 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const post = [...posts].find(p => p.dataset.url === url);
+    const post = [...posts].find(p => p.dataset.url === path);
     if (post) {
-      showPost(url);
+      showPost(path);
       return;
     }
 
-    // default → homepage
-    if (url === '/' || url === '') {
-      showHome();
-      return;
-    }
-
-    // tidak ditemukan → 404
     show404();
   }
 
-  // ---------- INTERCEPT LINKS ----------
-  function attachLinkListeners() {
-    document.querySelectorAll('a[href^="/"]').forEach(a => {
-      if (a.dataset.spa) return;
-      if (!a.href.startsWith(location.origin)) return;
-      if (a.target === '_blank') return;
-
-      a.dataset.spa = "true";
-
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const href = new URL(a.href).pathname;
-        history.pushState(null, '', href);
-        router(href);
-      });
-    });
-  }
-
-  attachLinkListeners();
-
-  // klik tombol lihat blog
-  btn?.addEventListener('click', () => {
-    history.pushState(null, '', '#blog');
-    router();
-  });
-
-  // klik judul post
-  posts.forEach(post => {
-    const link = post.querySelector('.post-title a');
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const href = post.dataset.url;
-      history.pushState(null, '', href);
-      router(href);
-    });
-  });
-
   // intercept back/forward
-  window.addEventListener('popstate', () => router());
+  window.addEventListener('popstate', router);
 
-  // intercept reload / initial load
+  // initial load / reload
   router();
 });
 </script>
