@@ -1,15 +1,13 @@
----    
-layout: default    
----    
-<div class="homepage">    
+---
+layout: default
+---
+<div class="homepage">
   <h2>Selamat Datang di Situs Saya</h2>    
-    
-  <p>Ini adalah blog pribadi saya tentang teknologi dan coding.</p>    
-    
-<hr>    
-    
-</div>    
-    
+
+  <p>Ini adalah blog pribadi saya tentang teknologi dan coding.</p>
+
+</div>
+
 <hr>    
     
 <button id="open-blog">Lihat blog</button>    
@@ -47,24 +45,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
     posts.forEach(p => {    
       p.style.display = '';    
-      p.querySelector('.post-content').style.display = 'none';    
-      p.querySelector('.post-excerpt').style.display = '';    
+      p.querySelector('.post-content').style.display = 'none';
+      p.querySelector('.post-excerpt').style.display = '';
     });    
   }    
     
-  function showList() {    
-    btn.style.display = 'none';    
-    postsWrap.style.display = '';    
-    
+  function showList() {
+    btn.style.display = 'none';
+    postsWrap.style.display = '';
+  
     posts.forEach(p => {    
       p.style.display = '';    
       p.querySelector('.post-content').style.display = 'none';    
       p.querySelector('.post-excerpt').style.display = '';    
-    });    
-  }    
-    
-  function showPost(url) {    
-    showList();    
+    });
+  }
+  
+  function showPost(url) {
+    showList();
     
     posts.forEach(p => {    
       const isTarget = p.dataset.url === url;    
@@ -99,18 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
       return;    
     }    
     
-    const post = [...posts].find(p => p.dataset.url === path);    
-    if (post) {    
-      showPost(path);    
-      return;    
-    }    
-    
-    showHome();    
-  }    
-    
+    const post = [...posts].find(p => p.dataset.url === path);
+    if (post) {
+      showPost(path);
+      return;
+    }
+
+    showHome();
+  }
+
   window.addEventListener('popstate', router);    
   window.addEventListener('hashchange', router);    
-    
-  router(); // initial load    
-});    
+
+  router(); // initial load
+});
 </script>
