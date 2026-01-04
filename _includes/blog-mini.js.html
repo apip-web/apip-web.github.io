@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const page404   = document.getElementById('page-404');
   const BLOG_PATH = '/blog/';
 
-  function safe(el, fn) { if(el) fn(el); }
+  function safe(el, fn) { if (el) fn(el); }
 
   function hideAllPosts() {
     posts.forEach(p => {
@@ -47,24 +47,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function hide404() {
-    safe(page404, el => el.style.display = 'none');
-  }
-
-  function showHome(push = false) {
+  function showHome() {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
+    safe(page404, el => el.style.display = 'none');
     hideAllPosts();
-    hide404();
-    if(push) history.pushState(null, '', '/');
   }
 
-  function showList(push = false) {
+  function showList() {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    hide404();
+    safe(page404, el => el.style.display = 'none');
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -72,18 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
-
-    if(push) history.pushState(null, '', BLOG_PATH);
   }
 
-  function showPost(url, push = false) {
+  function showPost(url) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    hide404();
+    safe(page404, el => el.style.display = 'none');
 
     let found = false;
-
     posts.forEach(p => {
       const active = p.dataset.url === url;
       safe(p, el => el.style.display = active ? 'block' : 'none');
@@ -93,50 +85,59 @@ document.addEventListener('DOMContentLoaded', () => {
       if(active) found = true;
     });
 
-    if(!found) {
-      show404(push, url);
-      return;
-    }
-
-    if(push) history.pushState(null, '', url);
+    return found;
   }
 
-  function show404(push = false, url = location.pathname) {
+  function show404() {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
-
-    if(push) history.pushState(null, '', url);
   }
 
-  function router(path = location.pathname, push = false) {
-    // skip /page/ → biarkan browser load fisik
-    if(path.startsWith('/page/')) return;
+  function router(path, push = false) {
+    // jangan dicegat jika path berada di /page/
+    if(path.startsWith('/page/')) {
+      if(push) location.href = path;
+      return;
+    }
 
-    // cek post
+    // single post prioritas
     const post = posts.find(p => p.dataset.url === path);
-    if(post) return showPost(path, push);
+    if(post) {
+      showPost(path);
+      if(push) history.pushState(null, '', path);
+      return;
+    }
 
     // daftar blog
-    if(path === BLOG_PATH) return showList(push);
+    if(path === BLOG_PATH) {
+      showList();
+      if(push) history.pushState(null, '', path);
+      return;
+    }
 
     // homepage
-    if(path === '/' || path === '') return showHome(push);
+    if(path === '/' || path === '') {
+      showHome();
+      if(push) history.pushState(null, '', '/');
+      return;
+    }
 
-    // 404 SPA
-    show404(push, path);
+    // lainnya → 404 SPA
+    show404();
+    if(push) history.pushState(null, '', path);
   }
 
   // intercept semua link internal
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     a.addEventListener('click', e => {
-      const url = new URL(a.href, location.origin);
-      const path = url.pathname;
-      if(path.startsWith('/page/')) return; // biarkan browser
+      const href = a.getAttribute('href');
+      // biarkan external atau bukan / ... 
+      if(!href.startsWith('/')) return;
       e.preventDefault();
-      router(path, true);
+      router(href, true);
     });
   });
 
