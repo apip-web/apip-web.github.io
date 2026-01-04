@@ -30,36 +30,25 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const homepage  = document.querySelector('.homepage');
-  const btn       = document.getElementById('open-blog');
+  const btn = document.getElementById('open-blog');
+  const homepage = document.querySelector('.homepage');
   const postsWrap = document.getElementById('posts');
-  const posts     = [...document.querySelectorAll('.post')];
+  const posts = [...document.querySelectorAll('.post')];
 
   const BLOG_PATH = '/blog/';
-
-  if (!postsWrap || posts.length === 0) {
-    console.warn('SPA: posts container not found');
-    return;
-  }
 
   /* =====================
      VISIBILITY HELPERS
   ===================== */
-
-  function hideAll() {
-    if (homepage) homepage.style.display = 'none';
-    if (btn) btn.style.display = 'none';
+  function showHome() {
+    homepage.style.display = '';
+    btn.style.display = '';
     postsWrap.style.display = 'none';
   }
 
-  function showHome() {
-    hideAll();
-    if (homepage) homepage.style.display = '';
-    if (btn) btn.style.display = '';
-  }
-
   function showList(push = false) {
-    hideAll();
+    homepage.style.display = 'none';
+    btn.style.display = 'none';
     postsWrap.style.display = 'block';
 
     posts.forEach(p => {
@@ -70,13 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (a) a.style.display = '';
     });
 
-    if (push && location.pathname !== BLOG_PATH) {
+    if (push) {
       history.pushState({ view: 'list' }, '', BLOG_PATH);
     }
   }
 
   function showPost(url, push = false) {
-    hideAll();
+    homepage.style.display = 'none';
+    btn.style.display = 'none';
     postsWrap.style.display = 'block';
 
     let found = false;
@@ -94,28 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (active) found = true;
     });
 
-    if (found && push && location.pathname !== url) {
+    if (push && found) {
       history.pushState({ view: 'post', url }, '', url);
     }
 
-    if (!found) show404();
-  }
-
-  function show404() {
-    hideAll();
-    const el = document.getElementById('page-404');
-    if (el) el.style.display = 'block';
+    if (!found) showHome();
   }
 
   /* =====================
      EVENTS
   ===================== */
-
-  if (btn) {
-    btn.addEventListener('click', () => {
-      showList(true);
-    });
-  }
+  btn.addEventListener('click', () => {
+    showList(true);
+  });
 
   posts.forEach(post => {
     const link = post.querySelector('.post-title a');
@@ -128,42 +109,36 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* =====================
-     ROUTER (DETERMINISTIC)
+     ROUTER (FIXED)
   ===================== */
-
   function router() {
     const path = location.pathname;
 
-    // 1️⃣ Single post (PRIORITAS MUTLAK)
+    // 1️⃣ single post (PALING PRIORITAS)
     const post = posts.find(p => p.dataset.url === path);
     if (post) {
       showPost(path, false);
       return;
     }
 
-    // 2️⃣ Blog list
+    // 2️⃣ daftar blog
     if (path === BLOG_PATH) {
       showList(false);
       return;
     }
 
-    // 3️⃣ Homepage
+    // 3️⃣ homepage
     if (path === '/' || path === '') {
       showHome();
       return;
     }
 
-    // 4️⃣ Fallback
-    show404();
+    // fallback
+    showHome();
   }
 
   window.addEventListener('popstate', router);
 
-  /* =====================
-     BOOTSTRAP
-  ===================== */
-
   router();
-
 });
 </script>
