@@ -13,7 +13,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('#spa-home');
+  const homepage  = document.querySelector('#spa-home .homepage');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showHome(push = false) {
-    safe(homepage, el => el.style.display = 'block');
-    safe(btn, el => el.style.display = 'block');
+    safe(homepage, el => el.style.display = '');
+    safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
     hideAllPosts();
     hide404();
@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
-    hideAllPosts();
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -101,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function router(path = location.pathname, push = false) {
-    // jangan intercept folder /page/
+    // jangan intercept folder /page/ → biarkan browser load fisik
     if(path.startsWith('/page/')) return;
 
     // cek post
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // intercept semua link internal kecuali /page/
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
-    if(href.startsWith('/page/')) return;
+    if(href.startsWith('/page/')) return; // biarkan browser handle
     a.addEventListener('click', e => {
       e.preventDefault();
       router(href, true);
@@ -151,8 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     router(location.pathname, false);
   });
 
-  // initial load
-  showHome(); // Homepage aman sejak awal
-  router(location.pathname, false); // lalu cek route SPA
+  // **initial load SPA**
+  // Homepage akan muncul secara otomatis jika path = /
+  router(location.pathname, false);
 });
 </script>
