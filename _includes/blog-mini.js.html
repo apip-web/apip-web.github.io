@@ -1,71 +1,42 @@
-<style>
-  #spa-home { display: block; }
-  #posts { display: none; }
-</style>
-
-<div id="page-404" style="display:none;">
-    <h1>404</h1>
-    <p>Halaman tidak ditemukan.</p>
-    <a href="/">Kembali ke Home</a>
-</div>
-
-<div id="posts" style="display:none;">
-{% for post in site.posts %}
-  <article class="post" data-url="{{ post.url | relative_url }}">
-    <h2 class="post-title">
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </h2>
-
-    <div class="post-excerpt">
-      {{ post.excerpt }}
-    </div>
-
-    <div class="post-content" style="display:none;">
-      {% include post-meta.html post=post %}
-    </div>
-  </article>
-{% endfor %}
-</div>
-
-<style>
-  #spa-home { display: block; }
-  #posts { display: none; }
-</style>
-
-<div id="page-404" style="display:none;">
-    <h1>404</h1>
-    <p>Halaman tidak ditemukan.</p>
-    <a href="/">Kembali ke Home</a>
-</div>
-
-<div id="posts" style="display:none;">
-{% for post in site.posts %}
-  <article class="post" data-url="{{ post.url | relative_url }}">
-    <h2 class="post-title">
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </h2>
-
-    <div class="post-excerpt">
-      {{ post.excerpt }}
-    </div>
-
-    <div class="post-content" style="display:none;">
-      {% include post-meta.html post=post %}
-    </div>
-  </article>
-{% endfor %}
+<style>  
+  #spa-home { display: block; }  
+  #posts { display: none; }  
+</style>  
+  
+<div id="page-404" style="display:none;">  
+    <h1>404</h1>  
+    <p>Halaman tidak ditemukan.</p>  
+    <a href="/">Kembali ke Home</a>  
+</div>  
+  
+<div id="posts" style="display:none;">  
+{% for post in site.posts %}  
+  <article class="post" data-url="{{ post.url | relative_url }}">  
+    <h2 class="post-title">  
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>  
+    </h2>  
+  
+    <div class="post-excerpt">  
+      {{ post.excerpt }}  
+    </div>  
+  
+    <div class="post-content" style="display:none;">  
+      {% include post-meta.html post=post %}  
+    </div>  
+  </article>  
+{% endfor %}  
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const homepage  = document.querySelector('#spa-home');
-  const btn       = document.getElementById('open-blog');
-  const postsWrap = document.getElementById('posts');
-  const page404   = document.getElementById('page-404');
-  const posts     = [...document.querySelectorAll('.post')];
+  const homepage   = document.querySelector('#spa-home');
+  const btn        = document.getElementById('open-blog');
+  const postsWrap  = document.getElementById('posts');
+  const posts      = [...document.querySelectorAll('.post')];
+  const page404    = document.getElementById('page-404');
 
-  const BLOG_PATH = '/blog/';
+  const BLOG_PATH  = '/blog/';
 
   function safe(el, fn) { if (el) fn(el); }
 
@@ -78,21 +49,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function hideAllPages() {
-    safe(homepage, el => el.style.display = 'none');
-    safe(postsWrap, el => el.style.display = 'none');
+  function hide404() {
     safe(page404, el => el.style.display = 'none');
-    hideAllPosts();
+  }
+
+  function show404() {
+    safe(homepage, el => el.style.display = 'none');
+    safe(btn, el => el.style.display = 'none');
+    safe(postsWrap, el => el.style.display = 'none');
+    safe(page404, el => el.style.display = 'block');
   }
 
   function showHome() {
-    hideAllPages();
+    hide404();
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
+    safe(postsWrap, el => el.style.display = 'none');
+    hideAllPosts();
   }
 
   function showList(push = false) {
-    hideAllPages();
+    hide404();
+    safe(homepage, el => el.style.display = 'none');
+    safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
 
     posts.forEach(p => {
@@ -106,7 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showPost(url, push = false) {
-    hideAllPages();
+    hide404();
+    safe(homepage, el => el.style.display = 'none');
+    safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
 
     let found = false;
@@ -123,47 +104,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!found) {
-      show404(push);
+      // jika post tidak ada → tampilkan 404 SPA
+      show404();
       return;
     }
 
-    if (push) history.pushState(null, '', url);
-  }
-
-  function show404(push = false) {
-    hideAllPages();
-    safe(page404, el => el.style.display = 'block');
-
-    if (push) history.pushState(null, '', '/404');
+    if (push && found) {
+      history.pushState(null, '', url);
+    }
   }
 
   function router() {
     const path = location.pathname;
 
-    // 1️⃣ single post
+    // cek single post
     const post = posts.find(p => p.dataset.url === path);
-    if (post) {
-      showPost(path);
-      return;
-    }
+    if (post) return showPost(path);
 
-    // 2️⃣ daftar blog
-    if (path === BLOG_PATH) {
-      showList();
-      return;
-    }
+    // cek daftar post
+    if (path === BLOG_PATH) return showList();
 
-    // 3️⃣ homepage
-    if (path === '/' || path === '') {
-      showHome();
-      return;
-    }
+    // cek homepage
+    if (path === '/' || path === '') return showHome();
 
-    // 4️⃣ fallback → 404
+    // fallback → 404 SPA
     show404();
   }
 
-  // tombol "Lihat Blog" SPA
   if (btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -171,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // link ke postingan SPA
   posts.forEach(p => {
     const a = p.querySelector('.post-title a');
     if (!a) return;
@@ -182,11 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // popstate (back/forward)
   window.addEventListener('popstate', router);
 
-  // initial load
   router();
-
 });
 </script>
