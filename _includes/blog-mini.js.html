@@ -98,21 +98,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if(!found) {
-      show404(push);
+      show404(push, url);
       return;
     }
 
     if(push) pushIfDifferent(url);
   }
 
-  function show404(push = false) {
+  function show404(push = false, url = location.pathname) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
 
-    if(push) pushIfDifferent(location.pathname);
+    if(push) pushIfDifferent(url);
   }
 
   function router(path = location.pathname, push = false) {
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(path === '/' || path === '') return showHome(push);
 
     // 404 SPA
-    show404(push);
+    show404(push, path);
   }
 
   // intercept semua link internal kecuali /page/
