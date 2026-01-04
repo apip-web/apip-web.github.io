@@ -4,7 +4,7 @@ layout: default
 
 {% include blog.html %}
 
-<div id="posts" style="display:none;">    
+<div id="posts">    
 <h1>Blog:</h1>
 {% for post in site.posts %}    
   <article class="post" data-url="{{ post.url | relative_url }}">    
