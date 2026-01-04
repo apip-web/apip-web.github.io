@@ -111,6 +111,23 @@ document.addEventListener('DOMContentLoaded', () => {
   /* =====================
      ROUTER (FIXED)
   ===================== */
+  function syncInitialState() {
+  const path = location.pathname;
+
+  const post = posts.find(p => p.dataset.url === path);
+  if (post) {
+    history.replaceState({ view: 'post', url: path }, '', path);
+    return;
+  }
+
+  if (path === BLOG_PATH) {
+    history.replaceState({ view: 'list' }, '', path);
+    return;
+  }
+
+  history.replaceState({ view: 'home' }, '', path);
+}
+  
   function router() {
     const path = location.pathname;
 
@@ -139,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('popstate', router);
 
-  router();
+  syncInitialState();
+router();
 });
 </script>
