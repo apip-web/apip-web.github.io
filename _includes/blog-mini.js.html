@@ -27,6 +27,20 @@
 {% endfor %}  
 </div>
 
+<div id="pages" style="display:none;">
+{% for page in site.pages %}
+  <article class="page" data-url="{{ page.url | relative_url }}">
+    <h2 class="page-title">
+      <a href="{{ page.url | relative_url }}">{{ page.title }}</a>
+    </h2>
+
+    <div class="page-content">
+      {{ page.content }}
+    </div>
+  </article>
+{% endfor %}
+</div>
+
 <script>    
 document.addEventListener('DOMContentLoaded', () => {    
   const homepage  = document.querySelector('#spa-home');    
