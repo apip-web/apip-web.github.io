@@ -21,10 +21,10 @@ layout: default
     <h2 class="post-title">  
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
     </h2>
-
-<div class="post-body">
-  {{ include.post.content }}
-</div>
+    
+<div class="post-content" style="display:none;">  
+      {% post=post %}  
+    </div>
 
   </article>
 {% endfor %}
