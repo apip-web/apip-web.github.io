@@ -36,50 +36,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const posts = [...document.querySelectorAll('.post')];
 
   const BLOG_PATH = '/blog/';
-  const STORE_KEY = 'spa:last-view';
 
-  function saveView(data) {
-    sessionStorage.setItem(STORE_KEY, JSON.stringify(data));
-  }
-
-  function loadView() {
-    try {
-      return JSON.parse(sessionStorage.getItem(STORE_KEY));
-    } catch {
-      return null;
-    }
-  }
-
-  function showHome() {
-    homepage.style.display = '';
-    btn.style.display = '';
+  /* =====================
+     RENDER HELPERS
+  ===================== */
+  function hideAll() {
+    if (homepage) homepage.style.display = 'none';
+    if (btn) btn.style.display = 'none';
     postsWrap.style.display = 'none';
-    saveView({ type: 'home', url: '/' });
   }
 
-  function showList(push = false) {
-    homepage.style.display = 'none';
-    btn.style.display = 'none';
+  function renderHome() {
+    hideAll();
+    if (homepage) homepage.style.display = '';
+    if (btn) btn.style.display = '';
+  }
+
+  function renderList() {
+    hideAll();
     postsWrap.style.display = 'block';
 
     posts.forEach(p => {
       p.style.display = 'block';
       p.querySelector('.post-content').style.display = 'none';
       p.querySelector('.post-excerpt').style.display = 'block';
+
       const a = p.querySelector('.post-title a');
       if (a) a.style.display = '';
     });
-
-    saveView({ type: 'list', url: BLOG_PATH });
-
-    if (push) {
-      history.pushState({ view: 'list' }, '', BLOG_PATH);
-    }
   }
 
-  function showPost(url, push = false) {
-    homepage.style.display = 'none';
-    btn.style.display = 'none';
+  function renderPost(url) {
+    hideAll();
     postsWrap.style.display = 'block';
 
     let found = false;
@@ -97,21 +85,41 @@ document.addEventListener('DOMContentLoaded', () => {
       if (active) found = true;
     });
 
-    if (!found) {
-      showHome();
+    if (!found) renderHome();
+  }
+
+  /* =====================
+     ROUTER (URL FIRST)
+  ===================== */
+  function router() {
+    const path = location.pathname;
+
+    // 1️⃣ single post
+    const post = posts.find(p => p.dataset.url === path);
+    if (post) {
+      renderPost(path);
       return;
     }
 
-    saveView({ type: 'post', url });
-
-    if (push) {
-      history.pushState({ view: 'post', url }, '', url);
+    // 2️⃣ blog list
+    if (path === BLOG_PATH) {
+      renderList();
+      return;
     }
+
+    // 3️⃣ home
+    renderHome();
   }
 
-  btn.addEventListener('click', () => {
-    showList(true);
-  });
+  /* =====================
+     INTERCEPT NAVIGATION
+  ===================== */
+  if (btn) {
+    btn.addEventListener('click', () => {
+      history.pushState(null, '', BLOG_PATH);
+      router();
+    });
+  }
 
   posts.forEach(post => {
     const link = post.querySelector('.post-title a');
@@ -119,42 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     link.addEventListener('click', e => {
       e.preventDefault();
-      showPost(post.dataset.url, true);
+      history.pushState(null, '', post.dataset.url);
+      router();
     });
   });
 
-  function router() {
-    const path = location.pathname;
-
-    const post = posts.find(p => p.dataset.url === path);
-    if (post) {
-      showPost(path, false);
-      return;
-    }
-
-    if (path === BLOG_PATH) {
-      showList(false);
-      return;
-    }
-
-    showHome();
-  }
-
-  /* =====================
-     💡 FAKE BACK INJECTION
-  ===================== */
-  if (history.length === 1) {
-    const saved = loadView();
-
-    if (saved && saved.url !== location.pathname) {
-      history.replaceState({ view: 'current' }, '', location.pathname);
-      history.pushState({ view: saved.type }, '', saved.url);
-      history.back();
-    }
-  }
-
   window.addEventListener('popstate', router);
 
+  /* =====================
+     INITIAL LOAD
+  ===================== */
   router();
 });
 </script>
