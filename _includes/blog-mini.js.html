@@ -13,16 +13,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage    = document.querySelector('.homepage');
-  const btn         = document.getElementById('open-blog');
-  const postsWrap   = document.getElementById('posts');
-  const posts       = [...document.querySelectorAll('.post')];
-  const page404     = document.getElementById('page-404');
-  const BLOG_PATH   = '/blog/';
+  const homepage  = document.querySelector('.homepage');   // Hanya homepage
+  const btn       = document.getElementById('open-blog');
+  const postsWrap = document.getElementById('posts');
+  const posts     = [...document.querySelectorAll('.post')];
+  const page404   = document.getElementById('page-404');
+  const BLOG_PATH = '/blog/';
 
   function safe(el, fn) { if(el) fn(el); }
 
   function hideAllPosts() {
+    safe(postsWrap, el => el.style.display = 'none');
     posts.forEach(p => {
       safe(p, el => el.style.display = 'none');
       safe(p.querySelector('.post-content'), el => el.style.display = 'none');
@@ -39,11 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(location.pathname !== path) history.pushState(null, '', path);
   }
 
-  // === Helper khusus untuk homepage ===
+  // -----------------------------
+  // Homepage helper
+  // -----------------------------
   function displayHomepage(push = false) {
-    safe(homepage, el => el.style.display = '');   // tampilkan homepage
-    safe(btn, el => el.style.display = '');        // tampilkan tombol blog
-    safe(postsWrap, el => el.style.display = 'none'); // sembunyikan posts
+    safe(homepage, el => el.style.display = '');
     hideAllPosts();
     hide404();
     if(push) pushIfDifferent('/');
@@ -72,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
     hide404();
 
     let found = false;
-
     posts.forEach(p => {
       const active = p.dataset.url === url;
       safe(p, el => el.style.display = active ? 'block' : 'none');
@@ -82,44 +82,36 @@ document.addEventListener('DOMContentLoaded', () => {
       if(active) found = true;
     });
 
-    if(!found) {
-      show404(push, url);
-      return;
-    }
-
+    if(!found) { show404(push, url); return; }
     if(push) pushIfDifferent(url);
   }
 
   function show404(push = false, url = location.pathname) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
-    safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'block');
     hideAllPosts();
+    safe(page404, el => el.style.display = 'block');
 
     if(push) pushIfDifferent(url);
   }
 
-  // === Router SPA ===
+  // -----------------------------
+  // Router
+  // -----------------------------
   function router(path = location.pathname, push = false) {
-    // jangan intercept folder /page/ → biarkan browser load fisik
-    if(path.startsWith('/page/')) return;
+    if(path.startsWith('/page/')) return; // biarkan browser load fisik
 
-    // prioritas single post
     const post = posts.find(p => p.dataset.url === path);
     if(post) return showPost(path, push);
-
-    // daftar blog
     if(path === BLOG_PATH) return showList(push);
-
-    // homepage
     if(path === '/' || path === '') return displayHomepage(push);
 
-    // SPA 404
     show404(push, path);
   }
 
-  // intercept semua link internal kecuali /page/
+  // -----------------------------
+  // Link interception
+  // -----------------------------
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
     if(href.startsWith('/page/')) return; // biarkan browser handle
@@ -129,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // tombol blog
   if(btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -137,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // klik post
   posts.forEach(p => {
     const a = p.querySelector('.post-title a');
     if(!a) return;
@@ -147,12 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // back / forward
   window.addEventListener('popstate', () => {
     router(location.pathname, false);
   });
 
-  // initial load
+  // -----------------------------
+  // Initial load
+  // -----------------------------
   router(location.pathname, false);
 });
 </script>
