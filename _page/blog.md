@@ -2,6 +2,23 @@
 layout: default
 ---
 
-<h1>Blog:</h1>
-
 {% include blog.html %}
+
+<div id="posts" style="display:none;">    
+<h1>Blog:</h1>
+{% for post in site.posts %}    
+  <article class="post" data-url="{{ post.url | relative_url }}">    
+    <h2 class="post-title">    
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>    
+    </h2>    
+    
+    <div class="post-excerpt">    
+      {{ post.excerpt }}    
+    </div>    
+    
+    <div class="post-content" style="display:none;">    
+      {% include post-meta.html post=post %}    
+    </div>    
+  </article>    
+{% endfor %}    
+</div>
