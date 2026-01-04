@@ -16,8 +16,8 @@ layout: default
 </h1>
 
 <div id="pages" style="display:block;">  
-{% for post in site.posts %}  
-  <article class="post" data-url="{{ post.url | relative_url }}">  
+{% for post in site.page %}  
+  <article class="page" data-url="{{ post.url | relative_url }}">  
     <h2 class="post-title">  
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>  
     </h2>  
