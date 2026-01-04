@@ -70,13 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) fn(el);
   }
 
+  /* =====================
+     SHOW FUNCTIONS
+  ===================== */
   function showHome() {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
 
+    // reset semua post
     posts.forEach(p => {
-      p.style.display = 'none';
+      p.style.display = 'block';
       safe(p.querySelector('.post-content'), el => el.style.display = 'none');
       safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
@@ -84,16 +88,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showList(push = false) {
+    safe(homepage, el => el.style.display = 'none');
+    safe(btn, el => el.style.display = 'none');
+    safe(postsWrap, el => el.style.display = 'block');
+
+    // reset semua post
     posts.forEach(p => {
       p.style.display = 'block';
       safe(p.querySelector('.post-content'), el => el.style.display = 'none');
       safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
-
-    safe(homepage, el => el.style.display = 'none');
-    safe(btn, el => el.style.display = 'none');
-    safe(postsWrap, el => el.style.display = 'block');
 
     if (push) history.pushState(null, '', BLOG_PATH);
   }
@@ -118,25 +123,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (push && found) history.pushState(null, '', url);
 
-    if (!found) console.warn('❌ post not in DOM → biarkan halaman fisik');
+    if (!found) {
+      // biarkan halaman fisik tampil, fallback
+      console.warn('❌ post not found in DOM');
+    }
   }
 
+  /* =====================
+     ROUTER
+  ===================== */
   function router() {
     const path = location.pathname;
 
-    if (posts.length) {
-      const post = posts.find(p => p.dataset.url === path);
-      if (post) return showPost(path);
-    }
+    // single post prioritas
+    const post = posts.find(p => p.dataset.url === path);
+    if (post) return showPost(path);
 
     if (path === BLOG_PATH) return showList();
-    showHome();
+    return showHome();
   }
 
+  /* =====================
+     EVENTS
+  ===================== */
   if (btn) {
-    btn.addEventListener('click', () => {
-      showList(true);
-    });
+    btn.addEventListener('click', () => showList(true));
   }
 
   posts.forEach(p => {
@@ -149,11 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  window.addEventListener('popstate', () => {
-    router();
-  });
+  window.addEventListener('popstate', router);
 
+  // initial load
   router();
-
 });
 </script>
