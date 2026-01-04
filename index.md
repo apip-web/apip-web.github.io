@@ -22,8 +22,8 @@ layout: default
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
     </h2>
     
-<div class="post-content" style="display:none;">  
-      {% post=post %}  
+<div class="post-content" style="display:block;">  
+      {% include post-meta.html post=post %}  
     </div>
 
   </article>
