@@ -1,7 +1,7 @@
 @import "rouge-github";
 /* @import "noir-pre"; */
 @import "noir-lightbox";
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap'); */
 
 /*
 
@@ -37,7 +37,7 @@ html {
 }
 
 body {
-	font-family: "Roboto Flex", Courier, Arial, sans-serif;
+	font-family: Courier, Arial, sans-serif;
 	background: var(--bg-dark);
 	color: var(--text-light);
 	overflow-x: hidden;
@@ -568,6 +568,7 @@ footer {
   color:#0f0;
   margin-top:5px;
 }
+
 
 
 
