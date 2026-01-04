@@ -12,4 +12,5 @@ layout: default
 
 <button id="open-blog">Lihat blog</button>
 
-<a href="/blog/">LINK 404</a>
+<h1><a href="/archive/">LINK 404</a>
+</h1>
