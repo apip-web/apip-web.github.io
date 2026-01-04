@@ -36,14 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const posts = [...document.querySelectorAll('.post')];
 
   const BLOG_PATH = '/blog/';
+  const STORE_KEY = 'spa:last-view';
 
-  /* =====================
-     VISIBILITY HELPERS
-  ===================== */
+  function saveView(data) {
+    sessionStorage.setItem(STORE_KEY, JSON.stringify(data));
+  }
+
+  function loadView() {
+    try {
+      return JSON.parse(sessionStorage.getItem(STORE_KEY));
+    } catch {
+      return null;
+    }
+  }
+
   function showHome() {
     homepage.style.display = '';
     btn.style.display = '';
     postsWrap.style.display = 'none';
+    saveView({ type: 'home', url: '/' });
   }
 
   function showList(push = false) {
@@ -58,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const a = p.querySelector('.post-title a');
       if (a) a.style.display = '';
     });
+
+    saveView({ type: 'list', url: BLOG_PATH });
 
     if (push) {
       history.pushState({ view: 'list' }, '', BLOG_PATH);
@@ -84,16 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (active) found = true;
     });
 
-    if (push && found) {
-      history.pushState({ view: 'post', url }, '', url);
+    if (!found) {
+      showHome();
+      return;
     }
 
-    if (!found) showHome();
+    saveView({ type: 'post', url });
+
+    if (push) {
+      history.pushState({ view: 'post', url }, '', url);
+    }
   }
 
-  /* =====================
-     EVENTS
-  ===================== */
   btn.addEventListener('click', () => {
     showList(true);
   });
@@ -108,55 +123,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* =====================
-     ROUTER (FIXED)
-  ===================== */
-  function syncInitialState() {
-  const path = location.pathname;
-
-  const post = posts.find(p => p.dataset.url === path);
-  if (post) {
-    history.replaceState({ view: 'post', url: path }, '', path);
-    return;
-  }
-
-  if (path === BLOG_PATH) {
-    history.replaceState({ view: 'list' }, '', path);
-    return;
-  }
-
-  history.replaceState({ view: 'home' }, '', path);
-}
-  
   function router() {
     const path = location.pathname;
 
-    // 1️⃣ single post (PALING PRIORITAS)
     const post = posts.find(p => p.dataset.url === path);
     if (post) {
       showPost(path, false);
       return;
     }
 
-    // 2️⃣ daftar blog
     if (path === BLOG_PATH) {
       showList(false);
       return;
     }
 
-    // 3️⃣ homepage
-    if (path === '/' || path === '') {
-      showHome();
-      return;
-    }
-
-    // fallback
     showHome();
+  }
+
+  /* =====================
+     💡 FAKE BACK INJECTION
+  ===================== */
+  if (history.length === 1) {
+    const saved = loadView();
+
+    if (saved && saved.url !== location.pathname) {
+      history.replaceState({ view: 'current' }, '', location.pathname);
+      history.pushState({ view: saved.type }, '', saved.url);
+      history.back();
+    }
   }
 
   window.addEventListener('popstate', router);
 
-  syncInitialState();
-router();
+  router();
 });
 </script>
