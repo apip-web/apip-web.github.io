@@ -13,12 +13,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('#spa-home');
-  const btn       = document.getElementById('open-blog');
-  const postsWrap = document.getElementById('posts');
-  const posts     = [...document.querySelectorAll('.post')];
-  const page404   = document.getElementById('page-404');
-  const BLOG_PATH = '/blog/';
+  const homepageEl  = document.querySelector('.homepage'); // target khusus homepage
+  const btn          = document.getElementById('open-blog');
+  const postsWrap    = document.getElementById('posts');
+  const posts        = [...document.querySelectorAll('.post')];
+  const page404      = document.getElementById('page-404');
+  const BLOG_PATH    = '/blog/';
 
   function safe(el, fn) { if(el) fn(el); }
 
@@ -40,8 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showHome(push = false) {
-    safe(homepage, el => el.style.display = '');
-    safe(btn, el => el.style.display = '');
+    safe(homepageEl, el => el.style.display = 'block'); // tampilkan homepage
     safe(postsWrap, el => el.style.display = 'none');
     hideAllPosts();
     hide404();
@@ -49,8 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showList(push = false) {
-    safe(homepage, el => el.style.display = 'none');
-    safe(btn, el => el.style.display = 'none');
+    safe(homepageEl, el => el.style.display = 'none'); // sembunyikan homepage
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
 
@@ -65,8 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showPost(url, push = false) {
-    safe(homepage, el => el.style.display = 'none');
-    safe(btn, el => el.style.display = 'none');
+    safe(homepageEl, el => el.style.display = 'none'); // sembunyikan homepage
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
 
@@ -89,8 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function show404(push = false, url = location.pathname) {
-    safe(homepage, el => el.style.display = 'none');
-    safe(btn, el => el.style.display = 'none');
+    safe(homepageEl, el => el.style.display = 'none'); // sembunyikan homepage
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
