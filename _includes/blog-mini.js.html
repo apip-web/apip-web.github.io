@@ -13,7 +13,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepageEl  = document.querySelector('#spa-home .homepage'); // homepage sebenarnya
+  const homepageEl  = document.querySelector('#spa-home .homepage');
   const btn         = document.getElementById('open-blog');
   const postsWrap   = document.getElementById('posts');
   const posts       = [...document.querySelectorAll('.post')];
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function pushIfDifferent(path) { if(location.pathname !== path) history.pushState(null,'',path); }
 
   function showHome(push=false){
-    safe(homepageEl, el => el.style.display = '');  // tampilkan homepage
+    safe(homepageEl, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
     hideAllPosts();
@@ -44,12 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showList(push=false){
-    safe(homepageEl, el => el.style.display = 'none'); // sembunyikan homepage
+    safe(homepageEl, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
-    hideAllPosts();
+    hideAllPosts(); // sembunyikan semua post dulu
 
+    // tampilkan semua post dalam list
     posts.forEach(p=>{
       safe(p, el => el.style.display='block');
       safe(p.querySelector('.post-content'), el => el.style.display='none');
@@ -65,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(btn, el => el.style.display='none');
     safe(postsWrap, el => el.style.display='block');
     hide404();
+    hideAllPosts(); // pastikan semua post disembunyikan dulu
 
     let found=false;
     posts.forEach(p=>{
@@ -98,13 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
     show404(push, path);
   }
 
-  // intercept semua link internal kecuali /page/
   document.querySelectorAll('a[href^="/"]').forEach(a=>{
     const href=a.getAttribute('href');
-    if(href.startsWith('/page/')) return; // biarkan browser handle
+    if(href.startsWith('/page/')) return;
     a.addEventListener('click', e=>{
       e.preventDefault();
-      router(href, true);
+      router(href,true);
     });
   });
 
@@ -122,10 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // back / forward
   window.addEventListener('popstate', ()=>router(location.pathname,false));
 
-  // initial load
   router(location.pathname,false);
 });
 </script>
