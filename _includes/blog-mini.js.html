@@ -51,17 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(page404, el => el.style.display = 'none');
   }
 
-  function pushIfDifferent(path) {
-    if(location.pathname !== path) history.pushState(null, '', path);
-  }
-
   function showHome(push = false) {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
     hideAllPosts();
     hide404();
-    if(push) pushIfDifferent('/');
+    if(push) history.pushState(null, '', '/');
   }
 
   function showList(push = false) {
@@ -77,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
 
-    if(push) pushIfDifferent(BLOG_PATH);
+    if(push) history.pushState(null, '', BLOG_PATH);
   }
 
   function showPost(url, push = false) {
@@ -98,48 +94,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if(!found) {
-      show404(push);
+      show404(push, url);
       return;
     }
 
-    if(push) pushIfDifferent(url);
+    if(push) history.pushState(null, '', url);
   }
 
-  function show404(push = false) {
+  function show404(push = false, url = location.pathname) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
 
-    if(push) pushIfDifferent(location.pathname);
+    if(push) history.pushState(null, '', url);
   }
 
   function router(path = location.pathname, push = false) {
-    // jangan intercept folder /page/ → biarkan browser load fisik
+    // skip /page/ → biarkan browser load fisik
     if(path.startsWith('/page/')) return;
 
     // cek post
     const post = posts.find(p => p.dataset.url === path);
     if(post) return showPost(path, push);
 
-    // cek daftar blog
+    // daftar blog
     if(path === BLOG_PATH) return showList(push);
 
     // homepage
     if(path === '/' || path === '') return showHome(push);
 
     // 404 SPA
-    show404(push);
+    show404(push, path);
   }
 
-  // intercept semua link internal kecuali /page/
+  // intercept semua link internal
   document.querySelectorAll('a[href^="/"]').forEach(a => {
-    const href = a.getAttribute('href');
-    if(href.startsWith('/page/')) return; // biarkan browser handle
     a.addEventListener('click', e => {
+      const url = new URL(a.href, location.origin);
+      const path = url.pathname;
+      if(path.startsWith('/page/')) return; // biarkan browser
       e.preventDefault();
-      router(href, true);
+      router(path, true);
     });
   });
 
