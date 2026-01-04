@@ -11,3 +11,5 @@ layout: default
 </div>
 
 <button id="open-blog">Lihat blog</button>
+
+<a href="/blog/">LINK 404</a>
