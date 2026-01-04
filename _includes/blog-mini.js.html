@@ -30,43 +30,58 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const btn = document.getElementById('open-blog');
-  const homepage = document.querySelector('.homepage');
-  const postsWrap = document.getElementById('posts');
-  const spaHome = document.getElementById('spa-home'); // 🔑 INI KUNCI
-  const posts = [...document.querySelectorAll('.post')];
+  const btn        = document.getElementById('open-blog');
+  const homepage   = document.querySelector('.homepage');
+  const postsWrap  = document.getElementById('posts');
+  const spaHome    = document.getElementById('spa-home');
+  const posts      = [...document.querySelectorAll('.post')];
 
   const BLOG_PATH = '/blog/';
 
   /* =====================
-     VISIBILITY RESET
+     GUARD (HALAMAN POST)
   ===================== */
-  function hideAll() {
-    if (homepage) homepage.style.display = 'none';
-    if (btn) btn.style.display = 'none';
-    if (postsWrap) postsWrap.style.display = 'none';
-    if (spaHome) spaHome.style.display = 'none';
+  if (!homepage || !postsWrap || posts.length === 0) {
+    console.warn('SPA: element inti tidak lengkap');
+    return;
   }
 
   /* =====================
-     VIEWS
+     RESET SEMUA VIEW
+  ===================== */
+  function hideAll() {
+    homepage.style.display  = 'none';
+    postsWrap.style.display = 'none';
+    if (btn) btn.style.display = 'none';
+    if (spaHome) spaHome.style.display = 'none';
+
+    posts.forEach(p => {
+      p.style.display = 'none';
+    });
+  }
+
+  /* =====================
+     HOME
   ===================== */
   function showHome() {
     hideAll();
-    if (homepage) homepage.style.display = '';
+    homepage.style.display = '';
     if (btn) btn.style.display = '';
   }
 
+  /* =====================
+     LIST
+  ===================== */
   function showList(push = false) {
     hideAll();
-    if (!postsWrap) return;
 
     postsWrap.style.display = 'block';
 
     posts.forEach(p => {
       p.style.display = 'block';
-      p.querySelector('.post-content').style.display = 'none';
       p.querySelector('.post-excerpt').style.display = 'block';
+      p.querySelector('.post-content').style.display = 'none';
+
       const a = p.querySelector('.post-title a');
       if (a) a.style.display = '';
     });
@@ -76,35 +91,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* =====================
+     SINGLE POST
+  ===================== */
   function showPost(url, push = false) {
     hideAll();
+
+    postsWrap.style.display = 'block';
+    if (spaHome) spaHome.style.display = '';
 
     let found = false;
 
     posts.forEach(p => {
       const active = p.dataset.url === url;
 
-      p.style.display = active ? 'block' : 'none';
-      p.querySelector('.post-content').style.display = active ? 'block' : 'none';
-      p.querySelector('.post-excerpt').style.display = active ? 'none' : 'block';
+      if (active) {
+        p.style.display = 'block';
+        p.querySelector('.post-excerpt').style.display = 'none';
+        p.querySelector('.post-content').style.display = 'block';
 
-      const a = p.querySelector('.post-title a');
-      if (a) a.style.display = active ? 'none' : '';
+        const a = p.querySelector('.post-title a');
+        if (a) a.style.display = 'none';
 
-      if (active) found = true;
+        found = true;
+      }
     });
-
-    if (spaHome) spaHome.style.display = found ? '' : 'none';
 
     if (push && found) {
       history.pushState(null, '', url);
     }
 
-    if (!found) showHome();
+    if (!found) {
+      showHome();
+    }
   }
 
   /* =====================
-     EVENTS
+     EVENTS (OPSIONAL)
   ===================== */
   if (btn) {
     btn.addEventListener('click', () => {
@@ -123,26 +146,42 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* =====================
-     ROUTER
+     ROUTER (URL = TRUTH)
   ===================== */
   function router() {
     const path = location.pathname;
 
+    // 1️⃣ single post
     const post = posts.find(p => p.dataset.url === path);
     if (post) {
       showPost(path, false);
       return;
     }
 
+    // 2️⃣ blog list
     if (path === BLOG_PATH) {
       showList(false);
       return;
     }
 
+    // 3️⃣ home
+    if (path === '/' || path === '') {
+      showHome();
+      return;
+    }
+
+    // fallback
     showHome();
   }
 
+  /* =====================
+     BACK / FORWARD
+  ===================== */
   window.addEventListener('popstate', router);
+
+  /* =====================
+     INITIAL LOAD
+  ===================== */
   router();
 });
 </script>
