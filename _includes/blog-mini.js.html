@@ -49,20 +49,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function hide404() {
+    safe(page404, el => el.style.display = 'none');
+  }
+
   function showHome() {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'none');
-
     hideAllPosts();
+    hide404();
   }
 
   function showList(push = false) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    safe(page404, el => el.style.display = 'none');
+    hide404();
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -78,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    safe(page404, el => el.style.display = 'none');
+    hide404();
 
     let found = false;
 
@@ -94,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!found) {
-      show404(push);
+      // post tidak ada → biarkan browser load fisik
       return;
     }
 
@@ -113,15 +116,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function router() {
     const path = location.pathname;
 
-    // single post prioritas
+    // 1️⃣ single post prioritas
     const post = posts.find(p => p.dataset.url === path);
     if (post) return showPost(path);
 
+    // 2️⃣ daftar blog
     if (path === BLOG_PATH) return showList();
 
+    // 3️⃣ homepage
+    if (path === '/') return showHome();
+
+    // 4️⃣ internal 404
     if (path === '/404') return show404();
 
-    show404(); // fallback semua URL tidak dikenal
+    // 5️⃣ fallback → biarkan browser load fisik (atau bisa show404())
+    hideAllPosts();
+    hide404();
   }
 
   if (btn) {
