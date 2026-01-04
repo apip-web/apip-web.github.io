@@ -47,12 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function hide404() {
+    safe(page404, el => el.style.display = 'none');
+  }
+
   function showHome(push = false) {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'none');
     hideAllPosts();
+    hide404();
     if(push) history.pushState(null, '', '/');
   }
 
@@ -60,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    safe(page404, el => el.style.display = 'none');
+    hide404();
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -76,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    safe(page404, el => el.style.display = 'none');
+    hide404();
 
     let found = false;
 
@@ -102,24 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
-
     hideAllPosts();
 
     if(push) history.pushState(null, '', location.pathname);
   }
 
   function router(path = location.pathname, push = false) {
-    // cek post
     const post = posts.find(p => p.dataset.url === path);
     if(post) return showPost(path, push);
-
-    // cek daftar blog
     if(path === BLOG_PATH) return showList(push);
-
-    // homepage
     if(path === '/' || path === '') return showHome(push);
-
-    // lainnya → 404 SPA
     show404(push);
   }
 
@@ -127,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     a.addEventListener('click', e => {
       const href = a.getAttribute('href');
-      if(!href.startsWith(location.origin) && !href.startsWith('/')) return;
       e.preventDefault();
       router(href, true);
     });
