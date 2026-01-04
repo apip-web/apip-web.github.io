@@ -29,16 +29,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
   const homepage  = document.querySelector('#spa-home');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
   const page404   = document.getElementById('page-404');
-
   const BLOG_PATH = '/blog/';
 
-  function safe(el, fn) { if (el) fn(el); }
+  function safe(el, fn) { if(el) fn(el); }
 
   function hideAllPosts() {
     posts.forEach(p => {
@@ -49,23 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function hide404() {
-    safe(page404, el => el.style.display = 'none');
-  }
-
-  function showHome() {
+  function showHome(push = false) {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
+    safe(page404, el => el.style.display = 'none');
     hideAllPosts();
-    hide404();
+    if(push) history.pushState(null, '', '/');
   }
 
   function showList(push = false) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    hide404();
+    safe(page404, el => el.style.display = 'none');
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -74,34 +69,32 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
 
-    if (push) history.pushState(null, '', BLOG_PATH);
+    if(push) history.pushState(null, '', BLOG_PATH);
   }
 
   function showPost(url, push = false) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    hide404();
+    safe(page404, el => el.style.display = 'none');
 
     let found = false;
 
     posts.forEach(p => {
       const active = p.dataset.url === url;
-
       safe(p, el => el.style.display = active ? 'block' : 'none');
       safe(p.querySelector('.post-content'), el => el.style.display = active ? 'block' : 'none');
       safe(p.querySelector('.post-excerpt'), el => el.style.display = active ? 'none' : 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = active ? 'none' : '');
-
-      if (active) found = true;
+      if(active) found = true;
     });
 
-    if (!found) {
+    if(!found) {
       show404(push);
       return;
     }
 
-    if (push) history.pushState(null, '', url);
+    if(push) history.pushState(null, '', url);
   }
 
   function show404(push = false) {
@@ -110,54 +103,60 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
 
-    if (push) history.pushState(null, '', location.pathname);
+    hideAllPosts();
+
+    if(push) history.pushState(null, '', location.pathname);
   }
 
-  function router() {
-    const path = location.pathname;
-
-    // prioritas single post
+  function router(path = location.pathname, push = false) {
+    // cek post
     const post = posts.find(p => p.dataset.url === path);
-    if (post) {
-      showPost(path);
-      return;
-    }
+    if(post) return showPost(path, push);
 
-    // daftar blog
-    if (path === BLOG_PATH) {
-      showList();
-      return;
-    }
+    // cek daftar blog
+    if(path === BLOG_PATH) return showList(push);
 
     // homepage
-    if (path === '/' || path === '') {
-      showHome();
-      return;
-    }
+    if(path === '/' || path === '') return showHome(push);
 
-    // 404 SPA
-    show404();
+    // lainnya → 404 SPA
+    show404(push);
   }
 
-  if (btn) {
-    btn.addEventListener('click', e => {
-      e.preventDefault();
-      showList(true);
-    });
-  }
-
-  posts.forEach(p => {
-    const a = p.querySelector('.post-title a');
-    if (!a) return;
-
+  // intercept semua link internal
+  document.querySelectorAll('a[href^="/"]').forEach(a => {
     a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if(!href.startsWith(location.origin) && !href.startsWith('/')) return;
       e.preventDefault();
-      showPost(p.dataset.url, true);
+      router(href, true);
     });
   });
 
-  window.addEventListener('popstate', router);
+  // tombol blog
+  if(btn) {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      router(BLOG_PATH, true);
+    });
+  }
 
-  router();
+  // klik post
+  posts.forEach(p => {
+    const a = p.querySelector('.post-title a');
+    if(!a) return;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      router(p.dataset.url, true);
+    });
+  });
+
+  // back / forward
+  window.addEventListener('popstate', () => {
+    router(location.pathname, false);
+  });
+
+  // initial load
+  router(location.pathname, false);
 });
 </script>
