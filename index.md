@@ -20,12 +20,8 @@ layout: default
   <article class="page" data-url="{{ post.url | relative_url }}">  
     <h2 class="post-title">  
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>  
-    </h2>  
-  
-    <div class="post-excerpt">  
-      {{ post.excerpt }}  
-    </div>  
-  
+    </h2>
+
     <div class="post-content" style="display:block;">  
       {% include post-meta.html post=post %}  
     </div>  
