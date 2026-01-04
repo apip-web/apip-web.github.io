@@ -13,16 +13,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('.homepage');  // parent yang berisi tombol
-  const btn       = document.getElementById('open-blog'); // hanya untuk referensi, tidak diubah manual
+  const homepage  = document.querySelector('.homepage'); // hanya homepage
+  const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
   const page404   = document.getElementById('page-404');
   const BLOG_PATH = '/blog/';
 
-  const body = document.body;
-
-  function safe(el, fn) { if (el) fn(el); }
+  function safe(el, fn) { if(el) fn(el); }
 
   function hideAllPosts() {
     posts.forEach(p => {
@@ -37,31 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(page404, el => el.style.display = 'none');
   }
 
+  function hideHomepage() {
+    safe(homepage, el => el.style.display = 'none');
+  }
+
+  function showHomepage() {
+    safe(homepage, el => el.style.display = 'block');
+  }
+
   function pushIfDifferent(path) {
-    if (location.pathname !== path) history.pushState(null, '', path);
-  }
-
-  function updateHomepageVisibility(isHome = false) {
-    // Kontrol homepage hanya melalui class body (CSS akan menangani display)
-    // JS fallback jika CSS belum siap
-    safe(homepage, el => {
-      el.style.display = isHome ? '' : 'none';
-    });
-  }
-
-  function showHome(push = false) {
-    body.classList.add('spa-mode-home');
-    body.classList.remove('spa-mode-blog', 'spa-mode-post', 'spa-mode-404');
-    safe(postsWrap, el => el.style.display = 'none');
-    hideAllPosts();
-    hide404();
-    updateHomepageVisibility(true);
-    if (push) pushIfDifferent('/');
+    if(location.pathname !== path) history.pushState(null, '', path);
   }
 
   function showList(push = false) {
-    body.classList.add('spa-mode-blog');
-    body.classList.remove('spa-mode-home', 'spa-mode-post', 'spa-mode-404');
+    hideHomepage();
+    safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
 
@@ -72,13 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
 
-    updateHomepageVisibility(false);
-    if (push) pushIfDifferent(BLOG_PATH);
+    if(push) pushIfDifferent(BLOG_PATH);
   }
 
   function showPost(url, push = false) {
-    body.classList.add('spa-mode-post');
-    body.classList.remove('spa-mode-home', 'spa-mode-blog', 'spa-mode-404');
+    hideHomepage();
+    safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
 
@@ -90,95 +77,79 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-content'), el => el.style.display = active ? 'block' : 'none');
       safe(p.querySelector('.post-excerpt'), el => el.style.display = active ? 'none' : 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = active ? 'none' : '');
-      if (active) found = true;
+      if(active) found = true;
     });
 
-    if (!found) {
+    if(!found) {
       show404(push, url);
       return;
     }
 
-    updateHomepageVisibility(false);
-    if (push) pushIfDifferent(url);
+    if(push) pushIfDifferent(url);
   }
 
   function show404(push = false, url = location.pathname) {
-    body.classList.add('spa-mode-404');
-    body.classList.remove('spa-mode-home', 'spa-mode-blog', 'spa-mode-post');
+    hideHomepage();
+    safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
-    updateHomepageVisibility(false);
-    if (push) pushIfDifferent(url);
+
+    if(push) pushIfDifferent(url);
   }
 
   function router(path = location.pathname, push = false) {
-    // Normalisasi path (hapus trailing slash untuk matching lebih toleran)
-    let cleanPath = path.replace(/\/$/, '') || '/';
+    if(path.startsWith('/page/')) return; // biarkan browser load fisik
 
-    // jangan intercept folder /page/
-    if (cleanPath.startsWith('/page')) return;
+    const post = posts.find(p => p.dataset.url === path);
+    if(post) return showPost(path, push);
 
-    // prioritas single post
-    const post = posts.find(p => p.dataset.url.replace(/\/$/, '') === cleanPath);
-    if (post) return showPost(post.dataset.url, push);
+    if(path === BLOG_PATH) return showList(push);
 
-    // daftar blog
-    if (cleanPath === BLOG_PATH.replace(/\/$/, '')) return showList(push);
+    if(path === '/' || path === '') {
+      showHomepage();
+      safe(btn, el => el.style.display = ''); // tombol blog tetap muncul
+      safe(postsWrap, el => el.style.display = 'none');
+      hideAllPosts();
+      hide404();
+      if(push) pushIfDifferent('/');
+      return;
+    }
 
-    // homepage
-    if (cleanPath === '/') return showHome(push);
-
-    // SPA 404
     show404(push, path);
   }
 
-  // Intercept semua link internal kecuali /page/
+  // intercept semua link internal kecuali /page/
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
-    if (href.startsWith('/page/')) return; // biarkan browser handle
+    if(href.startsWith('/page/')) return;
     a.addEventListener('click', e => {
       e.preventDefault();
       router(href, true);
     });
   });
 
-  // Tombol buka blog
-  if (btn) {
+  if(btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
       router(BLOG_PATH, true);
     });
   }
 
-  // Klik judul post
   posts.forEach(p => {
     const a = p.querySelector('.post-title a');
-    if (!a) return;
+    if(!a) return;
     a.addEventListener('click', e => {
       e.preventDefault();
       router(p.dataset.url, true);
     });
   });
 
-  // Back / forward
   window.addEventListener('popstate', () => {
     router(location.pathname, false);
   });
 
-  // Initial load
+  // initial load
   router(location.pathname, false);
 });
 </script>
-
-<style>
-.spa-mode-home .homepage {
-  display: block !important;
-}
-
-.spa-mode-blog .homepage,
-.spa-mode-post .homepage,
-.spa-mode-404 .homepage {
-  display: none !important;
-}
-</style>
