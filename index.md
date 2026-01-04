@@ -26,7 +26,7 @@ layout: default
       {{ post.excerpt }}  
     </div>  
   
-    <div class="post-content" style="display:none;">  
+    <div class="post-content" style="display:block;">  
       {% include post-meta.html post=post %}  
     </div>  
   </article>  
