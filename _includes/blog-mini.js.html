@@ -71,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     hide404();
 
     let found = false;
-
     posts.forEach(p => {
       const active = p.dataset.url === url;
       safe(p, el => el.style.display = active ? 'block' : 'none');
