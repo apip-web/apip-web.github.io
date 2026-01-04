@@ -59,32 +59,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const homepage  = document.querySelector('.homepage');
+  const homepage  = document.querySelector('#spa-home');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
 
   const BLOG_PATH = '/blog/';
 
-  function safe(el, fn) {
-    if (el) fn(el);
+  function safe(el, fn) { if (el) fn(el); }
+
+  function hideAllPosts() {
+    posts.forEach(p => {
+      safe(p, el => el.style.display = 'none');
+      safe(p.querySelector('.post-content'), el => el.style.display = 'none');
+      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'none');
+      safe(p.querySelector('.post-title a'), el => el.style.display = '');
+    });
   }
 
-  /* =====================
-     SHOW FUNCTIONS
-  ===================== */
   function showHome() {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
 
-    // reset semua post
-    posts.forEach(p => {
-      p.style.display = 'block';
-      safe(p.querySelector('.post-content'), el => el.style.display = 'none');
-      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
-      safe(p.querySelector('.post-title a'), el => el.style.display = '');
-    });
+    hideAllPosts();
   }
 
   function showList(push = false) {
@@ -92,9 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
 
-    // reset semua post
     posts.forEach(p => {
-      p.style.display = 'block';
+      safe(p, el => el.style.display = 'block');
       safe(p.querySelector('.post-content'), el => el.style.display = 'none');
       safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
@@ -113,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     posts.forEach(p => {
       const active = p.dataset.url === url;
 
-      p.style.display = active ? 'block' : 'none';
+      safe(p, el => el.style.display = active ? 'block' : 'none');
       safe(p.querySelector('.post-content'), el => el.style.display = active ? 'block' : 'none');
       safe(p.querySelector('.post-excerpt'), el => el.style.display = active ? 'none' : 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = active ? 'none' : '');
@@ -121,17 +118,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (active) found = true;
     });
 
-    if (push && found) history.pushState(null, '', url);
-
     if (!found) {
-      // biarkan halaman fisik tampil, fallback
-      console.warn('❌ post not found in DOM');
+      // post tidak ditemukan → biarkan browser load fisik
+      return;
+    }
+
+    if (push && found) {
+      history.pushState(null, '', url);
     }
   }
 
-  /* =====================
-     ROUTER
-  ===================== */
   function router() {
     const path = location.pathname;
 
@@ -140,14 +136,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (post) return showPost(path);
 
     if (path === BLOG_PATH) return showList();
-    return showHome();
+
+    showHome();
   }
 
-  /* =====================
-     EVENTS
-  ===================== */
   if (btn) {
-    btn.addEventListener('click', () => showList(true));
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      showList(true);
+    });
   }
 
   posts.forEach(p => {
@@ -162,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('popstate', router);
 
-  // initial load
   router();
 });
 </script>
