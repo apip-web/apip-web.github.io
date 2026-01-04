@@ -22,9 +22,10 @@ layout: default
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
     </h2>
 
-    <div class="post-content" style="display:block;">
+<div class="post-body">
+  {{ include.post.content }}
+</div>
 
-    </div>
   </article>
 {% endfor %}
 </div>
