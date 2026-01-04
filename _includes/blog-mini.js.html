@@ -29,14 +29,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
   const homepage  = document.querySelector('#spa-home');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
   const page404   = document.getElementById('page-404');
+
   const BLOG_PATH = '/blog/';
 
-  function safe(el, fn) { if (el) fn(el); }
+  function safe(el, fn) { if(el) fn(el); }
 
   function hideAllPosts() {
     posts.forEach(p => {
@@ -47,19 +49,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function showHome() {
+  function hide404() {
+    safe(page404, el => el.style.display = 'none');
+  }
+
+  function pushStateIfNeeded(url) {
+    if(url !== location.pathname) {
+      history.pushState(null, '', url);
+    }
+  }
+
+  function showHome(push = false) {
     safe(homepage, el => el.style.display = '');
     safe(btn, el => el.style.display = '');
     safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'none');
     hideAllPosts();
+    hide404();
+    if(push) pushStateIfNeeded('/');
   }
 
-  function showList() {
+  function showList(push = false) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    safe(page404, el => el.style.display = 'none');
+    hide404();
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -67,13 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
+
+    if(push) pushStateIfNeeded(BLOG_PATH);
   }
 
-  function showPost(url) {
+  function showPost(url, push = false) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    safe(page404, el => el.style.display = 'none');
+    hide404();
 
     let found = false;
     posts.forEach(p => {
@@ -85,57 +100,42 @@ document.addEventListener('DOMContentLoaded', () => {
       if(active) found = true;
     });
 
-    return found;
+    if(!found) {
+      show404(push);
+      return;
+    }
+
+    if(push && found) pushStateIfNeeded(url);
   }
 
-  function show404() {
+  function show404(push = false) {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
+
+    if(push) pushStateIfNeeded(location.pathname);
   }
 
-  function router(path, push = false) {
-    // jangan dicegat jika path berada di /page/
-    if(path.startsWith('/page/')) {
-      if(push) location.href = path;
-      return;
-    }
+  function router(path = location.pathname, push = false) {
+    // jangan intercept halaman di /page/...
+    if(path.startsWith('/page/')) return;
 
-    // single post prioritas
     const post = posts.find(p => p.dataset.url === path);
-    if(post) {
-      showPost(path);
-      if(push) history.pushState(null, '', path);
-      return;
-    }
+    if(post) return showPost(path, push);
 
-    // daftar blog
-    if(path === BLOG_PATH) {
-      showList();
-      if(push) history.pushState(null, '', path);
-      return;
-    }
+    if(path === BLOG_PATH) return showList(push);
+    if(path === '/' || path === '') return showHome(push);
 
-    // homepage
-    if(path === '/' || path === '') {
-      showHome();
-      if(push) history.pushState(null, '', '/');
-      return;
-    }
-
-    // lainnya → 404 SPA
-    show404();
-    if(push) history.pushState(null, '', path);
+    show404(push);
   }
 
   // intercept semua link internal
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     a.addEventListener('click', e => {
       const href = a.getAttribute('href');
-      // biarkan external atau bukan / ... 
-      if(!href.startsWith('/')) return;
+      if(!href.startsWith('/') || href.startsWith('/page/')) return;
       e.preventDefault();
       router(href, true);
     });
