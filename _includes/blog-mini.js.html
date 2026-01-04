@@ -13,7 +13,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('#spa-home');
+  const homepage  = document.querySelector('.homepage');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
@@ -31,7 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function hide404() { safe(page404, el => el.style.display = 'none'); }
+  function hide404() {
+    safe(page404, el => el.style.display = 'none');
+  }
 
   function pushIfDifferent(path) {
     if(location.pathname !== path) history.pushState(null, '', path);
@@ -50,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(homepage, el => el.style.display = 'none');
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
-    hideAllPosts();
     hide404();
 
     posts.forEach(p => {
@@ -70,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     hide404();
 
     let found = false;
-
     posts.forEach(p => {
       const active = p.dataset.url === url;
       safe(p, el => el.style.display = active ? 'block' : 'none');
@@ -94,11 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
+
     if(push) pushIfDifferent(url);
   }
 
   function router(path = location.pathname, push = false) {
-    // jangan intercept folder /page/
+    // jangan intercept folder /page/ → biarkan browser load fisik
     if(path.startsWith('/page/')) return;
 
     // cek post
@@ -118,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // intercept semua link internal kecuali /page/
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
-    if(href.startsWith('/page/')) return;
+    if(href.startsWith('/page/')) return; // biarkan browser handle
     a.addEventListener('click', e => {
       e.preventDefault();
       router(href, true);
@@ -148,15 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     router(location.pathname, false);
   });
 
-  // initial load → pastikan state sesuai URL
-  if(location.pathname === '/' || location.pathname === '') {
-    showHome(false);
-  } else if(location.pathname === BLOG_PATH) {
-    showList(false);
-  } else {
-    const post = posts.find(p => p.dataset.url === location.pathname);
-    if(post) showPost(location.pathname, false);
-    else if(!location.pathname.startsWith('/page/')) show404(false, location.pathname);
-  }
+  // initial load
+  router(location.pathname, false);
 });
 </script>
