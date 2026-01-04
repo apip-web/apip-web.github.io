@@ -13,7 +13,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('.homepage');
+  const homepage  = document.querySelector('#spa-home');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showHome(push = false) {
-    safe(homepage, el => el.style.display = '');
-    safe(btn, el => el.style.display = '');
+    safe(homepage, el => el.style.display = 'block');
+    safe(btn, el => el.style.display = 'block');
     safe(postsWrap, el => el.style.display = 'none');
     hideAllPosts();
     hide404();
@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(btn, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
+    hideAllPosts();
 
     posts.forEach(p => {
       safe(p, el => el.style.display = 'block');
@@ -71,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hide404();
 
     let found = false;
+
     posts.forEach(p => {
       const active = p.dataset.url === url;
       safe(p, el => el.style.display = active ? 'block' : 'none');
@@ -99,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function router(path = location.pathname, push = false) {
-    // jangan intercept folder /page/ → biarkan browser load fisik
+    // jangan intercept folder /page/
     if(path.startsWith('/page/')) return;
 
     // cek post
@@ -119,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // intercept semua link internal kecuali /page/
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
-    if(href.startsWith('/page/')) return; // biarkan browser handle
+    if(href.startsWith('/page/')) return;
     a.addEventListener('click', e => {
       e.preventDefault();
       router(href, true);
@@ -150,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // initial load
-  router(location.pathname, false);
+  showHome(); // Homepage aman sejak awal
+  router(location.pathname, false); // lalu cek route SPA
 });
 </script>
