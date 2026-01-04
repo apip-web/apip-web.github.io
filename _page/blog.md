@@ -4,14 +4,14 @@ layout: default
 
 {% include blog.html %}
 
-<div id="posts">    
+<div id="blog-posts">
 <h1>Blog:</h1>
-{% for post in site.posts %}    
+{% for post in site.posts %} 
   <article class="post" data-url="{{ post.url | relative_url }}">    
     <h2 class="post-title">    
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>    
-    </h2>    
-    
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    </h2>
+
     <div class="post-excerpt">    
       {{ post.excerpt }}    
     </div>    
