@@ -97,11 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!found) {
-      // post tidak ada → biarkan browser load fisik
+      show404(push);
       return;
     }
 
-    if (push && found) history.pushState(null, '', url);
+    if (push) history.pushState(null, '', url);
   }
 
   function show404(push = false) {
@@ -110,28 +110,33 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
 
-    if (push) history.pushState(null, '', '/404');
+    if (push) history.pushState(null, '', location.pathname);
   }
 
   function router() {
     const path = location.pathname;
 
-    // 1️⃣ single post prioritas
+    // prioritas single post
     const post = posts.find(p => p.dataset.url === path);
-    if (post) return showPost(path);
+    if (post) {
+      showPost(path);
+      return;
+    }
 
-    // 2️⃣ daftar blog
-    if (path === BLOG_PATH) return showList();
+    // daftar blog
+    if (path === BLOG_PATH) {
+      showList();
+      return;
+    }
 
-    // 3️⃣ homepage
-    if (path === '/') return showHome();
+    // homepage
+    if (path === '/' || path === '') {
+      showHome();
+      return;
+    }
 
-    // 4️⃣ internal 404
-    if (path === '/404') return show404();
-
-    // 5️⃣ fallback → biarkan browser load fisik (atau bisa show404())
-    hideAllPosts();
-    hide404();
+    // 404 SPA
+    show404();
   }
 
   if (btn) {
