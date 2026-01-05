@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const BLOG_PATH = '/2026/01/05/blog.html';
   let STATE = '';
 
+  // ambil semua post dari DOM
   function getPosts() {
     return [...document.querySelectorAll('.post')];
   }
@@ -75,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- renderers ---------------- */
-
   function renderHome(pushState) {
     STATE = 'home';
     hideAll();
@@ -99,12 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
     post.style.display = 'block';
-
     const c = post.querySelector('.post-content');
     const a = post.querySelector('.post-title a');
     if (c) c.style.display = 'block';
     if (a) a.style.display = 'none';
-
     if (pushState) push(post.dataset.url);
     debug();
   }
@@ -118,29 +116,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- router + debug ---------------- */
-
   function findPostByPath(path) {
     const posts = getPosts();
-    let found = null;
-
-    posts.forEach(p => {
+    for (const p of posts) {
       const postUrl = p.dataset.url;
-      const match = path.endsWith(postUrl);
-      if (match) found = p;
+      // normalize path & postUrl (hilangkan trailing slash)
+      const normPath = path.replace(/\/$/, '');
+      const normUrl  = postUrl.replace(/\/$/, '');
+      const match = normPath === normUrl || normPath.endsWith(normUrl);
 
-      // debug overlay: tampilkan cek setiap post
-      safe(debugBox, box => {
-        box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;
-      });
-    });
+      // debug overlay
+      if (debugBox) {
+        debugBox.innerHTML += `<br>[DEBUG findPostByPath] path: ${normPath}, postUrl: ${normUrl}, match: ${match}`;
+      }
 
-    return found;
+      if (match) return p;
+    }
+    return undefined;
   }
 
   function router(path = location.pathname, pushState = false) {
-    // clear overlay sebelum cek
-    safe(debugBox, box => box.innerHTML = '');
-
+    if (debugBox) debugBox.innerHTML = ''; // reset debug overlay
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
     if (path === BLOG_PATH) return renderList(pushState);
@@ -149,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- link interception ---------------- */
-
   document.querySelectorAll('a[href]').forEach(a => {
     a.addEventListener('click', e => {
       const href = a.getAttribute('href');
@@ -184,21 +179,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ---------------- debug overlay ---------------- */
-
   function debug() {
     if (!debugBox) return;
-    debugBox.innerHTML +=
-      `<hr><b>STATE:</b> ${STATE}<br>` +
-      `<b>PATH:</b> ${location.pathname}<br>`;
+    debugBox.innerHTML =
+      `<b>STATE:</b> ${STATE}<br>` +
+      `<b>PATH:</b> ${location.pathname}`;
   }
 
   /* ---------------- init ---------------- */
-
   if (location.pathname === BLOG_PATH) {
     renderList(false);
   } else {
     router(location.pathname, false);
   }
-
 });
 </script>
