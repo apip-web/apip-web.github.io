@@ -63,19 +63,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const safe = (el, fn) => el && fn(el);
 
 function hideAll() {  
-  // 1. Sembunyikan kontainer utama Jekyll (ini kunci utamanya!)
-  const jekyllWrapper = document.getElementById('spa-home');
-  safe(jekyllWrapper, el => el.style.display = 'none');
-
-  // 2. Sembunyikan elemen lainnya seperti biasa
+  // Sembunyikan semua kontainer utama
+  safe(document.getElementById('spa-home'), el => el.style.display = 'none');
   safe(homepage, el => el.style.display = 'none');  
   safe(postsWrap, el => el.style.display = 'none');  
   safe(page404, el => el.style.display = 'none');  
 
+  // RESET semua elemen post ke kondisi default (tersembunyi)
   getPosts().forEach(p => {  
-    p.style.display = 'none';  
-    const c = p.querySelector('.post-content');
-    if (c) c.style.display = 'none';
+    p.style.display = 'none'; // Sembunyikan artikelnya
+    
+    const c = p.querySelector('.post-content');  
+    const a = p.querySelector('.post-title a');  
+    
+    if (c) c.style.display = 'none'; // Sembunyikan isinya
+    if (a) a.style.display = '';     // KEMBALIKAN link agar muncul lagi (reset ke CSS default)
   });  
 }
 
@@ -100,15 +102,21 @@ function renderHome(pushState) {
   debug();  
 }
 
-  function renderList(pushState) {  
-    STATE = 'list';
-    hideAll();  
-    safe(postsWrap, el => el.style.display = 'block');  
-    getPosts().forEach(p => p.style.display = 'block');  
-    if (pushState) push(BLOG_PATH);  
-    debug();  
-  }  
+function renderList(pushState) {  
+  STATE = 'list';  
+  hideAll(); // Reset semuanya dulu, termasuk memunculkan kembali semua link <a>
+
+  safe(postsWrap, el => el.style.display = 'block');  
   
+  // Tampilkan semua kontainer artikel post
+  getPosts().forEach(p => {
+    p.style.display = 'block';
+  });
+
+  if (pushState) push(BLOG_PATH);  
+  debug();  
+}
+
   function renderPost(post, pushState) {  
     STATE = 'post';  
     hideAll();  
