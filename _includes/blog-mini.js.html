@@ -43,124 +43,121 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* ========= ELEMENTS ========= */
   const homepage  = document.querySelector('.homepage');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
   const page404   = document.getElementById('page-404');
-
   const BLOG_PATH = '/blog/';
+
+  /* ========= STATE ========= */
   let STATE = 'home';
 
-  function safe(el, fn) { if (el) fn(el); }
+  /* ========= DEBUG OVERLAY ========= */
+  const debug = document.createElement('div');
+  debug.style.cssText = `
+    position:fixed;bottom:10px;right:10px;
+    background:#000;color:#0f0;
+    padding:8px 12px;font:12px monospace;
+    z-index:9999
+  `;
+  document.body.appendChild(debug);
 
-  /* ================= DEBUG ================= */
-
-  const debug = document.getElementById('spa-debug');
-  function setState(next) {
-    STATE = next;
-    if (debug) {
-      debug.innerHTML =
-        `<b>STATE:</b> ${STATE}<br>` +
-        `<b>PATH:</b> ${location.pathname}`;
-    }
+  function updateDebug() {
+    debug.textContent =
+      `STATE: ${STATE}\nPATH: ${location.pathname}`;
   }
 
-  /* ================= RESET ================= */
+  /* ========= HELPERS ========= */
+  function hide(el)  { if (el) el.style.display = 'none'; }
+  function show(el)  { if (el) el.style.display = ''; }
 
-  function resetView() {
-    safe(homepage, el => el.style.display = 'none');
-    safe(btn, el => el.style.display = 'none');
-    safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'none');
+  function resetDOM() {
+    hide(homepage);
+    hide(postsWrap);
+    hide(page404);
 
     posts.forEach(p => {
-      safe(p, el => el.style.display = 'none');
-      safe(p.querySelector('.post-content'), el => el.style.display = 'none');
-      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'none');
-      safe(p.querySelector('.post-title a'), el => el.style.display = '');
+      hide(p);
+      hide(p.querySelector('.post-content'));
+      hide(p.querySelector('.post-excerpt'));
+      show(p.querySelector('.post-title a'));
     });
   }
 
-  function push(path) {
-    if (location.pathname !== path) {
-      history.pushState(null, '', path);
-    }
+  /* ========= RENDERERS ========= */
+  function renderHome() {
+    resetDOM();
+    STATE = 'home';
+    show(homepage);
+    show(btn);
   }
 
-  /* ================= STATES ================= */
-
-  function showHome(pushState = false) {
-    resetView();
-    setState('home');
-
-    safe(homepage, el => el.style.display = '');
-    safe(btn, el => el.style.display = '');
-
-    if (pushState) push('/');
-  }
-
-  function showList(pushState = false) {
-    resetView();
-    setState('list');
-
-    safe(postsWrap, el => el.style.display = 'block');
+  function renderList() {
+    resetDOM();
+    STATE = 'list';
+    show(postsWrap);
 
     posts.forEach(p => {
-      safe(p, el => el.style.display = 'block');
-      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
+      show(p);
+      show(p.querySelector('.post-excerpt'));
     });
-
-    if (pushState) push(BLOG_PATH);
   }
 
-  function showPost(url, pushState = false) {
-    resetView();
-    setState('post');
-
-    safe(postsWrap, el => el.style.display = 'block');
+  function renderPost(path) {
+    resetDOM();
+    STATE = 'post';
+    show(postsWrap);
 
     let found = false;
 
     posts.forEach(p => {
-      if (p.dataset.url !== url) return;
-
-      safe(p, el => el.style.display = 'block');
-      safe(p.querySelector('.post-content'), el => el.style.display = 'block');
-      safe(p.querySelector('.post-title a'), el => el.style.display = 'none');
-
-      found = true;
+      if (p.dataset.url === path) {
+        show(p);
+        show(p.querySelector('.post-content'));
+        hide(p.querySelector('.post-excerpt'));
+        hide(p.querySelector('.post-title a'));
+        found = true;
+      }
     });
 
-    if (!found) return show404(pushState, url);
-    if (pushState) push(url);
+    if (!found) render404();
   }
 
-  function show404(pushState = false, url = location.pathname) {
-    resetView();
-    setState('404');
-
-    safe(page404, el => el.style.display = 'block');
-
-    if (pushState) push(url);
+  function render404() {
+    resetDOM();
+    STATE = '404';
+    show(page404);
   }
 
-  /* ================= ROUTER ================= */
+  /* ========= ROUTER (URL = TRUTH) ========= */
+  function router() {
+    const path = location.pathname;
 
-  function router(path = location.pathname, pushState = false) {
+    if (path === '/' || path === '') {
+      renderHome();
+    }
+    else if (path === BLOG_PATH) {
+      renderList();
+    }
+    else if (posts.some(p => p.dataset.url === path)) {
+      renderPost(path);
+    }
+    else {
+      render404();
+    }
 
-    if (path.startsWith('/page/')) return;
-
-    const post = posts.find(p => p.dataset.url === path);
-    if (post) return showPost(path, pushState);
-
-    if (path === BLOG_PATH) return showList(pushState);
-    if (path === '/' || path === '') return showHome(pushState);
-
-    show404(pushState, path);
+    updateDebug();
   }
 
-  /* ================= EVENTS ================= */
+  /* ========= NAVIGATION ========= */
+  function navigate(path) {
+    if (location.pathname !== path) {
+      history.pushState(null, '', path);
+      router();
+    }
+  }
 
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
@@ -168,24 +165,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     a.addEventListener('click', e => {
       e.preventDefault();
-      router(href, true);
+      navigate(href);
     });
   });
 
   if (btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
-      router(BLOG_PATH, true);
+      navigate(BLOG_PATH);
     });
   }
 
-  window.addEventListener('popstate', () => {
-    router(location.pathname, false);
-  });
+  window.addEventListener('popstate', router);
 
-  /* ================= INIT ================= */
-
-  router(location.pathname, false);
-
+  /* ========= INITIAL ========= */
+  router();
 });
 </script>
