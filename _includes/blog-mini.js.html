@@ -48,13 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const BLOG_PATH = '/2026/01/05/blog.html';
   let STATE = '';
 
-  /* ---------------- helpers ---------------- */
-  const safe = (el, fn) => el && fn(el);
-
+  // ambil semua post valid
   function getPosts() {
-    return [...document.querySelectorAll('.post')];
+    return [...document.querySelectorAll('.post')].filter(p => {
+      const url = p.dataset.url;
+      return url && !url.includes('{{');
+    });
   }
 
+  const safe = (el, fn) => el && fn(el);
+
+  // sembunyikan semua konten SPA
   function hideAll() {
     safe(homepage, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
@@ -69,10 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // pushState helper
   function push(path) {
-    if (location.pathname !== path) {
-      history.pushState(null, '', path);
-    }
+    if (location.pathname !== path) history.pushState(null, '', path);
   }
 
   /* ---------------- renderers ---------------- */
@@ -99,10 +102,12 @@ document.addEventListener('DOMContentLoaded', () => {
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
     post.style.display = 'block';
+
     const c = post.querySelector('.post-content');
     const a = post.querySelector('.post-title a');
     if (c) c.style.display = 'block';
     if (a) a.style.display = 'none';
+
     if (pushState) push(post.dataset.url);
     debug();
   }
@@ -115,9 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
     debug();
   }
 
-  /* ---------------- router + debug ---------------- */
+  /* ---------------- router ---------------- */
   function findPostByPath(path) {
-    if (path === BLOG_PATH) return null; // jangan anggap list page sebagai post
     const posts = getPosts();
     let found = null;
 
@@ -126,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const match = path.endsWith(postUrl);
       if (match) found = p;
 
-      // tampilkan cek setiap post di overlay
+      // debug overlay
       safe(debugBox, box => {
         box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;
       });
@@ -136,7 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function router(path = location.pathname, pushState = false) {
-    safe(debugBox, box => box.innerHTML = ''); // clear overlay
+    // clear overlay
+    safe(debugBox, box => box.innerHTML = '');
 
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
@@ -145,19 +150,23 @@ document.addEventListener('DOMContentLoaded', () => {
     render404(path, pushState);
   }
 
-  /* ---------------- link interception ---------------- */
-  document.querySelectorAll('a[href]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (!href || href.startsWith('#')) return;
+  /* ---------------- intercept link clicks ---------------- */
+  function interceptLinks() {
+    document.querySelectorAll('a[href]').forEach(a => {
+      a.addEventListener('click', e => {
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#')) return;
 
-      const url = new URL(href, location.origin);
-      if (url.origin !== location.origin) return;
+        const url = new URL(href, location.origin);
+        if (url.origin !== location.origin) return;
 
-      e.preventDefault();
-      router(url.pathname, true);
+        e.preventDefault();
+        router(url.pathname, true);
+      });
     });
-  });
+  }
+
+  interceptLinks();
 
   if (btn) {
     btn.addEventListener('click', e => {
@@ -175,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // popstate (back/forward)
   window.addEventListener('popstate', () => {
     router(location.pathname, false);
   });
@@ -182,15 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- debug overlay ---------------- */
   function debug() {
     if (!debugBox) return;
-    debugBox.innerHTML +=
-      `<hr><b>STATE:</b> ${STATE}<br>` +
-      `<b>PATH:</b> ${location.pathname}<br>`;
+    debugBox.innerHTML += `<hr><b>STATE:</b> ${STATE}<br><b>PATH:</b> ${location.pathname}<br>`;
   }
 
-  // klik overlay → copy seluruh HTML debug
+  // klik overlay → copy HTML debug
   if (debugBox) {
     debugBox.addEventListener('click', () => {
-      const htmlToCopy = debugBox.outerHTML;
+      const htmlToCopy = debugBox.innerHTML;
       navigator.clipboard.writeText(htmlToCopy).then(() => {
         debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;
       });
@@ -198,10 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- init ---------------- */
-  if (location.pathname === BLOG_PATH) {
-    renderList(false);
-  } else {
-    router(location.pathname, false);
-  }
+  // sembunyikan semua dulu agar SPA selalu tampil
+  hideAll();
+  // jalankan router di microtask untuk memastikan DOM siap
+  setTimeout(() => router(location.pathname, false), 0);
 });
 </script>
