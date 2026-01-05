@@ -44,150 +44,168 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const homepage  = document.querySelector('.homepage');
-  const spaRoot   = document.querySelector('#spa-home');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
   const page404   = document.getElementById('page-404');
+
   const BLOG_PATH = '/blog/';
+  let STATE = '';
 
-  let STATE = 'home';
+  /* ---------------- helpers ---------------- */
 
-  /* ===== DEBUG OVERLAY ===== */
-  const debug = document.createElement('div');
-  debug.style.cssText = `
-    position:fixed;
-    bottom:10px;
-    right:10px;
-    background:#000;
-    color:#0f0;
-    padding:8px 12px;
-    font:12px monospace;
-    white-space:pre;      /* 🔧 FIX */
-    z-index:9999;
-  `;
-  document.body.appendChild(debug);
+  const safe = (el, fn) => el && fn(el);
 
-  function updateDebug() {
-    debug.textContent =
-      `STATE: ${STATE}\nPATH: ${location.pathname}`;
-  }
+  function hideAll() {
+    safe(homepage,  el => el.style.display = 'none');
+    safe(postsWrap, el => el.style.display = 'none');
+    safe(page404,   el => el.style.display = 'none');
 
-  /* ===== HELPERS ===== */
-  const hide = el => el && (el.style.display = 'none');
-  const show = el => el && (el.style.display = '');
-
-  function resetPosts() {
     posts.forEach(p => {
-      hide(p);
-      hide(p.querySelector('.post-content'));
-      hide(p.querySelector('.post-excerpt'));
-      show(p.querySelector('.post-title a'));
+      p.style.display = 'none';
+      const c = p.querySelector('.post-content');
+      const e = p.querySelector('.post-excerpt');
+      const a = p.querySelector('.post-title a');
+      if (c) c.style.display = 'none';
+      if (e) e.style.display = 'none';
+      if (a) a.style.display = '';
     });
   }
 
-  /* ===== RENDERERS ===== */
-  function renderHome() {
-    STATE = 'home';
-    show(homepage);
-    show(btn);
-    hide(postsWrap);
-    hide(page404);
-    resetPosts();
-  }
-
-  function renderList() {
-    STATE = 'list';
-    hide(homepage);
-    hide(btn);
-    hide(page404);
-    show(postsWrap);
-
-    posts.forEach(p => {
-      show(p);
-      show(p.querySelector('.post-excerpt'));
-    });
-  }
-
-  function renderPost(path) {
-    STATE = 'post';
-    hide(homepage);
-    hide(btn);
-    hide(page404);
-    show(postsWrap);
-
-    let found = false;
-
-    posts.forEach(p => {
-      if (p.dataset.url === path) {
-        show(p);
-        show(p.querySelector('.post-content'));
-        hide(p.querySelector('.post-excerpt'));
-        hide(p.querySelector('.post-title a'));
-        found = true;
-      } else {
-        hide(p);
-      }
-    });
-
-    if (!found) render404();
-  }
-
-  function render404() {
-    STATE = '404';
-    hide(homepage);
-    hide(btn);
-    hide(postsWrap);
-    show(page404);
-    resetPosts();
-  }
-
-  /* ===== ROUTER ===== */
-  function router() {
-    const path = location.pathname;
-
-    if (path === '/' || path === '') {
-      renderHome();
-    }
-    else if (path === BLOG_PATH) {
-      renderList();
-    }
-    else if (posts.some(p => p.dataset.url === path)) {
-      renderPost(path);
-    }
-    else {
-      render404();
-    }
-
-    updateDebug();
-  }
-
-  /* ===== NAV ===== */
-  function navigate(path) {
+  function push(path) {
     if (location.pathname !== path) {
       history.pushState(null, '', path);
-      router();
     }
   }
 
+  /* ---------------- renderers ---------------- */
+
+  function renderHome(pushState) {
+    STATE = 'home';
+    hideAll();
+
+    safe(homepage, el => el.style.display = 'block');
+    safe(btn,      el => el.style.display = 'inline-block');
+
+    if (pushState) push('/');
+    debug();
+  }
+
+  function renderList(pushState) {
+    STATE = 'list';
+    hideAll();
+
+    safe(postsWrap, el => el.style.display = 'block');
+
+    posts.forEach(p => {
+      p.style.display = 'block';
+      const e = p.querySelector('.post-excerpt');
+      if (e) e.style.display = 'block';
+    });
+
+    if (pushState) push(BLOG_PATH);
+    debug();
+  }
+
+  function renderPost(url, pushState) {
+    STATE = 'post';
+    hideAll();
+
+    const post = posts.find(p => p.dataset.url === url);
+    if (!post) return render404(url, pushState);
+
+    safe(postsWrap, el => el.style.display = 'block');
+    post.style.display = 'block';
+
+    const c = post.querySelector('.post-content');
+    const a = post.querySelector('.post-title a');
+    if (c) c.style.display = 'block';
+    if (a) a.style.display = 'none';
+
+    if (pushState) push(url);
+    debug();
+  }
+
+  function render404(path, pushState) {
+    STATE = '404';
+    hideAll();
+
+    safe(page404, el => el.style.display = 'block');
+
+    if (pushState) push(path);
+    debug();
+  }
+
+  /* ---------------- router ---------------- */
+
+  function router(path = location.pathname, pushState = false) {
+
+    // single post punya prioritas tertinggi
+    const post = posts.find(p => p.dataset.url === path);
+    if (post) return renderPost(path, pushState);
+
+    if (path === BLOG_PATH) return renderList(pushState);
+    if (path === '/' || path === '') return renderHome(pushState);
+
+    render404(path, pushState);
+  }
+
+  /* ---------------- links ---------------- */
+
   document.querySelectorAll('a[href^="/"]').forEach(a => {
-    const href = a.getAttribute('href');
-    if (href.startsWith('/page/')) return;
     a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (!href) return;
       e.preventDefault();
-      navigate(href);
+      router(href, true);
     });
   });
 
   if (btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
-      navigate(BLOG_PATH);
+      router(BLOG_PATH, true);
     });
   }
 
-  window.addEventListener('popstate', router);
+  posts.forEach(p => {
+    const a = p.querySelector('.post-title a');
+    if (!a) return;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      router(p.dataset.url, true);
+    });
+  });
 
-  router(); // initial
+  window.addEventListener('popstate', () => {
+    router(location.pathname, false);
+  });
+
+  /* ---------------- debug overlay ---------------- */
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;
+    bottom:8px;
+    left:8px;
+    z-index:9999;
+    background:#000;
+    color:#0f0;
+    font:12px/1.4 monospace;
+    padding:8px;
+    white-space:pre;
+    opacity:.85;
+  `;
+  document.body.appendChild(overlay);
+
+  function debug() {
+    overlay.textContent =
+`STATE: ${STATE}
+PATH : ${location.pathname}`;
+  }
+
+  /* ---------------- init ---------------- */
+
+  router(location.pathname, false);
 });
 </script>
