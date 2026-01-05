@@ -203,6 +203,12 @@ function debug() {
 
   /* ---------------- init ---------------- */
 
+  /* ---------------- init ---------------- */
+
+if (location.pathname === BLOG_PATH) {
+  renderList(false);
+} else {
   router(location.pathname, false);
+}
 });
 </script>
