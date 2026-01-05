@@ -3,6 +3,14 @@
   #posts { display: none; }
 </style>
 
+<style>
+  /* Ganti display: block menjadi none */
+  #spa-home { display: none; } 
+  #posts { display: none; }
+  .homepage { display: none; }
+  #page-404 { display: none; }
+</style>
+
 <div id="page-404" style="display:none;">
     <h1>404</h1>
     <p>Halaman tidak ditemukan.</p>
@@ -52,22 +60,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return [...document.querySelectorAll('.post')];  
   }  
   
-  const safe = (el, fn) => el && fn(el);  
-  
-  function hideAll() {  
-    safe(homepage, el => el.style.display = 'none');  
-    safe(postsWrap, el => el.style.display = 'none');  
-    safe(page404, el => el.style.display = 'none');  
-  
-    getPosts().forEach(p => {  
-      p.style.display = 'none';  
-      const c = p.querySelector('.post-content');  
-      const a = p.querySelector('.post-title a');  
-      if (c) c.style.display = 'none';  
-      if (a) a.style.display = '';  
-    });  
-  }  
-  
+  const safe = (el, fn) => el && fn(el);
+
+function hideAll() {  
+  // 1. Sembunyikan kontainer utama Jekyll (ini kunci utamanya!)
+  const jekyllWrapper = document.getElementById('spa-home');
+  safe(jekyllWrapper, el => el.style.display = 'none');
+
+  // 2. Sembunyikan elemen lainnya seperti biasa
+  safe(homepage, el => el.style.display = 'none');  
+  safe(postsWrap, el => el.style.display = 'none');  
+  safe(page404, el => el.style.display = 'none');  
+
+  getPosts().forEach(p => {  
+    p.style.display = 'none';  
+    const c = p.querySelector('.post-content');
+    if (c) c.style.display = 'none';
+  });  
+}
+
   function push(path) {  
     if (location.pathname !== path) {  
       history.pushState(null, '', path);  
@@ -76,17 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
   
   /* ---------------- renderers ---------------- */  
   
-  function renderHome(pushState) {  
-    STATE = 'home';  
-    hideAll();  
-    safe(homepage, el => el.style.display = 'block');  
-    safe(btn, el => el.style.display = 'inline-block');  
-    if (pushState) push('/');  
-    debug();  
-  }  
-  
+function renderHome(pushState) {  
+  STATE = 'home';  
+  hideAll(); // Ini akan menyembunyikan #spa-home dulu
+
+  // Sekarang tampilkan kembali hanya untuk Home
+  const jekyllWrapper = document.getElementById('spa-home');
+  safe(jekyllWrapper, el => el.style.display = 'block'); 
+  safe(homepage, el => el.style.display = 'block');  
+
+  if (pushState) push('/');  
+  debug();  
+}
+
   function renderList(pushState) {  
-    STATE = 'list';  
+    STATE = 'list';
     hideAll();  
     safe(postsWrap, el => el.style.display = 'block');  
     getPosts().forEach(p => p.style.display = 'block');  
@@ -140,6 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
 function router(path = location.pathname, pushState = false) {  
+
+  hideAll();
+  
   // 1. Bersihkan debug box
   safe(debugBox, box => box.innerHTML = '');  
 
