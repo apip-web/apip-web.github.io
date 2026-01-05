@@ -183,11 +183,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- debug overlay ---------------- */
 
-  function debug() {
-    overlay.textContent =
-`STATE: ${STATE}
-PATH : ${location.pathname}`;
-  }
+const debugBox = document.getElementById('spa-debug');
+
+function debug() {
+  if (!debugBox) return;
+  debugBox.innerHTML =
+    `<b>STATE:</b> ${STATE}<br>` +
+    `<b>PATH:</b> ${location.pathname}`;
+}
 
   /* ---------------- init ---------------- */
 
