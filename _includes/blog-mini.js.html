@@ -135,18 +135,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });  
   
     return found;  
-  }  
-  
-  function router(path = location.pathname, pushState = false) {  
-    // clear overlay sebelum cek  
-    safe(debugBox, box => box.innerHTML = '');  
-  
-    const post = findPostByPath(path);  
-    if (post) return renderPost(post, pushState);  
-    if (path === BLOG_PATH) return renderList(pushState);  
-    if (path === '/' || path === '') return renderHome(pushState);  
-    render404(path, pushState);  
-  }  
+  }
+
+/* ---------------- router (Sudah Diperbaiki) ---------------- */  
+
+function router(path = location.pathname, pushState = false) {  
+  // 1. Bersihkan debug box
+  safe(debugBox, box => box.innerHTML = '');  
+
+  // 2. CEK DAFTAR BLOG DULU (Prioritas Utama)
+  // Gunakan .includes atau normalisasi path untuk memastikan kecocokan
+  if (path === BLOG_PATH || path.endsWith(BLOG_PATH)) {
+    return renderList(pushState);
+  }
+
+  // 3. CEK HALAMAN HOME
+  if (path === '/' || path === '' || path === '/index.html') {
+    return renderHome(pushState);
+  }
+
+  // 4. CEK APAKAH INI POSTINGAN
+  const post = findPostByPath(path);  
+  if (post) {
+    return renderPost(post, pushState);
+  }
+
+  // 5. JIKA TIDAK ADA YANG COCOK -> 404
+  render404(path, pushState);  
+}  
+
+/* ---------------- init (Sudah Diperbaiki) ---------------- */  
+
+// Panggil router secara langsung untuk menangani semua kondisi saat load awal
+router(location.pathname, false);  
   
   /* ---------------- link interception ---------------- */  
   
