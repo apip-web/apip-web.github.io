@@ -57,9 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let STATE = '';  
   
   function getPosts() {  
-    return [...document.querySelectorAll('.post')];  
-  }  
-  
+  const all = document.querySelectorAll('#posts .post');
+  return [...all];
+}
+
   const safe = (el, fn) => el && fn(el);
 
 function hideAll() {  
