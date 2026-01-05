@@ -2,4 +2,4 @@
 layout: default
 ---
 
-<h3><a href="/2025/12/05/halo-dunia.html">LINK manual</a></h3>
+<h5><a href="/2025/12/05/halo-dunia.html">LINK manual [homepage]</a></h5>
