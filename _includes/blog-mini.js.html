@@ -48,11 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const BLOG_PATH = '/2026/01/05/blog.html';
   let STATE = '';
 
+  /* ---------------- helpers ---------------- */
+  const safe = (el, fn) => el && fn(el);
+
   function getPosts() {
     return [...document.querySelectorAll('.post')];
   }
-
-  const safe = (el, fn) => el && fn(el);
 
   function hideAll() {
     safe(homepage, el => el.style.display = 'none');
@@ -75,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- renderers ---------------- */
-
   function renderHome(pushState) {
     STATE = 'home';
     hideAll();
@@ -99,12 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
     post.style.display = 'block';
-
     const c = post.querySelector('.post-content');
     const a = post.querySelector('.post-title a');
     if (c) c.style.display = 'block';
     if (a) a.style.display = 'none';
-
     if (pushState) push(post.dataset.url);
     debug();
   }
@@ -118,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- router + debug ---------------- */
-
   function findPostByPath(path) {
+    if (path === BLOG_PATH) return null; // jangan anggap list page sebagai post
     const posts = getPosts();
     let found = null;
 
@@ -138,8 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function router(path = location.pathname, pushState = false) {
-    // clear overlay sebelum cek
-    safe(debugBox, box => box.innerHTML = '');
+    safe(debugBox, box => box.innerHTML = ''); // clear overlay
 
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
@@ -149,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- link interception ---------------- */
-
   document.querySelectorAll('a[href]').forEach(a => {
     a.addEventListener('click', e => {
       const href = a.getAttribute('href');
@@ -184,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ---------------- debug overlay ---------------- */
-
   function debug() {
     if (!debugBox) return;
     debugBox.innerHTML +=
@@ -195,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // klik overlay → copy seluruh HTML debug
   if (debugBox) {
     debugBox.addEventListener('click', () => {
-      const htmlToCopy = debugBox.innerHTML;
+      const htmlToCopy = debugBox.outerHTML;
       navigator.clipboard.writeText(htmlToCopy).then(() => {
         debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;
       });
@@ -203,12 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- init ---------------- */
-
   if (location.pathname === BLOG_PATH) {
     renderList(false);
   } else {
     router(location.pathname, false);
   }
-
 });
 </script>
