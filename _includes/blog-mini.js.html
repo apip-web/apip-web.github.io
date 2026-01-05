@@ -146,16 +146,20 @@ function findPostByPath(path) {
   const posts = getPosts();  
   let found = null;  
 
-  // Normalisasi path pencarian
-  const searchPath = path.replace(/\/$/, "");
-
   posts.forEach(p => {  
-    const postUrl = p.dataset.url.replace(/\/$/, "");
-    
-    // Pencocokan eksak atau berakhir dengan url tersebut
-    const match = (searchPath === postUrl) || searchPath.endsWith(postUrl);
-    
+    const postUrl = p.dataset.url;  
+    if (!postUrl) return;
+
+    // Pastikan kita tidak mencocokkan halaman daftar sebagai postingan
+    if (postUrl.includes('blog.html')) return; 
+
+    const match = path.endsWith(postUrl);  
     if (match) found = p;  
+
+    // Logging ke Debug Box sesuai permintaan
+    safe(debugBox, box => {  
+      box.innerHTML += `[CHECK] path: ${path} | post: ${postUrl} | result: ${match}<br>`;  
+    });  
   });  
 
   return found;  
@@ -199,13 +203,8 @@ function router(path = location.pathname, pushState = false) {
   render404(path, pushState);  
 }
 
-/* ---------------- init (Sudah Diperbaiki) ---------------- */  
+  /* ---------------- link interception ---------------- */
 
-// Panggil router secara langsung untuk menangani semua kondisi saat load awal
-router(location.pathname, false);  
-  
-  /* ---------------- link interception ---------------- */  
-  
   document.querySelectorAll('a[href]').forEach(a => {  
     a.addEventListener('click', e => {  
       const href = a.getAttribute('href');  
