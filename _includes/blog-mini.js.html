@@ -121,16 +121,17 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- router ---------------- */
 
 function router(path = location.pathname, pushState = false) {
-
-  // LIST harus dicek dulu
-  if (path === BLOG_PATH) return renderList(pushState);
-
-  // baru cek post
+  // prioritas tertinggi: cek apakah path cocok dengan post di DOM
   const post = posts.find(p => p.dataset.url === path);
   if (post) return renderPost(path, pushState);
 
+  // kalau path sama dengan halaman list nyata
+  if (path === BLOG_PATH) return renderList(pushState);
+
+  // homepage
   if (path === '/' || path === '') return renderHome(pushState);
 
+  // selain itu → 404
   render404(path, pushState);
 }
 
