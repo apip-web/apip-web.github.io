@@ -138,17 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- router ---------------- */
 
-  function router(path = location.pathname, pushState = false) {
+function router(path = location.pathname, pushState = false) {
 
-    // single post punya prioritas tertinggi
-    const post = posts.find(p => p.dataset.url === path);
-    if (post) return renderPost(path, pushState);
+  // LIST harus dicek dulu
+  if (path === BLOG_PATH) return renderList(pushState);
 
-    if (path === BLOG_PATH) return renderList(pushState);
-    if (path === '/' || path === '') return renderHome(pushState);
+  // baru cek post
+  const post = posts.find(p => p.dataset.url === path);
+  if (post) return renderPost(path, pushState);
 
-    render404(path, pushState);
-  }
+  if (path === '/' || path === '') return renderHome(pushState);
+
+  render404(path, pushState);
+}
 
   /* ---------------- links ---------------- */
 
