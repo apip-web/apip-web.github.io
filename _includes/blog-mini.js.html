@@ -183,21 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- debug overlay ---------------- */
 
-  const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position:fixed;
-    bottom:8px;
-    left:8px;
-    z-index:9999;
-    background:#000;
-    color:#0f0;
-    font:12px/1.4 monospace;
-    padding:8px;
-    white-space:pre;
-    opacity:.85;
-  `;
-  document.body.appendChild(overlay);
-
   function debug() {
     overlay.textContent =
 `STATE: ${STATE}
