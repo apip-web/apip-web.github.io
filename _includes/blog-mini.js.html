@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const BLOG_PATH = '/2026/01/05/blog.html';
   let STATE = '';
 
-  // ambil semua post dari DOM
   function getPosts() {
     return [...document.querySelectorAll('.post')];
   }
@@ -120,23 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const posts = getPosts();
     for (const p of posts) {
       const postUrl = p.dataset.url;
-      // normalize path & postUrl (hilangkan trailing slash)
       const normPath = path.replace(/\/$/, '');
       const normUrl  = postUrl.replace(/\/$/, '');
       const match = normPath === normUrl || normPath.endsWith(normUrl);
-
-      // debug overlay
       if (debugBox) {
         debugBox.innerHTML += `<br>[DEBUG findPostByPath] path: ${normPath}, postUrl: ${normUrl}, match: ${match}`;
       }
-
       if (match) return p;
     }
     return undefined;
   }
 
   function router(path = location.pathname, pushState = false) {
-    if (debugBox) debugBox.innerHTML = ''; // reset debug overlay
+    if (debugBox) debugBox.innerHTML = ''; // reset debug
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
     if (path === BLOG_PATH) return renderList(pushState);
@@ -144,18 +139,19 @@ document.addEventListener('DOMContentLoaded', () => {
     render404(path, pushState);
   }
 
-  /* ---------------- link interception ---------------- */
-  document.querySelectorAll('a[href]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (!href || href.startsWith('#')) return;
+  /* ---------------- delegated link clicks ---------------- */
+  document.body.addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
 
-      const url = new URL(href, location.origin);
-      if (url.origin !== location.origin) return;
+    const href = a.getAttribute('href');
+    if (!href || href.startsWith('#')) return;
 
-      e.preventDefault();
-      router(url.pathname, true);
-    });
+    const url = new URL(href, location.origin);
+    if (url.origin !== location.origin) return;
+
+    e.preventDefault();
+    router(url.pathname, true);
   });
 
   if (btn) {
@@ -164,19 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
       router(BLOG_PATH, true);
     });
   }
-
-  getPosts().forEach(p => {
-    const a = p.querySelector('.post-title a');
-    if (!a) return;
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      router(p.dataset.url, true);
-    });
-  });
-
-  window.addEventListener('popstate', () => {
-    router(location.pathname, false);
-  });
 
   /* ---------------- debug overlay ---------------- */
   function debug() {
