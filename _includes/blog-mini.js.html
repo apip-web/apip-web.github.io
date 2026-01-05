@@ -1,44 +1,39 @@
-<style>  
-  #spa-home { display: block;   
-  #posts { display: none; }  
-</style>  
-  
-<div id="page-404" style="display:none;">  
-    <h1>404</h1>  
-    <p>Halaman tidak ditemukan.</p>  
-    <a href="/">Kembali ke Home</a>  
-</div>  
-  
-<div id="posts" style="display:none;">      
-{% for post in site.posts %}      
-  <article class="post" data-url="{{ post.url | relative_url }}">      
-    <h2 class="post-title">      
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>      
-    </h2>      
-      
-    <div class="post-excerpt">      
-      {{ post.excerpt }}      
-    </div>      
-      
-    <div class="post-content" style="display:none;">      
-      {% include post-meta.html post=post %}      
-    </div>      
-  </article>      
-{% endfor %}      
-</div>  
-  
-<div id="spa-debug" style="  
-  position: fixed;  
-  bottom: 100px;  
-  right: 10px;  
-  padding: 8px 10px;  
-  font: 12px monospace;  
-  background: rgba(0,0,0,.75);  
-  color: lightgreen;  
-  z-index: 9999;  
-  border-radius: 4px;  
-">  
-</div>  
+<style>
+  #spa-home { display: block; }
+  #posts { display: none; }
+</style>
+
+<div id="page-404" style="display:none;">
+    <h1>404</h1>
+    <p>Halaman tidak ditemukan.</p>
+    <a href="/">Kembali ke Home</a>
+</div>
+
+<div id="posts" style="display:none;">
+{% for post in site.posts %}
+  <article class="post" data-url="{{ post.url | relative_url }}">
+    <h2 class="post-title">
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    </h2>
+
+    <div class="post-content" style="display:none;">
+      {% include post-meta.html post=post %}
+    </div>
+  </article>
+{% endfor %}
+</div>
+
+<div id="spa-debug" style="
+  position: fixed;
+  bottom: 100px;
+  right: 10px;
+  padding: 8px 10px;
+  font: 12px monospace;
+  background: rgba(0,0,0,.75);
+  color: lightgreen;
+  z-index: 9999;
+  border-radius: 4px;
+"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -46,22 +41,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
+  const debugBox  = document.getElementById('spa-debug');
 
   const BLOG_PATH = '/2026/01/05/blog.html';
   let STATE = '';
-
-  /* ---------------- helpers ---------------- */
-
-  const safe = (el, fn) => el && fn(el);
 
   function getPosts() {
     return [...document.querySelectorAll('.post')];
   }
 
+  const safe = (el, fn) => el && fn(el);
+
   function hideAll() {
-    safe(homepage,  el => el.style.display = 'none');
+    safe(homepage, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
-    safe(page404,   el => el.style.display = 'none');
+    safe(page404, el => el.style.display = 'none');
 
     getPosts().forEach(p => {
       p.style.display = 'none';
@@ -84,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     STATE = 'home';
     hideAll();
     safe(homepage, el => el.style.display = 'block');
-    safe(btn,      el => el.style.display = 'inline-block');
+    safe(btn, el => el.style.display = 'inline-block');
     if (pushState) push('/');
     debug();
   }
@@ -93,11 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     STATE = 'list';
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
-
-    getPosts().forEach(p => {
-      p.style.display = 'block';
-    });
-
+    getPosts().forEach(p => p.style.display = 'block');
     if (pushState) push(BLOG_PATH);
     debug();
   }
@@ -125,20 +115,24 @@ document.addEventListener('DOMContentLoaded', () => {
     debug();
   }
 
-  /* ---------------- router ---------------- */
+  /* ---------------- router + debug ---------------- */
 
   function findPostByPath(path) {
-    // path bisa panjang /2026/01/05/some-post.html
-    return getPosts().find(p => path.endsWith(p.dataset.url));
+    const posts = getPosts();
+    for (const p of posts) {
+      const postUrl = p.dataset.url;
+      const match = path.endsWith(postUrl);
+      console.log('[DEBUG findPostByPath]', { path, postUrl, match });
+      if (match) return p;
+    }
+    return undefined;
   }
 
   function router(path = location.pathname, pushState = false) {
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
-
     if (path === BLOG_PATH) return renderList(pushState);
     if (path === '/' || path === '') return renderHome(pushState);
-
     render404(path, pushState);
   }
 
@@ -179,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- debug overlay ---------------- */
 
-  const debugBox = document.getElementById('spa-debug');
   function debug() {
     if (!debugBox) return;
     debugBox.innerHTML =
@@ -189,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- init ---------------- */
 
-  // kalau langsung di list
   if (location.pathname === BLOG_PATH) {
     renderList(false);
   } else {
