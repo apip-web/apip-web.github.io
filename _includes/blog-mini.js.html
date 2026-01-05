@@ -1,24 +1,12 @@
 <style>
-  #spa-home { display: block; }
+  #homepage { display: block; }
   #posts { display: none; }
   #page-404 { display: none; }
-  #spa-debug {
-    position: fixed;
-    bottom: 100px;
-    right: 10px;
-    padding: 8px 10px;
-    font: 12px monospace;
-    background: rgba(0,0,0,.75);
-    color: lightgreen;
-    z-index: 9999;
-    border-radius: 4px;
-  }
 </style>
 
-<div id="page-404">
-  <h1>404</h1>
-  <p>Halaman tidak ditemukan.</p>
-  <a href="/">Kembali ke Home</a>
+<div id="homepage">
+  <h1>Homepage</h1>
+  <button id="open-blog">Lihat Blog</button>
 </div>
 
 <div id="posts">
@@ -27,7 +15,6 @@
       <h3 class="post-title">
         <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
       </h3>
-
       <div class="post-content" style="display:none;">
         {% include post-meta.html post=post %}
       </div>
@@ -35,12 +22,28 @@
   {% endfor %}
 </div>
 
-<div id="spa-debug"></div>
+<div id="page-404">
+  <h1>404</h1>
+  <p>Halaman tidak ditemukan.</p>
+  <a href="/">Kembali ke Home</a>
+</div>
+
+<div id="spa-debug" style="
+  position: fixed;
+  bottom: 100px;
+  right: 10px;
+  padding: 8px 10px;
+  font: 12px monospace;
+  background: rgba(0,0,0,.75);
+  color: lightgreen;
+  z-index: 9999;
+  border-radius: 4px;
+"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const homepage  = document.querySelector('.homepage');
+  const homepage  = document.getElementById('homepage');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
@@ -49,29 +52,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const BLOG_PATH = '/2026/01/05/blog.html';
   let STATE = '';
 
-  /* ---------------- helpers ---------------- */
+  function getPosts() {
+    return [...document.querySelectorAll('.post')];
+  }
+
   const safe = (el, fn) => el && fn(el);
-  const getPosts = () => [...document.querySelectorAll('.post')];
 
   function hideAll() {
     safe(homepage, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'none');
-
     getPosts().forEach(p => {
       p.style.display = 'none';
-      const content = p.querySelector('.post-content');
-      const link = p.querySelector('.post-title a');
-      if (content) content.style.display = 'none';
-      if (link) link.style.display = '';
+      const c = p.querySelector('.post-content');
+      const a = p.querySelector('.post-title a');
+      if (c) c.style.display = 'none';
+      if (a) a.style.display = '';
     });
   }
 
   function push(path) {
-    if (location.pathname !== path) history.pushState(null, '', path);
+    if (location.pathname !== path) {
+      history.pushState(null, '', path);
+    }
   }
 
-  /* ---------------- renderers ---------------- */
   function renderHome(pushState) {
     STATE = 'home';
     hideAll();
@@ -85,13 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     STATE = 'list';
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
-
-    getPosts().forEach(p => {
-      p.style.display = 'block';
-      const content = p.querySelector('.post-content');
-      if (content) content.style.display = 'none'; // excerpt atau meta tetap tersembunyi
-    });
-
+    getPosts().forEach(p => p.style.display = 'block');
     if (pushState) push(BLOG_PATH);
     debug();
   }
@@ -99,18 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderPost(url, pushState) {
     STATE = 'post';
     hideAll();
-
     const post = getPosts().find(p => p.dataset.url === url);
     if (!post) return render404(url, pushState);
-
     safe(postsWrap, el => el.style.display = 'block');
     post.style.display = 'block';
-
-    const content = post.querySelector('.post-content');
-    const link    = post.querySelector('.post-title a');
-    if (content) content.style.display = 'block';
-    if (link) link.style.display = 'none';
-
+    const c = post.querySelector('.post-content');
+    const a = post.querySelector('.post-title a');
+    if (c) c.style.display = 'block';
+    if (a) a.style.display = 'none';
     if (pushState) push(url);
     debug();
   }
@@ -123,11 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
     debug();
   }
 
-  /* ---------------- router ---------------- */
   function router(path = location.pathname, pushState = false) {
     const posts = getPosts();
 
-    // prioritas: cek post di DOM
+    // cek post di DOM
     const post = posts.find(p => p.dataset.url === path);
     if (post) return renderPost(path, pushState);
 
@@ -137,24 +131,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // homepage
     if (path === '/' || path === '') return renderHome(pushState);
 
-    // selain itu → 404
     render404(path, pushState);
   }
 
-  /* ---------------- link clicks ---------------- */
+  // klik link internal
   document.querySelectorAll('a[href]').forEach(a => {
     a.addEventListener('click', e => {
       const href = a.getAttribute('href');
       if (!href || href.startsWith('#')) return;
-
       const url = new URL(href, location.origin);
       if (url.origin !== location.origin) return;
-
       e.preventDefault();
       router(url.pathname, true);
     });
   });
 
+  // tombol Lihat Blog
   if (btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
@@ -162,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // klik judul post
   getPosts().forEach(p => {
     const a = p.querySelector('.post-title a');
     if (!a) return;
@@ -175,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     router(location.pathname, false);
   });
 
-  /* ---------------- debug ---------------- */
   function debug() {
     if (!debugBox) return;
     debugBox.innerHTML =
@@ -183,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `<b>PATH:</b> ${location.pathname}`;
   }
 
-  /* ---------------- init ---------------- */
+  // init
   if (location.pathname === BLOG_PATH) {
     renderList(false);
   } else {
