@@ -56,10 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const BLOG_PATH = '/2026/01/05/blog.html';  
   let STATE = '';  
   
-  function getPosts() {  
-  const all = document.querySelectorAll('#posts .post');
-  return [...all];
-}
+function getPosts() {  
+    return [...document.querySelectorAll('.post')];  
+  }
 
   const safe = (el, fn) => el && fn(el);
 
@@ -142,25 +141,21 @@ function renderList(pushState) {
   }  
   
   /* ---------------- router + debug ---------------- */  
-  
+
 function findPostByPath(path) {  
   const posts = getPosts();  
   let found = null;  
 
+  // Normalisasi path pencarian
+  const searchPath = path.replace(/\/$/, "");
+
   posts.forEach(p => {  
-    const postUrl = p.dataset.url;  
-    if (!postUrl) return;
-
-    // Pastikan kita tidak mencocokkan halaman daftar sebagai postingan
-    if (postUrl.includes('blog.html')) return; 
-
-    const match = path.endsWith(postUrl);  
+    const postUrl = p.dataset.url.replace(/\/$/, "");
+    
+    // Pencocokan eksak atau berakhir dengan url tersebut
+    const match = (searchPath === postUrl) || searchPath.endsWith(postUrl);
+    
     if (match) found = p;  
-
-    // Logging ke Debug Box sesuai permintaan
-    safe(debugBox, box => {  
-      box.innerHTML += `[CHECK] path: ${path} | post: ${postUrl} | result: ${match}<br>`;  
-    });  
   });  
 
   return found;  
