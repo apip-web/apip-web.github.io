@@ -119,16 +119,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function findPostByPath(path) {
     const posts = getPosts();
-    for (const p of posts) {
+    let found = null;
+
+    posts.forEach(p => {
       const postUrl = p.dataset.url;
       const match = path.endsWith(postUrl);
-      console.log('[DEBUG findPostByPath]', { path, postUrl, match });
-      if (match) return p;
-    }
-    return undefined;
+      if (match) found = p;
+
+      // debug overlay: tampilkan cek setiap post
+      safe(debugBox, box => {
+        box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;
+      });
+    });
+
+    return found;
   }
 
   function router(path = location.pathname, pushState = false) {
+    // clear overlay sebelum cek
+    safe(debugBox, box => box.innerHTML = '');
+
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
     if (path === BLOG_PATH) return renderList(pushState);
@@ -175,9 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function debug() {
     if (!debugBox) return;
-    debugBox.innerHTML =
-      `<b>STATE:</b> ${STATE}<br>` +
-      `<b>PATH:</b> ${location.pathname}`;
+    debugBox.innerHTML +=
+      `<hr><b>STATE:</b> ${STATE}<br>` +
+      `<b>PATH:</b> ${location.pathname}<br>`;
   }
 
   /* ---------------- init ---------------- */
