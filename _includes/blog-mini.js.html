@@ -13,12 +13,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('.homepage'); // hanya homepage
-  const btn       = document.getElementById('open-blog');
-  const postsWrap = document.getElementById('posts');
-  const posts     = [...document.querySelectorAll('.post')];
-  const page404   = document.getElementById('page-404');
-  const BLOG_PATH = '/blog/';
+  const homepage  = document.querySelector('.homepage');       // helper homepage
+  const btn       = document.getElementById('open-blog');       // tombol blog
+  const postsWrap = document.getElementById('posts');           // container post SPA
+  const posts     = [...document.querySelectorAll('.post')];    // list post SPA
+  const page404   = document.getElementById('page-404');        // container 404
+  const BLOG_URL  = 'https://apip-web.github.io/2026/01/05/blog.html';
 
   function safe(el, fn) { if(el) fn(el); }
 
@@ -31,41 +31,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function hide404() {
-    safe(page404, el => el.style.display = 'none');
-  }
-
-  function hideHomepage() {
-    safe(homepage, el => el.style.display = 'none');
-  }
-
-  function showHomepage() {
-    safe(homepage, el => el.style.display = 'block');
-  }
+  function hide404() { safe(page404, el => el.style.display = 'none'); }
 
   function pushIfDifferent(path) {
     if(location.pathname !== path) history.pushState(null, '', path);
   }
 
-  function showList(push = false) {
-    hideHomepage();
-    safe(btn, el => el.style.display = 'none');
-    safe(postsWrap, el => el.style.display = 'block');
+  function showHome(push = false) {
+    safe(homepage, el => el.style.display = '');
+    safe(postsWrap, el => el.style.display = 'none');
+    hideAllPosts();
     hide404();
-
-    posts.forEach(p => {
-      safe(p, el => el.style.display = 'block');
-      safe(p.querySelector('.post-content'), el => el.style.display = 'none');
-      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
-      safe(p.querySelector('.post-title a'), el => el.style.display = '');
-    });
-
-    if(push) pushIfDifferent(BLOG_PATH);
+    if(push) pushIfDifferent('/');
   }
 
   function showPost(url, push = false) {
-    hideHomepage();
-    safe(btn, el => el.style.display = 'none');
+    safe(homepage, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');
     hide404();
 
@@ -80,62 +61,49 @@ document.addEventListener('DOMContentLoaded', () => {
       if(active) found = true;
     });
 
-    if(!found) {
-      show404(push, url);
-      return;
-    }
-
+    if(!found) { show404(push, url); return; }
     if(push) pushIfDifferent(url);
   }
 
   function show404(push = false, url = location.pathname) {
-    hideHomepage();
-    safe(btn, el => el.style.display = 'none');
+    safe(homepage, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'none');
     safe(page404, el => el.style.display = 'block');
     hideAllPosts();
-
     if(push) pushIfDifferent(url);
   }
 
   function router(path = location.pathname, push = false) {
-    if(path.startsWith('/page/')) return; // biarkan browser load fisik
+    // jangan intercept folder /page/ atau /blog/
+    if(path.startsWith('/page/') || path === '/2026/01/05/blog.html') return;
 
     const post = posts.find(p => p.dataset.url === path);
     if(post) return showPost(path, push);
 
-    if(path === BLOG_PATH) return showList(push);
-
-    if(path === '/' || path === '') {
-      showHomepage();
-      safe(btn, el => el.style.display = ''); // tombol blog tetap muncul
-      safe(postsWrap, el => el.style.display = 'none');
-      hideAllPosts();
-      hide404();
-      if(push) pushIfDifferent('/');
-      return;
-    }
+    if(path === '/' || path === '') return showHome(push);
 
     show404(push, path);
   }
 
-  // intercept semua link internal kecuali /page/
+  // intercept semua link internal kecuali /page/ atau /blog/
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
-    if(href.startsWith('/page/')) return;
+    if(href.startsWith('/page/') || href === '/2026/01/05/blog.html') return;
     a.addEventListener('click', e => {
       e.preventDefault();
       router(href, true);
     });
   });
 
+  // tombol blog → navigasi ke halaman nyata
   if(btn) {
     btn.addEventListener('click', e => {
       e.preventDefault();
-      router(BLOG_PATH, true);
+      location.href = BLOG_URL;
     });
   }
 
+  // klik post SPA
   posts.forEach(p => {
     const a = p.querySelector('.post-title a');
     if(!a) return;
@@ -145,9 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  window.addEventListener('popstate', () => {
-    router(location.pathname, false);
-  });
+  // back / forward
+  window.addEventListener('popstate', () => { router(location.pathname, false); });
 
   // initial load
   router(location.pathname, false);
