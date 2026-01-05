@@ -57,114 +57,178 @@
   }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const homepage = document.querySelector('.homepage');
-  const postsWrap = document.getElementById('posts');
-  const debugBox = document.getElementById('spa-debug');
-  let STATE = '';
-
-  function getPosts() {
-    return [...document.querySelectorAll('.post')];
-  }
-
-  const safe = (el, fn) => el && fn(el);
-
-  function hideAllPosts() {
-    getPosts().forEach(p => {
-      p.style.display = 'none';
-      const c = p.querySelector('.post-content');
-      const a = p.querySelector('.post-title a');
-      if(c) c.style.display = 'none';
-      if(a) a.style.display = '';
-    });
-    safe(postsWrap, el => el.style.display = 'none');
-    safe(homepage, el => el.style.display = 'none');
-  }
-
-  function showHome() {
-    hideAllPosts();
-    safe(homepage, el => el.style.display = 'block');
-    STATE = 'home';
-    debug();
-  }
-
-  function showList() {
-    hideAllPosts();
-    safe(postsWrap, el => el.style.display = 'block');
-    getPosts().forEach(p => p.style.display = 'block');
-    STATE = 'list';
-    debug();
-  }
-
-  function showPost(post) {
-    hideAllPosts();
-    safe(postsWrap, el => el.style.display = 'block');
-    post.style.display = 'block';
-    const c = post.querySelector('.post-content');
-    const a = post.querySelector('.post-title a');
-    if(c) c.style.display = 'block';
-    if(a) a.style.display = 'none';
-    STATE = 'post';
-    debug();
-  }
-
-  /* ---------------- link/tab handling ---------------- */
-
-  // klik semua link post
-  getPosts().forEach(p => {
-    const a = p.querySelector('.post-title a');
-    if(!a) return;
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      showPost(p);
-    });
-  });
-
-  // tombol buka list / blog
-  const btn = document.getElementById('open-blog');
-  if(btn) {
-    btn.addEventListener('click', e => {
-      e.preventDefault();
-      showList();
-    });
-  }
-
-  // klik homepage
-  const homeLinks = document.querySelectorAll('a[href="/"]');
-  homeLinks.forEach(a => {
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      showHome();
-    });
-  });
-
-  /* ---------------- debug overlay ---------------- */
-
-  function debug() {
-    if(!debugBox) return;
-    debugBox.innerHTML = '';
-    debugBox.innerHTML += `<hr><b>STATE:</b> ${STATE}<br>`;
-    debugBox.innerHTML += `<b>Visible Posts:</b><br>`;
-    getPosts().forEach(p => {
-      const visible = p.style.display !== 'none';
-      debugBox.innerHTML += `[${visible ? 'SHOW' : 'HIDE'}] ${p.dataset.url}<br>`;
-    });
-  }
-
-  // klik overlay → copy seluruh HTML debug
-  if(debugBox) {
-    debugBox.addEventListener('click', () => {
-      navigator.clipboard.writeText(debugBox.innerHTML)
-        .then(() => {
-          debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;
-        });
-    });
-  }
-
-  /* ---------------- init ---------------- */
-
-  // inisialisasi SPA, tampilkan homepage
-  showHome();
-});
+<script>  
+document.addEventListener('DOMContentLoaded', () => {  
+  const homepage  = document.querySelector('.homepage');  
+  const btn       = document.getElementById('open-blog');  
+  const postsWrap = document.getElementById('posts');  
+  const page404   = document.getElementById('page-404');  
+  const debugBox  = document.getElementById('spa-debug');  
+  
+  const BLOG_PATH = '/2026/01/05/blog.html';  
+  let STATE = '';  
+  
+  function getPosts() {  
+    return [...document.querySelectorAll('.post')];  
+  }  
+  
+  const safe = (el, fn) => el && fn(el);  
+  
+  function hideAll() {  
+    safe(homepage, el => el.style.display = 'none');  
+    safe(postsWrap, el => el.style.display = 'none');  
+    safe(page404, el => el.style.display = 'none');  
+  
+    getPosts().forEach(p => {  
+      p.style.display = 'none';  
+      const c = p.querySelector('.post-content');  
+      const a = p.querySelector('.post-title a');  
+      if (c) c.style.display = 'none';  
+      if (a) a.style.display = '';  
+    });  
+  }  
+  
+  function push(path) {  
+    if (location.pathname !== path) {  
+      history.pushState(null, '', path);  
+    }  
+  }  
+  
+  /* ---------------- renderers ---------------- */  
+  
+  function renderHome(pushState) {  
+    STATE = 'home';  
+    hideAll();  
+    safe(homepage, el => el.style.display = 'block');  
+    safe(btn, el => el.style.display = 'inline-block');  
+    if (pushState) push('/');  
+    debug();  
+  }  
+  
+  function renderList(pushState) {  
+    STATE = 'list';  
+    hideAll();  
+    safe(postsWrap, el => el.style.display = 'block');  
+    getPosts().forEach(p => p.style.display = 'block');  
+    if (pushState) push(BLOG_PATH);  
+    debug();  
+  }  
+  
+  function renderPost(post, pushState) {  
+    STATE = 'post';  
+    hideAll();  
+    safe(postsWrap, el => el.style.display = 'block');  
+    post.style.display = 'block';  
+  
+    const c = post.querySelector('.post-content');  
+    const a = post.querySelector('.post-title a');  
+    if (c) c.style.display = 'block';  
+    if (a) a.style.display = 'none';  
+  
+    if (pushState) push(post.dataset.url);  
+    debug();  
+  }  
+  
+  function render404(path, pushState) {  
+    STATE = '404';  
+    hideAll();  
+    safe(page404, el => el.style.display = 'block');  
+    if (pushState) push(path);  
+    debug();  
+  }  
+  
+  /* ---------------- router + debug ---------------- */  
+  
+  function findPostByPath(path) {  
+    const posts = getPosts();  
+    let found = null;  
+  
+    posts.forEach(p => {  
+      const postUrl = p.dataset.url;  
+      const match = path.endsWith(postUrl);  
+      if (match) found = p;  
+  
+      // tampilkan cek setiap post di overlay  
+      safe(debugBox, box => {  
+        box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;  
+      });  
+    });  
+  
+    return found;  
+  }  
+  
+  function router(path = location.pathname, pushState = false) {  
+    // clear overlay sebelum cek  
+    safe(debugBox, box => box.innerHTML = '');  
+  
+    const post = findPostByPath(path);  
+    if (post) return renderPost(post, pushState);  
+    if (path === BLOG_PATH) return renderList(pushState);  
+    if (path === '/' || path === '') return renderHome(pushState);  
+    render404(path, pushState);  
+  }  
+  
+  /* ---------------- link interception ---------------- */  
+  
+  document.querySelectorAll('a[href]').forEach(a => {  
+    a.addEventListener('click', e => {  
+      const href = a.getAttribute('href');  
+      if (!href || href.startsWith('#')) return;  
+  
+      const url = new URL(href, location.origin);  
+      if (url.origin !== location.origin) return;  
+  
+      e.preventDefault();  
+      router(url.pathname, true);  
+    });  
+  });  
+  
+  if (btn) {  
+    btn.addEventListener('click', e => {  
+      e.preventDefault();  
+      router(BLOG_PATH, true);  
+    });  
+  }  
+  
+  getPosts().forEach(p => {  
+    const a = p.querySelector('.post-title a');  
+    if (!a) return;  
+    a.addEventListener('click', e => {  
+      e.preventDefault();  
+      router(p.dataset.url, true);  
+    });  
+  });  
+  
+  window.addEventListener('popstate', () => {  
+    router(location.pathname, false);  
+  });  
+  
+  /* ---------------- debug overlay ---------------- */  
+  
+  function debug() {  
+    if (!debugBox) return;  
+    debugBox.innerHTML +=  
+      `<hr><b>STATE:</b> ${STATE}<br>` +  
+      `<b>PATH:</b> ${location.pathname}<br>`;  
+  }  
+  
+  // klik overlay → copy seluruh HTML debug  
+  if (debugBox) {  
+    debugBox.addEventListener('click', () => {  
+      const htmlToCopy = debugBox.innerHTML;  
+      navigator.clipboard.writeText(htmlToCopy).then(() => {  
+        debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;  
+      });  
+    });  
+  }  
+  
+  /* ---------------- init ---------------- */  
+  
+  if (location.pathname === BLOG_PATH) {  
+    renderList(false);  
+  } else {  
+    router(location.pathname, false);  
+  }  
+  
+});  
 </script>
