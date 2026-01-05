@@ -142,53 +142,66 @@ function renderList(pushState) {
   
   /* ---------------- router + debug ---------------- */  
   
-  function findPostByPath(path) {  
-    const posts = getPosts();  
-    let found = null;  
-  
-    posts.forEach(p => {  
-      const postUrl = p.dataset.url;  
-      const match = path.endsWith(postUrl);  
-      if (match) found = p;  
-  
-      // tampilkan cek setiap post di overlay  
-      safe(debugBox, box => {  
-        box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;  
-      });  
+function findPostByPath(path) {  
+  const posts = getPosts();  
+  let found = null;  
+
+  posts.forEach(p => {  
+    const postUrl = p.dataset.url;  
+    if (!postUrl) return;
+
+    // Pastikan kita tidak mencocokkan halaman daftar sebagai postingan
+    if (postUrl.includes('blog.html')) return; 
+
+    const match = path.endsWith(postUrl);  
+    if (match) found = p;  
+
+    // Logging ke Debug Box sesuai permintaan
+    safe(debugBox, box => {  
+      box.innerHTML += `[CHECK] path: ${path} | post: ${postUrl} | result: ${match}<br>`;  
     });  
-  
-    return found;  
-  }
+  });  
+
+  return found;  
+}
 
 /* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
 function router(path = location.pathname, pushState = false) {  
+  // Reset Debug Box di awal setiap proses routing
+  safe(debugBox, box => {
+    box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`;
+  });
 
-  hideAll();
-  
-  // 1. Bersihkan debug box
-  safe(debugBox, box => box.innerHTML = '');  
+  // 1. NORMALISASI PATH (Hapus trailing slash)
+  const cleanPath = path.replace(/\/$/, "");
+  const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
-  // 2. CEK DAFTAR BLOG DULU (Prioritas Utama)
-  // Gunakan .includes atau normalisasi path untuk memastikan kecocokan
-  if (path === BLOG_PATH || path.endsWith(BLOG_PATH)) {
+  // 2. CEK DAFTAR BLOG DULU (Gunakan Prioritas Utama)
+  // Kita cek apakah path mengandung BLOG_PATH atau sebaliknya
+  if (cleanPath === cleanBlogPath || path.includes('blog.html')) {
+    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
     return renderList(pushState);
   }
 
   // 3. CEK HALAMAN HOME
-  if (path === '/' || path === '' || path === '/index.html') {
+  if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
+    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: HOME MODE</span><br>`);
     return renderHome(pushState);
   }
 
   // 4. CEK APAKAH INI POSTINGAN
+  // Jalankan pencarian post hanya jika path bukan home/blog
   const post = findPostByPath(path);  
   if (post) {
+    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: POST MODE</span><br>`);
     return renderPost(post, pushState);
   }
 
   // 5. JIKA TIDAK ADA YANG COCOK -> 404
+  safe(debugBox, box => box.innerHTML += `<span style="color:red">Match: 404 NOT FOUND</span><br>`);
   render404(path, pushState);  
-}  
+}
 
 /* ---------------- init (Sudah Diperbaiki) ---------------- */  
 
@@ -249,13 +262,11 @@ router(location.pathname, false);
     });  
   }  
   
-  /* ---------------- init ---------------- */  
-  
-  if (location.pathname === BLOG_PATH) {  
-    renderList(false);  
-  } else {  
-    router(location.pathname, false);  
-  }  
-  
+  /* ---------------- init ---------------- */
+
+// Hapus block if(location.pathname === BLOG_PATH) lama
+// Cukup panggil router secara global
+router(location.pathname, false);
+
 });  
 </script>
