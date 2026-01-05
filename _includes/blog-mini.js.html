@@ -1,186 +1,201 @@
-<style>
-  #homepage { display: block; }
-  #posts { display: none; }
-  #page-404 { display: none; }
-</style>
-
-<div id="homepage">
-  <h1>Homepage</h1>
-  <button id="open-blog">Lihat Blog</button>
-</div>
-
-<div id="posts">
-  {% for post in site.posts %}
-    <article class="post" data-url="{{ post.url | relative_url }}">
-      <h3 class="post-title">
-        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-      </h3>
-      <div class="post-content" style="display:none;">
-        {% include post-meta.html post=post %}
-      </div>
-    </article>
-  {% endfor %}
-</div>
-
-<div id="page-404">
-  <h1>404</h1>
-  <p>Halaman tidak ditemukan.</p>
-  <a href="/">Kembali ke Home</a>
-</div>
-
-<div id="spa-debug" style="
-  position: fixed;
-  bottom: 100px;
-  right: 10px;
-  padding: 8px 10px;
-  font: 12px monospace;
-  background: rgba(0,0,0,.75);
-  color: lightgreen;
-  z-index: 9999;
-  border-radius: 4px;
-"></div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-
-  const homepage  = document.getElementById('homepage');
-  const btn       = document.getElementById('open-blog');
-  const postsWrap = document.getElementById('posts');
-  const page404   = document.getElementById('page-404');
-  const debugBox  = document.getElementById('spa-debug');
-
-  const BLOG_PATH = '/2026/01/05/blog.html';
-  let STATE = '';
-
-  function getPosts() {
-    return [...document.querySelectorAll('.post')];
-  }
-
-  const safe = (el, fn) => el && fn(el);
-
-  function hideAll() {
-    safe(homepage, el => el.style.display = 'none');
-    safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'none');
-    getPosts().forEach(p => {
-      p.style.display = 'none';
-      const c = p.querySelector('.post-content');
-      const a = p.querySelector('.post-title a');
-      if (c) c.style.display = 'none';
-      if (a) a.style.display = '';
-    });
-  }
-
-  function push(path) {
-    if (location.pathname !== path) {
-      history.pushState(null, '', path);
-    }
-  }
-
-  function renderHome(pushState) {
-    STATE = 'home';
-    hideAll();
-    safe(homepage, el => el.style.display = 'block');
-    safe(btn, el => el.style.display = 'inline-block');
-    if (pushState) push('/');
-    debug();
-  }
-
-  function renderList(pushState) {
-    STATE = 'list';
-    hideAll();
-    safe(postsWrap, el => el.style.display = 'block');
-    getPosts().forEach(p => p.style.display = 'block');
-    if (pushState) push(BLOG_PATH);
-    debug();
-  }
-
-  function renderPost(url, pushState) {
-    STATE = 'post';
-    hideAll();
-    const post = getPosts().find(p => p.dataset.url === url);
-    if (!post) return render404(url, pushState);
-    safe(postsWrap, el => el.style.display = 'block');
-    post.style.display = 'block';
-    const c = post.querySelector('.post-content');
-    const a = post.querySelector('.post-title a');
-    if (c) c.style.display = 'block';
-    if (a) a.style.display = 'none';
-    if (pushState) push(url);
-    debug();
-  }
-
-  function render404(path, pushState) {
-    STATE = '404';
-    hideAll();
-    safe(page404, el => el.style.display = 'block');
-    if (pushState) push(path);
-    debug();
-  }
-
-  function router(path = location.pathname, pushState = false) {
-    const posts = getPosts();
-
-    // cek post di DOM
-    const post = posts.find(p => p.dataset.url === path);
-    if (post) return renderPost(path, pushState);
-
-    // halaman list nyata
-    if (path === BLOG_PATH) return renderList(pushState);
-
-    // homepage
-    if (path === '/' || path === '') return renderHome(pushState);
-
-    render404(path, pushState);
-  }
-
-  // klik link internal
-  document.querySelectorAll('a[href]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (!href || href.startsWith('#')) return;
-      const url = new URL(href, location.origin);
-      if (url.origin !== location.origin) return;
-      e.preventDefault();
-      router(url.pathname, true);
-    });
-  });
-
-  // tombol Lihat Blog
-  if (btn) {
-    btn.addEventListener('click', e => {
-      e.preventDefault();
-      router(BLOG_PATH, true);
-    });
-  }
-
-  // klik judul post
-  getPosts().forEach(p => {
-    const a = p.querySelector('.post-title a');
-    if (!a) return;
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      router(p.dataset.url, true);
-    });
-  });
-
-  window.addEventListener('popstate', () => {
-    router(location.pathname, false);
-  });
-
-  function debug() {
-    if (!debugBox) return;
-    debugBox.innerHTML =
-      `<b>STATE:</b> ${STATE}<br>` +
-      `<b>PATH:</b> ${location.pathname}`;
-  }
-
-  // init
-  if (location.pathname === BLOG_PATH) {
-    renderList(false);
-  } else {
-    router(location.pathname, false);
-  }
-
-});
+<style>  
+  #spa-home { display: block;   
+  #posts { display: none; }  
+</style>  
+  
+<div id="page-404" style="display:none;">  
+    <h1>404</h1>  
+    <p>Halaman tidak ditemukan.</p>  
+    <a href="/">Kembali ke Home</a>  
+</div>  
+  
+<div id="posts" style="display:none;">      
+{% for post in site.posts %}      
+  <article class="post" data-url="{{ post.url | relative_url }}">      
+    <h2 class="post-title">      
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>      
+    </h2>      
+      
+    <div class="post-excerpt">      
+      {{ post.excerpt }}      
+    </div>      
+      
+    <div class="post-content" style="display:none;">      
+      {% include post-meta.html post=post %}      
+    </div>      
+  </article>      
+{% endfor %}      
+</div>  
+  
+<div id="spa-debug" style="  
+  position: fixed;  
+  bottom: 100px;  
+  right: 10px;  
+  padding: 8px 10px;  
+  font: 12px monospace;  
+  background: rgba(0,0,0,.75);  
+  color: lightgreen;  
+  z-index: 9999;  
+  border-radius: 4px;  
+">  
+</div>  
+  
+<script>  
+document.addEventListener('DOMContentLoaded', () => {  
+  
+  const homepage  = document.querySelector('.homepage');  
+  const btn       = document.getElementById('open-blog');  
+  const postsWrap = document.getElementById('posts');  
+  const page404   = document.getElementById('page-404');  
+  const debugBox  = document.getElementById('spa-debug');  
+  
+  const BLOG_PATH = '/2026/01/05/blog.html';  
+  let STATE = '';  
+  
+  // ambil semua post dari DOM  
+  function getPosts() {  
+    return [...document.querySelectorAll('.post')];  
+  }  
+  
+  /* ---------------- helpers ---------------- */  
+  const safe = (el, fn) => el && fn(el);  
+  
+  function hideAll() {  
+    safe(homepage,  el => el.style.display = 'none');  
+    safe(postsWrap, el => el.style.display = 'none');  
+    safe(page404,   el => el.style.display = 'none');  
+  
+    getPosts().forEach(p => {  
+      p.style.display = 'none';  
+      const c = p.querySelector('.post-content');  
+      const a = p.querySelector('.post-title a');  
+      if (c) c.style.display = 'none';  
+      if (a) a.style.display = '';  
+    });  
+  }  
+  
+  function push(path) {  
+    if (location.pathname !== path) {  
+      history.pushState(null, '', path);  
+    }  
+  }  
+  
+  /* ---------------- renderers ---------------- */  
+  function renderHome(pushState) {  
+    STATE = 'home';  
+    hideAll();  
+    safe(homepage, el => el.style.display = 'block');  
+    safe(btn,      el => el.style.display = 'inline-block');  
+    if (pushState) push('/');  
+    debug();  
+  }  
+  
+  function renderList(pushState) {  
+    STATE = 'list';  
+    hideAll();  
+    safe(postsWrap, el => el.style.display = 'block');  
+  
+    getPosts().forEach(p => {  
+      p.style.display = 'block';  
+    });  
+  
+    if (pushState) push(BLOG_PATH);  
+    debug();  
+  }  
+  
+  function renderPost(url, pushState) {  
+    STATE = 'post';  
+    hideAll();  
+  
+    const post = getPosts().find(p => p.dataset.url === url);  
+    if (!post) return render404(url, pushState);  
+  
+    safe(postsWrap, el => el.style.display = 'block');  
+    post.style.display = 'block';  
+  
+    const c = post.querySelector('.post-content');  
+    const a = post.querySelector('.post-title a');  
+    if (c) c.style.display = 'block';  
+    if (a) a.style.display = 'none';  
+  
+    if (pushState) push(url);  
+    debug();  
+  }  
+  
+  function render404(path, pushState) {  
+    STATE = '404';  
+    hideAll();  
+    safe(page404, el => el.style.display = 'block');  
+    if (pushState) push(path);  
+    debug();  
+  }  
+  
+  /* ---------------- router ---------------- */  
+  function router(path = location.pathname, pushState = false) {  
+    const posts = getPosts();  
+  
+    // prioritas: post di DOM  
+    const post = posts.find(p => p.dataset.url === path);  
+    if (post) return renderPost(path, pushState);  
+  
+    // halaman list nyata  
+    if (path === BLOG_PATH) return renderList(pushState);  
+  
+    // homepage  
+    if (path === '/' || path === '') return renderHome(pushState);  
+  
+    render404(path, pushState);  
+  }  
+  
+  /* ---------------- link clicks ---------------- */  
+  document.querySelectorAll('a[href]').forEach(a => {  
+    a.addEventListener('click', e => {  
+      const href = a.getAttribute('href');  
+      if (!href) return;  
+      if (href.startsWith('#')) return;  
+  
+      const url = new URL(href, location.origin);  
+      if (url.origin !== location.origin) return;  
+  
+      e.preventDefault();  
+      router(url.pathname, true);  
+    });  
+  });  
+  
+  if (btn) {  
+    btn.addEventListener('click', e => {  
+      e.preventDefault();  
+      router(BLOG_PATH, true);  
+    });  
+  }  
+  
+  getPosts().forEach(p => {  
+    const a = p.querySelector('.post-title a');  
+    if (!a) return;  
+    a.addEventListener('click', e => {  
+      e.preventDefault();  
+      router(p.dataset.url, true);  
+    });  
+  });  
+  
+  window.addEventListener('popstate', () => {  
+    router(location.pathname, false);  
+  });  
+  
+  /* ---------------- debug ---------------- */  
+  function debug() {  
+    if (!debugBox) return;  
+    debugBox.innerHTML =  
+      `<b>STATE:</b> ${STATE}<br>` +  
+      `<b>PATH:</b> ${location.pathname}`;  
+  }  
+  
+  /* ---------------- init ---------------- */  
+  if (location.pathname === BLOG_PATH) {  
+    renderList(false);  
+  } else {  
+    router(location.pathname, false);  
+  }  
+  
+});  
 </script>
