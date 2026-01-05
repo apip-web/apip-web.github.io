@@ -128,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const match = path.endsWith(postUrl);
       if (match) found = p;
 
-      // debug overlay: tampilkan cek setiap post
       safe(debugBox, box => {
         box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;
       });
@@ -138,9 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function router(path = location.pathname, pushState = false) {
-    // clear overlay sebelum cek
-    safe(debugBox, box => box.innerHTML = '');
-
+    safe(debugBox, box => box.innerHTML = ''); // clear overlay
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
     if (path === BLOG_PATH) return renderList(pushState);
@@ -190,6 +187,15 @@ document.addEventListener('DOMContentLoaded', () => {
     debugBox.innerHTML +=
       `<hr><b>STATE:</b> ${STATE}<br>` +
       `<b>PATH:</b> ${location.pathname}<br>`;
+  }
+
+  // klik overlay otomatis copy PATH
+  if (debugBox) {
+    debugBox.addEventListener('click', () => {
+      navigator.clipboard.writeText(location.pathname).then(() => {
+        debugBox.innerHTML += `<br><i>Copied path! 😎</i>`;
+      });
+    });
   }
 
   /* ---------------- init ---------------- */
