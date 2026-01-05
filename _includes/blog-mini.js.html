@@ -54,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const postsWrap = document.getElementById('posts');  
   const page404   = document.getElementById('page-404');  
   const debugBox  = document.getElementById('spa-debug');  
-  
+
+  const listTitle = document.querySelector('.list-title');
   const BLOG_PATH = '/blog/';  
   let STATE = '';  
   
@@ -121,7 +122,8 @@ function renderList(pushState) {
 
   function renderPost(post, pushState) {  
     STATE = 'post';  
-    hideAll();  
+    hideAll();
+    safe(listTitle, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');  
     post.style.display = 'block';  
   
