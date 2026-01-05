@@ -152,14 +152,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- links ---------------- */
 
-  document.querySelectorAll('a[href^="/"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (!href) return;
-      e.preventDefault();
-      router(href, true);
-    });
+document.querySelectorAll('a[href]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (!href) return;
+
+    // abaikan anchor & external
+    if (href.startsWith('#')) return;
+
+    const url = new URL(href, location.origin);
+
+    // biarkan browser reload kalau beda origin
+    if (url.origin !== location.origin) return;
+
+    e.preventDefault();
+    router(url.pathname, true);
   });
+});
 
   if (btn) {
     btn.addEventListener('click', e => {
