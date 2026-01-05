@@ -43,7 +43,6 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ========= ELEMENTS ========= */
   const homepage  = document.querySelector('.homepage');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
@@ -51,10 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const page404   = document.getElementById('page-404');
   const BLOG_PATH = '/blog/';
 
-  /* ========= STATE ========= */
   let STATE = 'home';
 
-  /* ========= DEBUG OVERLAY ========= */
+  /* ========= DEBUG ========= */
   const debug = document.createElement('div');
   debug.style.cssText = `
     position:fixed;bottom:10px;right:10px;
@@ -70,11 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ========= HELPERS ========= */
-  function hide(el)  { if (el) el.style.display = 'none'; }
-  function show(el)  { if (el) el.style.display = ''; }
+  const hide = el => el && (el.style.display = 'none');
+  const show = el => el && (el.style.display = '');
 
   function resetDOM() {
     hide(homepage);
+    hide(btn);
     hide(postsWrap);
     hide(page404);
 
@@ -131,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     show(page404);
   }
 
-  /* ========= ROUTER (URL = TRUTH) ========= */
+  /* ========= ROUTER ========= */
   function router() {
     const path = location.pathname;
 
@@ -151,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDebug();
   }
 
-  /* ========= NAVIGATION ========= */
+  /* ========= NAV ========= */
   function navigate(path) {
     if (location.pathname !== path) {
       history.pushState(null, '', path);
@@ -162,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('a[href^="/"]').forEach(a => {
     const href = a.getAttribute('href');
     if (href.startsWith('/page/')) return;
-
     a.addEventListener('click', e => {
       e.preventDefault();
       navigate(href);
@@ -178,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('popstate', router);
 
-  /* ========= INITIAL ========= */
   router();
 });
 </script>
