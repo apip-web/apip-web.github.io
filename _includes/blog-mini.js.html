@@ -27,6 +27,9 @@
 
     <div class="post-content" style="display:none;">
       {% include post-meta.html post=post %}
+      <div class="entry-content">
+        {{ post.content | markdownify }}
+      </div>
     </div>
   </article>
 {% endfor %}
