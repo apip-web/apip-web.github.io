@@ -44,6 +44,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const homepage  = document.querySelector('.homepage');
+  const spaRoot   = document.querySelector('#spa-home');
   const btn       = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const posts     = [...document.querySelectorAll('.post')];
@@ -52,13 +53,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let STATE = 'home';
 
-  /* ========= DEBUG ========= */
+  /* ===== DEBUG OVERLAY ===== */
   const debug = document.createElement('div');
   debug.style.cssText = `
-    position:fixed;bottom:10px;right:10px;
-    background:#000;color:#0f0;
-    padding:8px 12px;font:12px monospace;
-    z-index:9999
+    position:fixed;
+    bottom:10px;
+    right:10px;
+    background:#000;
+    color:#0f0;
+    padding:8px 12px;
+    font:12px monospace;
+    white-space:pre;      /* 🔧 FIX */
+    z-index:9999;
   `;
   document.body.appendChild(debug);
 
@@ -67,16 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
       `STATE: ${STATE}\nPATH: ${location.pathname}`;
   }
 
-  /* ========= HELPERS ========= */
+  /* ===== HELPERS ===== */
   const hide = el => el && (el.style.display = 'none');
   const show = el => el && (el.style.display = '');
 
-  function resetDOM() {
-    hide(homepage);
-    hide(btn);
-    hide(postsWrap);
-    hide(page404);
-
+  function resetPosts() {
     posts.forEach(p => {
       hide(p);
       hide(p.querySelector('.post-content'));
@@ -85,17 +86,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ========= RENDERERS ========= */
+  /* ===== RENDERERS ===== */
   function renderHome() {
-    resetDOM();
     STATE = 'home';
     show(homepage);
     show(btn);
+    hide(postsWrap);
+    hide(page404);
+    resetPosts();
   }
 
   function renderList() {
-    resetDOM();
     STATE = 'list';
+    hide(homepage);
+    hide(btn);
+    hide(page404);
     show(postsWrap);
 
     posts.forEach(p => {
@@ -105,8 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderPost(path) {
-    resetDOM();
     STATE = 'post';
+    hide(homepage);
+    hide(btn);
+    hide(page404);
     show(postsWrap);
 
     let found = false;
@@ -118,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hide(p.querySelector('.post-excerpt'));
         hide(p.querySelector('.post-title a'));
         found = true;
+      } else {
+        hide(p);
       }
     });
 
@@ -125,12 +134,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function render404() {
-    resetDOM();
     STATE = '404';
+    hide(homepage);
+    hide(btn);
+    hide(postsWrap);
     show(page404);
+    resetPosts();
   }
 
-  /* ========= ROUTER ========= */
+  /* ===== ROUTER ===== */
   function router() {
     const path = location.pathname;
 
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDebug();
   }
 
-  /* ========= NAV ========= */
+  /* ===== NAV ===== */
   function navigate(path) {
     if (location.pathname !== path) {
       history.pushState(null, '', path);
@@ -176,6 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('popstate', router);
 
-  router();
+  router(); // initial
 });
 </script>
