@@ -30,158 +30,118 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const homepage   = document.querySelector('.homepage');
-  const btn        = document.getElementById('open-blog');
-  const postsWrap  = document.getElementById('posts');
-  const posts      = [...document.querySelectorAll('.post')];
-  const page404    = document.getElementById('page-404');
-  const BLOG_PATH  = '/blog/';
+  const homepage  = document.querySelector('.homepage');
+  const postsWrap = document.getElementById('posts');
+  const posts     = [...document.querySelectorAll('.post')];
+  const page404   = document.getElementById('page-404');
+  const btn       = document.getElementById('open-blog');
+  const BLOG_PATH = '/blog/';
 
-  function safe(el, fn) { if (el) fn(el); }
+  function safe(el, fn){ if(el) fn(el); }
 
-  /* =========================
-     GLOBAL RESET
-     ========================= */
-  function hideAll() {
-    safe(postsWrap, el => el.style.display = 'none');
-    safe(page404, el => el.style.display = 'none');
-
+  /* ========= RESET TOTAL ========= */
+  function resetPosts() {
     posts.forEach(p => {
-      safe(p, el => el.style.display = 'none');
+      p.style.display = 'block'; // ← penting
       safe(p.querySelector('.post-content'), el => el.style.display = 'none');
-      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'none');
+      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
       safe(p.querySelector('.post-title a'), el => el.style.display = '');
     });
   }
 
-  /* =========================
-     HOMEPAGE GATE (KUNCI UTAMA)
-     ========================= */
-  function syncHomepage(path) {
-    if (path === '/' || path === '') {
-      safe(homepage, el => el.style.display = '');
-      hideAll();
-      return true;   // homepage aktif → STOP routing
-    }
+  function hideAll() {
+    safe(postsWrap, el => el.style.display = 'none');
+    safe(page404, el => el.style.display = 'none');
+    posts.forEach(p => p.style.display = 'none');
+  }
 
+  /* ========= HOMEPAGE ========= */
+  function showHome(push){
+    safe(homepage, el => el.style.display = '');
+    hideAll();
+    if(push) history.pushState(null,'','/');
+  }
+
+  /* ========= BLOG LIST ========= */
+  function showList(push){
     safe(homepage, el => el.style.display = 'none');
-    return false;    // lanjut ke router SPA
-  }
-
-  /* =========================
-     BLOG LIST
-     ========================= */
-  function showList(push) {
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
 
-    posts.forEach(p => {
-      safe(p, el => el.style.display = 'block');
-      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'block');
-    });
+    resetPosts(); // ← INI FIX UTAMANYA
 
-    if (push && location.pathname !== BLOG_PATH) {
-      history.pushState(null, '', BLOG_PATH);
-    }
+    if(push) history.pushState(null,'',BLOG_PATH);
   }
 
-  /* =========================
-     SINGLE POST
-     ========================= */
-  function showPost(path, push) {
+  /* ========= SINGLE POST ========= */
+  function showPost(path, push){
+    safe(homepage, el => el.style.display = 'none');
+    hideAll();
+    safe(postsWrap, el => el.style.display = 'block');
+
     let found = false;
-    hideAll();
-    safe(postsWrap, el => el.style.display = 'block');
 
     posts.forEach(p => {
-      const active = p.dataset.url === path;
-      if (!active) return;
-
+      if (p.dataset.url !== path) return;
       found = true;
-      safe(p, el => el.style.display = 'block');
+      p.style.display = 'block';
       safe(p.querySelector('.post-content'), el => el.style.display = 'block');
+      safe(p.querySelector('.post-excerpt'), el => el.style.display = 'none');
       safe(p.querySelector('.post-title a'), el => el.style.display = 'none');
     });
 
-    if (!found) return false;
-
-    if (push && location.pathname !== path) {
-      history.pushState(null, '', path);
-    }
-
+    if(!found) return false;
+    if(push) history.pushState(null,'',path);
     return true;
   }
 
-  /* =========================
-     404 SPA
-     ========================= */
-  function show404(path, push) {
+  function show404(path, push){
     hideAll();
     safe(page404, el => el.style.display = 'block');
-
-    if (push && location.pathname !== path) {
-      history.pushState(null, '', path);
-    }
+    if(push) history.pushState(null,'',path);
   }
 
-  /* =========================
-     ROUTER SPA
-     ========================= */
-  function router(path = location.pathname, push = false) {
+  /* ========= ROUTER ========= */
+  function router(path = location.pathname, push = false){
 
-    // halaman fisik /page/*
-    if (path.startsWith('/page/')) return;
+    if(path.startsWith('/page/')) return;
 
-    // homepage gate
-    if (syncHomepage(path)) return;
+    if(path === '/' || path === ''){
+      showHome(push);
+      return;
+    }
 
-    // blog list
-    if (path === BLOG_PATH) {
+    if(path === BLOG_PATH){
       showList(push);
       return;
     }
 
-    // single post
-    if (showPost(path, push)) return;
+    if(showPost(path, push)) return;
 
-    // 404
     show404(path, push);
   }
 
-  /* =========================
-     LINK INTERCEPT
-     ========================= */
-  document.querySelectorAll('a[href^="/"]').forEach(a => {
+  /* ========= INTERCEPT ========= */
+  document.querySelectorAll('a[href^="/"]').forEach(a=>{
     const href = a.getAttribute('href');
-    if (href.startsWith('/page/')) return;
-
-    a.addEventListener('click', e => {
+    if(href.startsWith('/page/')) return;
+    a.addEventListener('click', e=>{
       e.preventDefault();
-      router(href, true);
+      router(href,true);
     });
   });
 
-  /* =========================
-     BUTTON BLOG
-     ========================= */
-  if (btn) {
-    btn.addEventListener('click', e => {
+  if(btn){
+    btn.addEventListener('click', e=>{
       e.preventDefault();
-      router(BLOG_PATH, true);
+      router(BLOG_PATH,true);
     });
   }
 
-  /* =========================
-     BACK / FORWARD
-     ========================= */
-  window.addEventListener('popstate', () => {
-    router(location.pathname, false);
+  window.addEventListener('popstate', ()=>{
+    router(location.pathname,false);
   });
 
-  /* =========================
-     INITIAL LOAD
-     ========================= */
-  router(location.pathname, false);
-
+  router(location.pathname,false);
 });
 </script>
