@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- router ---------------- */
 
 function router(path = location.pathname, pushState = false) {
+  const posts = getPosts(); // ambil post terbaru dari DOM
+
   // prioritas tertinggi: cek apakah path cocok dengan post di DOM
   const post = posts.find(p => p.dataset.url === path);
   if (post) return renderPost(path, pushState);
