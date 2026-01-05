@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- renderers ---------------- */
+
   function renderHome(pushState) {
     STATE = 'home';
     hideAll();
@@ -98,10 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
     hideAll();
     safe(postsWrap, el => el.style.display = 'block');
     post.style.display = 'block';
+
     const c = post.querySelector('.post-content');
     const a = post.querySelector('.post-title a');
     if (c) c.style.display = 'block';
     if (a) a.style.display = 'none';
+
     if (pushState) push(post.dataset.url);
     debug();
   }
@@ -115,23 +118,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------------- router + debug ---------------- */
+
   function findPostByPath(path) {
     const posts = getPosts();
-    for (const p of posts) {
+    let found = null;
+
+    posts.forEach(p => {
       const postUrl = p.dataset.url;
-      const normPath = path.replace(/\/$/, '');
-      const normUrl  = postUrl.replace(/\/$/, '');
-      const match = normPath === normUrl || normPath.endsWith(normUrl);
-      if (debugBox) {
-        debugBox.innerHTML += `<br>[DEBUG findPostByPath] path: ${normPath}, postUrl: ${normUrl}, match: ${match}`;
-      }
-      if (match) return p;
-    }
-    return undefined;
+      const match = path.endsWith(postUrl);
+      if (match) found = p;
+
+      // debug overlay: tampilkan cek setiap post
+      safe(debugBox, box => {
+        box.innerHTML += `[CHECK] path: ${path}, postUrl: ${postUrl}, match: ${match}<br>`;
+      });
+    });
+
+    return found;
   }
 
   function router(path = location.pathname, pushState = false) {
-    if (debugBox) debugBox.innerHTML = ''; // reset debug
+    // clear overlay sebelum cek
+    safe(debugBox, box => box.innerHTML = '');
+
     const post = findPostByPath(path);
     if (post) return renderPost(post, pushState);
     if (path === BLOG_PATH) return renderList(pushState);
@@ -139,19 +148,19 @@ document.addEventListener('DOMContentLoaded', () => {
     render404(path, pushState);
   }
 
-  /* ---------------- delegated link clicks ---------------- */
-  document.body.addEventListener('click', e => {
-    const a = e.target.closest('a[href]');
-    if (!a) return;
+  /* ---------------- link interception ---------------- */
 
-    const href = a.getAttribute('href');
-    if (!href || href.startsWith('#')) return;
+  document.querySelectorAll('a[href]').forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
 
-    const url = new URL(href, location.origin);
-    if (url.origin !== location.origin) return;
+      const url = new URL(href, location.origin);
+      if (url.origin !== location.origin) return;
 
-    e.preventDefault();
-    router(url.pathname, true);
+      e.preventDefault();
+      router(url.pathname, true);
+    });
   });
 
   if (btn) {
@@ -161,19 +170,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  getPosts().forEach(p => {
+    const a = p.querySelector('.post-title a');
+    if (!a) return;
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      router(p.dataset.url, true);
+    });
+  });
+
+  window.addEventListener('popstate', () => {
+    router(location.pathname, false);
+  });
+
   /* ---------------- debug overlay ---------------- */
+
   function debug() {
     if (!debugBox) return;
-    debugBox.innerHTML =
-      `<b>STATE:</b> ${STATE}<br>` +
-      `<b>PATH:</b> ${location.pathname}`;
+    debugBox.innerHTML +=
+      `<hr><b>STATE:</b> ${STATE}<br>` +
+      `<b>PATH:</b> ${location.pathname}<br>`;
   }
 
   /* ---------------- init ---------------- */
+
   if (location.pathname === BLOG_PATH) {
     renderList(false);
   } else {
     router(location.pathname, false);
   }
+
 });
 </script>
