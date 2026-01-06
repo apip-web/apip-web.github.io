@@ -3,6 +3,7 @@ layout: post
 title: "Tentang import font dari Google Font"
 author: Apip
 tags: tutorial
+description: "Cara import font dari google font dan memahami berbagai variable-nya"
 ---
 
 ```css
@@ -97,14 +98,5 @@ tags: tutorial
   color: #888;
   font-size: 14px;
   line-height: 1.4;
-}
-
-body {
-	color: var(--text-light);
-}
-
-.code-box pre code {
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 </style>
