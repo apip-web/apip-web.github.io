@@ -1,3 +1,28 @@
+<style>
+#spa-home, #posts, .homepage, #page-404, .post-content { display: none; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+.animate-slide {
+  display: block !important;
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+.animate-out {
+  display: block !important;
+  animation: slideOut 0.5s ease-in forwards;
+  pointer-events: none; /* Cegah klik ganda saat transisi */
+}
+</style>
+
 <div id="page-404" style="display:none;">
     <h1>404</h1>
     <p>Halaman tidak ditemukan.</p>
@@ -16,59 +41,33 @@
       </div>
       <div class="post-content">
         {% include post-meta.html post=post %}
-        <div class="entry-content">{{ post.content | markdownify }}</div>
+        <div class="entry-content">
+          {{ post.content | markdownify }}
+        </div>
       </div>
     </article>
   {% endfor %}
 </div>
 
-<div id="spa-debug"></div>
-
-<style>
-/* 1. Reset & Layout: Penting agar elemen tidak saling dorong saat transisi */
-#spa-home, #posts, .homepage, #page-404, .post-content { 
-  display: none; 
-}
-
-/* 2. Animasi Masuk (In) */
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* 3. Animasi Keluar (Out) */
-@keyframes slideOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(30px); }
-}
-
-.animate-slide {
-  display: block !important;
-  animation: slideDown 0.5s ease-out forwards;
-}
-
-.animate-out {
-  display: block !important;
-  animation: slideOut 0.5s ease-in forwards;
-  pointer-events: none; /* Mencegah klik saat elemen mau hilang */
-}
-</style>
+<div id="spa-debug" style="position: fixed; max-height: 100px; overflow: auto; left: 10px; bottom: 10px; right: 10px; padding: 8px 10px; font: 12px monospace; background: darkblue; color: lightgreen; z-index: 9; border-radius: 4px;"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('.homepage');
+  const homepage = document.querySelector('.homepage');
   const postsWrap = document.getElementById('posts');
-  const page404   = document.getElementById('page-404');
+  const page404 = document.getElementById('page-404');
   const listTitle = document.querySelector('.list-title');
+  const debugBox = document.getElementById('spa-debug');
   const BLOG_PATH = '/blog/';
+  let STATE = '';
 
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
 
-  // --- HIDEALL: Sekarang lebih selektif agar tidak mematikan animasi berjalan ---
   function hideAll() {
     const containers = [document.getElementById('spa-home'), homepage, postsWrap, page404];
     containers.forEach(el => safe(el, e => {
+      // PERBAIKAN: Jangan sembunyikan jika sedang animasi keluar
       if (!e.classList.contains('animate-out')) {
         e.style.display = 'none';
         e.classList.remove('animate-slide');
@@ -82,16 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* --- RENDERERS --- */
+  /* ---------------- renderers ---------------- */
   function renderHome(pushState) {
-    hideAll();
+    STATE = 'home'; hideAll();
     safe(document.getElementById('spa-home'), el => el.classList.add('animate-slide'));
     safe(homepage, el => el.classList.add('animate-slide'));
     if (pushState) history.pushState(null, '', '/');
+    debug();
   }
 
   function renderList(pushState) {
-    hideAll();
+    STATE = 'list'; hideAll();
     safe(listTitle, el => el.style.display = 'block');
     safe(postsWrap, el => el.classList.add('animate-slide'));
     getPosts().forEach(p => {
@@ -99,10 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
       safe(p.querySelector('.post-excerpt'), ex => ex.style.display = 'block');
     });
     if (pushState) history.pushState(null, '', BLOG_PATH);
+    debug();
   }
 
   function renderPost(post, pushState) {
-    hideAll();
+    STATE = 'post'; hideAll();
     safe(listTitle, el => el.style.display = 'none');
     safe(postsWrap, el => el.classList.add('animate-slide'));
     post.style.display = 'block';
@@ -110,63 +111,64 @@ document.addEventListener('DOMContentLoaded', () => {
     safe(post.querySelector('.post-excerpt'), ex => ex.style.display = 'none');
     safe(post.querySelector('.post-content'), c => c.style.display = 'block');
     if (pushState) history.pushState(null, '', post.dataset.url);
+    debug();
   }
 
-  /* --- ROUTER --- */
-  function executeRouting(path, pushState) {
-    const cleanPath = path.replace(/\/$/, "");
-    if (cleanPath === BLOG_PATH.replace(/\/$/, "") || path.includes('blog.html')) return renderList(pushState);
-    if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') return renderHome(pushState);
-    
-    const post = getPosts().find(p => p.dataset.url && path.endsWith(p.dataset.url));
-    if (post) return renderPost(post, pushState);
-    
-    hideAll(); safe(page404, el => el.classList.add('animate-slide'));
+  function findPostByPath(path) {
+    return getPosts().find(p => p.dataset.url && path.endsWith(p.dataset.url));
   }
 
-  function router(path, pushState = false) {
+  /* ---------------- router ---------------- */
+  function router(path = location.pathname, pushState = false) {
+    safe(debugBox, box => { box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`; });
+
     const currentActive = [document.getElementById('spa-home'), homepage, postsWrap, page404]
-                          .find(el => el && (el.classList.contains('animate-slide') || el.style.display === 'block'));
+                          .find(el => el && (el.style.display === 'block' || el.classList.contains('animate-slide')));
 
+    const execute = () => {
+      const cleanPath = path.replace(/\/$/, "");
+      if (cleanPath === BLOG_PATH.replace(/\/$/, "") || path.includes('blog.html')) return renderList(pushState);
+      if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') return renderHome(pushState);
+      const post = findPostByPath(path);
+      if (post) return renderPost(post, pushState);
+      hideAll(); safe(page404, el => el.style.display = 'block');
+    };
+
+    // LOGIKA PARALEL: Out dan In berjalan bersamaan
     if (pushState && currentActive) {
-      // 1. Pemicu OUT
       currentActive.classList.remove('animate-slide');
       currentActive.classList.add('animate-out');
-
-      // 2. Jeda sangat singkat (50ms) agar transisi terasa bersamaan tapi tidak bentrok
+      
       setTimeout(() => {
         window.scrollTo(0, 0);
-        executeRouting(path, pushState);
-        
-        // 3. Hapus elemen lama SETELAH animasi selesai (sesuai durasi CSS)
+        execute();
         setTimeout(() => {
           currentActive.classList.remove('animate-out');
           currentActive.style.display = 'none';
-        }, 500); 
-      }, 50); 
+        }, 500);
+      }, 50); // Jeda 50ms agar animasi mulai bersamaan
     } else {
-      executeRouting(path, pushState);
+      execute();
     }
   }
 
-  /* --- GLOBAL LINK CAPTURE (Solusi Tombol Tidak Berfungsi) --- */
-  document.addEventListener('click', (e) => {
-    // Mencari <a> terdekat, berguna jika klik kena icon/span di dalam tombol
+  // Intercept Klik Link
+  document.addEventListener('click', e => {
     const a = e.target.closest('a');
-    
-    if (a && a.href) {
-      const url = new URL(a.href);
-      if (url.origin === window.location.origin) {
-        // Abaikan link internal anchor (#)
-        if (a.getAttribute('href').startsWith('#')) return;
-        
-        e.preventDefault();
-        router(url.pathname, true);
-      }
+    if (!a || !a.href || a.getAttribute('href').startsWith('#')) return;
+    const url = new URL(a.href);
+    if (url.origin === window.location.origin) {
+      e.preventDefault();
+      router(url.pathname, true);
     }
   });
 
   window.addEventListener('popstate', () => router(location.pathname, false));
+
+  function debug() {
+    if (debugBox) debugBox.innerHTML += `<hr><b>STATE:</b> ${STATE}<br><b>PATH:</b> ${location.pathname}`;
+  }
+
   router(location.pathname, false);
 });
 </script>
