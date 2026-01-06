@@ -1,8 +1,9 @@
 <style>
-  #spa-home { display: none; } 
-  #posts { display: none; }
-  .homepage { display: none; }
-  #page-404 { display: none; }
+#spa-home,
+#posts,
+.homepage,
+#page-404,
+.post-content { display: none; }
 </style>
 
 <div id="page-404" style="display:none;">
@@ -27,7 +28,7 @@
       {% endif %}
     </div>
 
-    <div class="post-content" style="display:none;">
+    <div class="post-content">
       {% include post-meta.html post=post %}
       <div class="entry-content">
         {{ post.content | markdownify }}
