@@ -238,42 +238,47 @@ function findPostByPath(path) {
 
 /* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
-// Ganti fungsi router kamu dengan versi yang lebih simpel ini
-function router(path = location.pathname, pushState = false) {
-  const currentActive = [document.getElementById('spa-home'), postsWrap, page404]
-                        .find(el => el && (el.style.display === 'block' || el.classList.contains('animate-in')));
+/* ---------------- router logic ---------------- */
 
-  if (currentActive && pushState) { // Hanya animasi OUT jika klik link (bukan baru buka)
-    currentActive.classList.remove('animate-in');
-    currentActive.classList.add('animate-out');
-
-    setTimeout(() => {
-      executeRouting(path, pushState);
-      window.scrollTo(0, 0);
-    }, 250); // Delay sedikit lebih pendek dari durasi CSS
-  } else {
-    executeRouting(path, pushState);
-  }
-}
-
+// Fungsi untuk eksekusi pindah konten (tanpa delay keluar)
 function executeRouting(path, pushState) {
-  // Reset Debug Box
-  safe(debugBox, box => box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`);
-
   const cleanPath = path.replace(/\/$/, "");
   const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
   if (cleanPath === cleanBlogPath || path.includes('blog.html')) {
-    return renderList(pushState);
+    renderList(pushState);
+  } else if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
+    renderHome(pushState);
+  } else {
+    const post = findPostByPath(path);
+    if (post) {
+      renderPost(post, pushState);
+    } else {
+      render404(path, pushState);
+    }
   }
-  if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
-    return renderHome(pushState);
-  }
-  
-  const post = findPostByPath(path);
-  if (post) return renderPost(post, pushState);
+}
 
-  render404(path, pushState);
+// Fungsi utama untuk menangani animasi keluar-masuk
+function router(path = location.pathname, pushState = false) {
+  // Cari kontainer mana yang sedang tampil saat ini
+  const currentActive = [document.getElementById('spa-home'), postsWrap, page404]
+                        .find(el => el && el.style.display === 'block' || el && el.classList.contains('animate-in'));
+
+  if (currentActive && pushState) {
+    // 1. Jalankan animasi keluar
+    currentActive.classList.remove('animate-in');
+    currentActive.classList.add('animate-out');
+
+    // 2. Tunggu sebentar baru ganti konten
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      executeRouting(path, pushState);
+    }, 250); 
+  } else {
+    // Jika init awal atau back/forward browser, langsung eksekusi
+    executeRouting(path, pushState);
+  }
 }
 
   /* ---------------- link interception ---------------- */
@@ -330,8 +335,13 @@ function executeRouting(path, pushState) {
     });
   }
 
-// Init awal saat web dibuka
+/* ---------------- init ---------------- */
+
+// Gunakan executeRouting untuk load pertama kali (Instan)
 executeRouting(location.pathname, false);
+
+// Link Interception tetap pakai router (Dengan Animasi)
+document.querySelectorAll('a[href]').forEach(a => { ... });
 
 });
 </script>
