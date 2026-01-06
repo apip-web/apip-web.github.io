@@ -93,6 +93,7 @@ function hideAll() {
   containers.forEach(el => safe(el, e => {
     e.style.display = 'none';
     e.classList.remove('animate-slide');
+    void e.offsetWidth; // TRICK: Paksa browser reset state sebelum animasi dipasang lagi
   }));
 
   // Sembunyikan semua kontainer utama
