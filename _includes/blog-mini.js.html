@@ -12,8 +12,14 @@
   line-height: 1.5;
 }
 
-/* Sembunyikan excerpt saat artikel sedang dibuka (MODE POST) */
-.post[style*="block"] .post-excerpt {
+/* Tampilkan excerpt hanya ketika link judul (<a>) juga tampil */
+/* (Karena di mode Post, kita menyembunyikan link <a> pada judul) */
+
+.post .post-title a:not([style*="none"]) ~ .post-excerpt {
+  display: block;
+}
+
+.post .post-title a[style*="none"] ~ .post-excerpt {
   display: none;
 }
 </style>
