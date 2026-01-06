@@ -92,20 +92,26 @@ function getPosts() {
 
 function hideAll() {  
   const containers = [document.getElementById('spa-home'), homepage, postsWrap, page404];
+  
   containers.forEach(el => safe(el, e => {
-    e.style.display = 'none';
-    e.classList.remove('animate-slide', 'animate-out'); // Tambahkan animate-out di sini
+    // JANGAN sembunyikan jika elemen sedang dalam proses animasi keluar
+    if (!e.classList.contains('animate-out')) {
+      e.style.display = 'none';
+    }
+    
+    // Hapus class lama agar bisa di-trigger ulang nanti
+    e.classList.remove('animate-slide');
     void e.offsetWidth; 
   }));
 
   getPosts().forEach(p => {  
-    p.style.display = 'none';
-    p.classList.remove('animate-slide', 'animate-out'); // Dan di sini
+    if (!p.classList.contains('animate-out')) {
+      p.style.display = 'none';
+    }
+    p.classList.remove('animate-slide');
     
-    const c = p.querySelector('.post-content');  
-    const a = p.querySelector('.post-title a');  
-    if (c) c.style.display = 'none'; 
-    if (a) a.style.display = '';     
+    safe(p.querySelector('.post-content'), c => c.style.display = 'none');
+    safe(p.querySelector('.post-title a'), a => a.style.display = '');     
   });  
 }
 
