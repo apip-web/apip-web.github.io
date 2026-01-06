@@ -80,10 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const debugBox  = document.getElementById('spa-debug');  
 
   const listTitle = document.querySelector('.list-title');
-  const BLOG_PATH = '/blog/';  
-  let STATE = '';  
-  
-function getPosts() {  
+  const postExcerpt = document.querySelector('.post-excerpt');
+  const BLOG_PATH = '/blog/';
+  let STATE = '';
+
+function getPosts() {
     return [...document.querySelectorAll('.post')];  
   }
 
@@ -149,6 +150,7 @@ function renderList(pushState) {
     STATE = 'post';  
     hideAll();
     safe(listTitle, el => el.style.display = 'none');
+    safe(postExcerpt, el => el.style.display = 'none');
     safe(postsWrap, el => el.style.display = 'block');  
     post.style.display = 'block';  
   
