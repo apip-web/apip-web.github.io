@@ -156,6 +156,7 @@ function renderList(pushState) {
     
     getPosts().forEach(p => {
         p.style.display = 'block';
+        p.classList.add('animate-slide');
         // Reset elemen dalam post
         const ex = p.querySelector('.post-excerpt');
         if (ex) ex.style.display = 'block';
