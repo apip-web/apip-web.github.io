@@ -11,7 +11,7 @@
     <a href="/">Kembali ke Home</a>
 </div>
 
-<div id="posts" style="display:none;">
+<div id="posts">
 <div class="list-title"><h1>Blog:</h1></div>
 {% for post in site.posts %}
   <article class="post" data-url="{{ post.url | relative_url }}">
@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const debugBox  = document.getElementById('spa-debug');  
 
   const listTitle = document.querySelector('.list-title');
-  const postExcerpt = document.querySelector('.post-excerpt');
   const BLOG_PATH = '/blog/';
   let STATE = '';
 
@@ -112,29 +111,45 @@ function renderHome(pushState) {
 }
 
 function renderList(pushState) {  
-  STATE = 'list';  
-  hideAll(); // Reset semuanya dulu, termasuk memunculkan kembali semua link <a>
+    STATE = 'list';  
+    hideAll(); 
 
-  safe(listTitle, el => el.style.display = 'block');
-  safe(postsWrap, el => el.style.display = 'block');  
-  
-  // Tampilkan semua kontainer artikel post
-  getPosts().forEach(p => {
-    p.style.display = 'block';
-  });
+    safe(listTitle, el => el.style.display = 'block');
+    safe(postsWrap, el => el.style.display = 'block');  
+    
+    getPosts().forEach(p => {
+        p.style.display = 'block';
+        
+        // PASTIKAN excerpt muncul kembali di halaman daftar
+        const ex = p.querySelector('.post-excerpt');
+        if (ex) ex.style.display = 'block';
 
-  if (pushState) push(BLOG_PATH);  
-  debug();  
+        const c = p.querySelector('.post-content');
+        if (c) c.style.display = 'none';
+    });
+
+    if (pushState) push(BLOG_PATH);  
+    debug();  
 }
 
-  function renderPost(post, pushState) {  
+function renderPost(post, pushState) {  
     STATE = 'post';  
     hideAll();
+    
+    // Sembunyikan judul "Blog:"
     safe(listTitle, el => el.style.display = 'none');
-    safe(postExcerpt, el => el.style.display = 'none');
+    
+    // Tampilkan pembungkus postingan
     safe(postsWrap, el => el.style.display = 'block');  
+    
+    // Tampilkan artikel yang diklik
     post.style.display = 'block';  
-  
+
+    // CARI dan SEMBUNYIKAN excerpt khusus milik postingan ini saja
+    const thisExcerpt = post.querySelector('.post-excerpt');
+    if (thisExcerpt) thisExcerpt.style.display = 'none';
+
+    // Tampilkan konten utama
     const c = post.querySelector('.post-content');  
     const a = post.querySelector('.post-title a');  
     if (c) c.style.display = 'block';  
@@ -142,8 +157,8 @@ function renderList(pushState) {
   
     if (pushState) push(post.dataset.url);  
     debug();  
-  }  
-  
+}
+
   function render404(path, pushState) {  
     STATE = '404';  
     hideAll();  
