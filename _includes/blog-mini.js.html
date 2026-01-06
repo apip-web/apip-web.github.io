@@ -326,15 +326,12 @@ function executeRouting(path, pushState) {
       const htmlToCopy = debugBox.innerHTML;  
       navigator.clipboard.writeText(htmlToCopy).then(() => {  
         debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;  
-      });  
-    });  
-  }  
-  
-  /* ---------------- init ---------------- */
+      });
+    });
+  }
 
-// Hapus block if(location.pathname === BLOG_PATH) lama
-// Cukup panggil router secara global
-router(location.pathname, false);
+// Init awal saat web dibuka
+executeRouting(location.pathname, false);
 
-});  
+});
 </script>
