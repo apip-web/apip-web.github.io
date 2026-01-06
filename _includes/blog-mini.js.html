@@ -5,21 +5,20 @@
 #page-404,
 .post-content { display: none; }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px); /* Mulai dari sedikit di atas */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0); /* Berakhir di posisi asli */
-  }
+/* Animasi Masuk */
+@keyframes slideDownIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Class untuk memicu animasi */
-.animate-slide {
-  animation: slideDown 2s ease-out forwards;
+/* Animasi Keluar */
+@keyframes slideDownOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); } /* Meluncur turun dan menghilang */
 }
+
+.animate-in { animation: slideDownIn 0.3s ease-out forwards; }
+.animate-out { animation: slideDownOut 0.3s ease-in forwards; }
 </style>
 
 <div id="page-404" style="display:none;">
@@ -153,7 +152,7 @@ function renderList(pushState) {
     // Tampilkan pembungkus utama (#posts) dan beri animasi di sini
     safe(postsWrap, el => {
         el.style.display = 'block';
-        el.classList.add('animate-slide'); // Seluruh area blog meluncur!
+        el.classList.add('animate-in'); // Seluruh area blog meluncur!
     });  
     
     getPosts().forEach(p => {
@@ -235,40 +234,42 @@ function findPostByPath(path) {
 
 /* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
-function router(path = location.pathname, pushState = false) {  
-  // Reset Debug Box di awal setiap proses routing
-  safe(debugBox, box => {
-    box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`;
-  });
+function router(path = location.pathname, pushState = false) {
+  // 1. Cari kontainer yang sedang aktif saat ini
+  const currentActive = [document.getElementById('spa-home'), homepage, postsWrap, page404]
+                        .find(el => el && el.style.display === 'block');
 
-  // 1. NORMALISASI PATH (Hapus trailing slash)
+  if (currentActive) {
+    // 2. Beri animasi keluar pada halaman yang sedang dibuka
+    currentActive.classList.remove('animate-in');
+    currentActive.classList.add('animate-out');
+
+    // 3. Tunggu animasi keluar selesai (300ms sesuai durasi CSS) baru ganti konten
+    setTimeout(() => {
+      executeRouting(path, pushState);
+      window.scrollTo(0, 0);
+    }, 300);
+  } else {
+    // Jika tidak ada yang aktif (misal baru buka web), langsung render
+    executeRouting(path, pushState);
+  }
+}
+
+// Pindahkan logika routing lama ke fungsi baru ini
+function executeRouting(path, pushState) {
   const cleanPath = path.replace(/\/$/, "");
   const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
-  // 2. CEK DAFTAR BLOG DULU (Gunakan Prioritas Utama)
-  // Kita cek apakah path mengandung BLOG_PATH atau sebaliknya
   if (cleanPath === cleanBlogPath || path.includes('blog.html')) {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
     return renderList(pushState);
   }
-
-  // 3. CEK HALAMAN HOME
   if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: HOME MODE</span><br>`);
     return renderHome(pushState);
   }
+  const post = findPostByPath(path);
+  if (post) return renderPost(post, pushState);
 
-  // 4. CEK APAKAH INI POSTINGAN
-  // Jalankan pencarian post hanya jika path bukan home/blog
-  const post = findPostByPath(path);  
-  if (post) {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: POST MODE</span><br>`);
-    return renderPost(post, pushState);
-  }
-
-  // 5. JIKA TIDAK ADA YANG COCOK -> 404
-  safe(debugBox, box => box.innerHTML += `<span style="color:red">Match: 404 NOT FOUND</span><br>`);
-  render404(path, pushState);  
+  render404(path, pushState);
 }
 
   /* ---------------- link interception ---------------- */
