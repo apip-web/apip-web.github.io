@@ -100,30 +100,21 @@ function getPosts() {
   const safe = (el, fn) => el && fn(el);
 
 function hideAll() {  
-  // Hapus class animasi dari kontainer utama agar bisa diulang
   const containers = [document.getElementById('spa-home'), homepage, postsWrap, page404];
   containers.forEach(el => safe(el, e => {
     e.style.display = 'none';
-    e.classList.remove('animate-slide');
-    void e.offsetWidth; // TRICK: Paksa browser reset state sebelum animasi dipasang lagi
+    e.classList.remove('animate-in', 'animate-out'); // Bersihkan semua class animasi
+    void e.offsetWidth; 
   }));
 
-  // Sembunyikan semua kontainer utama
-  safe(document.getElementById('spa-home'), el => el.style.display = 'none');
-  safe(homepage, el => el.style.display = 'none');  
-  safe(postsWrap, el => el.style.display = 'none');  
-  safe(page404, el => el.style.display = 'none');  
-
-  // RESET semua elemen post ke kondisi default (tersembunyi)
   getPosts().forEach(p => {  
-    p.style.display = 'none'; // Sembunyikan artikelnya
-    p.classList.remove('animate-slide');
+    p.style.display = 'none';
+    p.classList.remove('animate-in', 'animate-out');
     
     const c = p.querySelector('.post-content');  
     const a = p.querySelector('.post-title a');  
-    
-    if (c) c.style.display = 'none'; // Sembunyikan isinya
-    if (a) a.style.display = '';     // KEMBALIKAN link agar muncul lagi (reset ke CSS default)
+    if (c) c.style.display = 'none'; 
+    if (a) a.style.display = '';     
   });  
 }
 
@@ -337,11 +328,18 @@ function router(path = location.pathname, pushState = false) {
 
 /* ---------------- init ---------------- */
 
-// Gunakan executeRouting untuk load pertama kali (Instan)
+// 1. Eksekusi routing pertama kali tanpa animasi keluar (agar tidak kosong)
 executeRouting(location.pathname, false);
 
-// Link Interception tetap pakai router (Dengan Animasi)
-document.querySelectorAll('a[href]').forEach(a => { ... });
-
+// 2. Intercept semua link agar menggunakan router (dengan animasi)
+document.querySelectorAll('a[href]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (!href || href.startsWith('#')) return;
+    const url = new URL(href, location.origin);
+    if (url.origin !== location.origin) return;
+    e.preventDefault();
+    router(url.pathname, true);
+  });
 });
 </script>
