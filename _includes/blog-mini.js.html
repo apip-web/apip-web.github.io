@@ -18,11 +18,13 @@
 
 /* Class untuk memicu animasi */
 .animate-slide {
+  display: block !important;
   animation: slideDown 2s ease-out forwards;
 }
 
 /* Tetap gunakan CSS kamu, tambahkan ini di bawahnya */
 @keyframes slideOut {
+  display: block !important;
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(20px); }
 }
