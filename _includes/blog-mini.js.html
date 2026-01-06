@@ -1,27 +1,8 @@
 <style>
-  /* Ganti display: block menjadi none */
   #spa-home { display: none; } 
   #posts { display: none; }
   .homepage { display: none; }
   #page-404 { display: none; }
-
-  .post-excerpt {
-  font-size: 0.9em;
-  color: #666;
-  margin-top: 5px;
-  line-height: 1.5;
-}
-
-/* Tampilkan excerpt hanya ketika link judul (<a>) juga tampil */
-/* (Karena di mode Post, kita menyembunyikan link <a> pada judul) */
-
-.post .post-title a:not([style*="none"]) ~ .post-excerpt {
-  display: block;
-}
-
-.post .post-title a[style*="none"] ~ .post-excerpt {
-  display: none;
-}
 </style>
 
 <div id="page-404" style="display:none;">
