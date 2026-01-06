@@ -124,12 +124,18 @@ function hideAll() {
   
 function renderHome(pushState) {  
   STATE = 'home';  
-  hideAll(); // Ini akan menyembunyikan #spa-home dulu
+  hideAll(); 
 
-  // Sekarang tampilkan kembali hanya untuk Home
   const jekyllWrapper = document.getElementById('spa-home');
-  safe(jekyllWrapper, el => el.style.display = 'block'); 
-  safe(homepage, el => el.style.display = 'block');  
+  safe(jekyllWrapper, el => {
+    el.style.display = 'block';
+    el.classList.add('animate-slide'); // Tambahkan ini
+  }); 
+  
+  safe(homepage, el => {
+    el.style.display = 'block';
+    el.classList.add('animate-slide'); // Tambahkan ini
+  });  
 
   if (pushState) push('/');  
   debug();  
@@ -140,15 +146,15 @@ function renderList(pushState) {
     hideAll(); 
 
     safe(listTitle, el => el.style.display = 'block');
-    safe(postsWrap, el => el.style.display = 'block');  
+    safe(postsWrap, el => {
+        el.style.display = 'block';
+        el.classList.add('animate-slide'); // Tambahkan ini agar halaman list juga slide
+    });  
     
     getPosts().forEach(p => {
         p.style.display = 'block';
-        
-        // PASTIKAN excerpt muncul kembali di halaman daftar
         const ex = p.querySelector('.post-excerpt');
         if (ex) ex.style.display = 'block';
-
         const c = p.querySelector('.post-content');
         if (c) c.style.display = 'none';
     });
