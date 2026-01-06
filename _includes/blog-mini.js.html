@@ -145,29 +145,22 @@ function renderList(pushState) {
     STATE = 'list';  
     hideAll(); 
 
-    // 1. Tampilkan judul "Blog:"
-    safe(listTitle, el => {
-        el.style.display = 'block';
-    });
+    // Tampilkan judul tanpa animasi individu
+    safe(listTitle, el => el.style.display = 'block');
 
-    // 2. Tampilkan kontainer utama postingan
+    // Tampilkan pembungkus utama (#posts) dan beri animasi di sini
     safe(postsWrap, el => {
         el.style.display = 'block';
-        el.classList.add('animate-slide'); // Beri animasi pada pembungkus daftar
+        el.classList.add('animate-slide'); // Seluruh area blog meluncur!
     });  
     
     getPosts().forEach(p => {
         p.style.display = 'block';
-        
-        // Reset tampilan elemen di dalam tiap artikel
+        // Reset elemen dalam post
         const ex = p.querySelector('.post-excerpt');
         if (ex) ex.style.display = 'block';
-
         const c = p.querySelector('.post-content');
         if (c) c.style.display = 'none';
-
-        const a = p.querySelector('.post-title a');
-        if (a) a.style.display = ''; 
     });
 
     if (pushState) push(BLOG_PATH);  
