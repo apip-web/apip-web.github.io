@@ -25,14 +25,20 @@
       <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
     </h2>
 
-<div class="post-content" style="display:none;">
-  {% include post-meta.html post=post %}
+    <div class="post-excerpt">
+      {% if post.description %}
+        {{ post.description }}
+      {% else %}
+        {{ post.excerpt | strip_html | truncatewords: 25 }}
+      {% endif %}
+    </div>
 
-  <div class="entry-content">
-    {{ post.content | markdownify }}
-  </div>
-</div>
-
+    <div class="post-content" style="display:none;">
+      {% include post-meta.html post=post %}
+      <div class="entry-content">
+        {{ post.content | markdownify }}
+      </div>
+    </div>
   </article>
 {% endfor %}
 </div>
