@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const page404   = document.getElementById('page-404');  
   const debugBox  = document.getElementById('spa-debug');  
 
+  const spaRoot = document.querySelector('.spa-root');
   const listTitle = document.querySelector('.list-title');
   const BLOG_PATH = '/blog/';
   let STATE = '';
@@ -145,10 +146,13 @@ function renderList(pushState) {
     STATE = 'list';  
     hideAll(); 
 
+    safe(spaRoot, el => {
+        el.classList.add('animate-slide'); // Beri animasi pada judul
+    });
+  
     // 1. Tampilkan judul "Blog:"
     safe(listTitle, el => {
         el.style.display = 'block';
-        el.classList.add('animate-slide'); // Beri animasi pada judul
     });
 
     // 2. Tampilkan kontainer utama postingan
