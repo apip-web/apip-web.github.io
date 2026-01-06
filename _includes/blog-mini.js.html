@@ -1,14 +1,21 @@
 <style>
-  #spa-home { display: block; }
-  #posts { display: none; }
-</style>
-
-<style>
   /* Ganti display: block menjadi none */
   #spa-home { display: none; } 
   #posts { display: none; }
   .homepage { display: none; }
   #page-404 { display: none; }
+
+  .post-excerpt {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* Sembunyikan excerpt saat artikel sedang dibuka (MODE POST) */
+.post[style*="block"] .post-excerpt {
+  display: none;
+}
 </style>
 
 <div id="page-404" style="display:none;">
