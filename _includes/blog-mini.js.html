@@ -133,12 +133,12 @@ function renderHome(pushState) {
   const jekyllWrapper = document.getElementById('spa-home');
   safe(jekyllWrapper, el => {
     el.style.display = 'block';
-    el.classList.add('animate-slide'); // Tambahkan ini
+    el.classList.add('animate-in'); // Tambahkan ini
   }); 
   
   safe(homepage, el => {
     el.style.display = 'block';
-    el.classList.add('animate-slide'); // Tambahkan ini
+    el.classList.add('animate-in'); // Tambahkan ini
   });  
 
   if (pushState) push('/');  
@@ -173,12 +173,12 @@ function renderPost(post, pushState) {
     // Tampilkan pembungkus postingan
 safe(postsWrap, el => {
         el.style.display = 'block';
-        el.classList.add('animate-slide'); // Tambahkan animasi ke pembungkus
+        el.classList.add('animate-in'); // Tambahkan animasi ke pembungkus
     });
     
     // Tampilkan artikel yang diklik
     post.style.display = 'block';
-    post.classList.add('animate-slide');
+    post.classList.add('animate-in');
 
     // CARI dan SEMBUNYIKAN excerpt khusus milik postingan ini saja
     const thisExcerpt = post.querySelector('.post-excerpt');
