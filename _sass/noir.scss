@@ -135,8 +135,6 @@ li {
 ul, ol {
   font-size: 14px;
   margin-left: 20px;
-  list-style-position: inside; /* Marker masuk ke dalam blok teks */
-  /* Default adalah 'outside' (marker di luar blok teks) */
 }
 
 /* ===== Post ===== */
@@ -476,4 +474,5 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
