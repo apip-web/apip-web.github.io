@@ -3,10 +3,12 @@
 #posts,
 .homepage,
 #page-404,
-.post-content { display: none; }
+.post-content {
+  display: none;
+}
 </style>
 
-<div id="page-404">
+<div id="page-404" style="display:none;">
   <h1>404</h1>
   <p>Halaman tidak ditemukan.</p>
   <a href="/">Kembali ke Home</a>
@@ -48,10 +50,10 @@
   overflow: auto;
   padding: 8px;
   font: 12px monospace;
-  background: #001b44;
-  color: #7CFC9A;
-  z-index: 999;
-  border-radius: 6px;
+  background: darkblue;
+  color: lightgreen;
+  z-index: 9;
+  border-radius: 4px;
 "></div>
 
 <script>
@@ -72,9 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const getPosts = () => [...document.querySelectorAll('.post')];
 
   function hideAll() {
-    [spaHome, homepage, postsWrap, page404].forEach(el =>
-      safe(el, e => e.style.display = 'none')
-    );
+    safe(spaHome,   el => el.style.display = 'none');
+    safe(homepage, el => el.style.display = 'none');
+    safe(postsWrap,el => el.style.display = 'none');
+    safe(page404,  el => el.style.display = 'none');
 
     getPosts().forEach(p => {
       p.style.display = 'none';
@@ -114,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderPost(post, pushState) {
     STATE = 'post';
     hideAll();
+
     safe(postsWrap, el => el.style.display = 'block');
     safe(listTitle, el => el.style.display = 'none');
 
@@ -170,17 +174,19 @@ document.addEventListener('DOMContentLoaded', () => {
     render404(path, pushState);
   }
 
-  /* ---------- INTERCEPT ---------- */
+  /* ---------- LINK INTERCEPT (AMAN & LAMA STYLE) ---------- */
 
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href]');
-    if (!a) return;
+  document.querySelectorAll('a[href]').forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#')) return;
 
-    const url = new URL(a.href, location.origin);
-    if (url.origin !== location.origin) return;
+      const url = new URL(href, location.origin);
+      if (url.origin !== location.origin) return;
 
-    e.preventDefault();
-    router(url.pathname, true);
+      e.preventDefault();
+      router(url.pathname, true);
+    });
   });
 
   if (btn) {
