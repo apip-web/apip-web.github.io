@@ -221,20 +221,23 @@ function findPostByPath(path) {
   const posts = getPosts();  
   let found = null;  
 
+  // Normalisasi path input
+  const normalizedPath = path.replace(/\/$/, "");
+
   posts.forEach(p => {  
-    const postUrl = p.dataset.url;  
+    if (found) return; // Jika sudah ketemu, stop loop
+
+    let postUrl = p.dataset.url;  
     if (!postUrl) return;
 
-    // Pastikan kita tidak mencocokkan halaman daftar sebagai postingan
-    if (postUrl.includes('blog.html')) return; 
+    // Normalisasi url post untuk dibandingkan
+    const normalizedPostUrl = postUrl.replace(/\/$/, "").replace(".html", "");
+    const normalizedTarget = normalizedPath.replace(".html", "");
 
-    const match = path.endsWith(postUrl);  
-    if (match) found = p;  
-
-    // Logging ke Debug Box sesuai permintaan
-    safe(debugBox, box => {  
-      box.innerHTML += `[CHECK] path: ${path} | post: ${postUrl} | result: ${match}<br>`;  
-    });  
+    // Cek apakah URL berakhir dengan path yang sama (cocok untuk relatif/absolut)
+    if (normalizedTarget.endsWith(normalizedPostUrl) || normalizedPostUrl.endsWith(normalizedTarget)) {
+       found = p;
+    }
   });  
 
   return found;  
@@ -242,40 +245,80 @@ function findPostByPath(path) {
 
 /* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
+/* ---------------- router (Versi Perbaikan) ---------------- */  
+
+
+
 function router(path = location.pathname, pushState = false) {  
-  // Reset Debug Box di awal setiap proses routing
+
+  // 1. Normalisasi path: hapus trailing slash dan index.html untuk perbandingan yang adil
+
+  const cleanPath = path.replace(/\/$/, "").replace("/index.html", "") || "/";
+
+  const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace("/index.html", "");
+
+
+
   safe(debugBox, box => {
-    box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`;
+
+    box.innerHTML = `<b>[ROUTING]</b> Path: ${cleanPath}<br>`;
+
   });
 
-  // 1. NORMALISASI PATH (Hapus trailing slash)
-  const cleanPath = path.replace(/\/$/, "");
-  const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
-  // 2. CEK DAFTAR BLOG DULU (Gunakan Prioritas Utama)
-  // Kita cek apakah path mengandung BLOG_PATH atau sebaliknya
-  if (cleanPath === cleanBlogPath || path.includes('blog.html')) {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
-    return renderList(pushState);
-  }
 
-  // 3. CEK HALAMAN HOME
-  if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
+  // 2. PRIORITAS 1: Cek Halaman Home (Exact Match)
+
+  if (cleanPath === '/' || cleanPath === '/index.html') {
+
     safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: HOME MODE</span><br>`);
+
     return renderHome(pushState);
+
   }
 
-  // 4. CEK APAKAH INI POSTINGAN
-  // Jalankan pencarian post hanya jika path bukan home/blog
-  const post = findPostByPath(path);  
+
+
+  // 3. PRIORITAS 2: Cek apakah ini sebuah POSTINGAN
+
+  // Kita cek post dulu sebelum list agar URL spesifik tidak "tertelan" oleh path blog
+
+  const post = findPostByPath(cleanPath);  
+
   if (post) {
+
     safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: POST MODE</span><br>`);
+
     return renderPost(post, pushState);
+
   }
+
+
+
+  // 4. PRIORITAS 3: Cek Daftar Blog (Exact Match)
+
+  // Gunakan perbandingan === , jangan gunakan .includes() agar tidak salah deteksi
+
+  if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html")) {
+
+    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
+
+    return renderList(pushState);
+
+  }
+
+
 
   // 5. JIKA TIDAK ADA YANG COCOK -> 404
+
   safe(debugBox, box => box.innerHTML += `<span style="color:red">Match: 404 NOT FOUND</span><br>`);
+
   render404(path, pushState);  
+
+}
+
+  return found;  
+
 }
 
   /* ---------------- link interception ---------------- */
