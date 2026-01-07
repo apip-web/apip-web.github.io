@@ -246,21 +246,32 @@ function router(path = location.pathname, pushState = false) {
 
   /* ---------------- Event Listeners ---------------- */
 
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a');
-    if (!a) return;
-    
-    const href = a.getAttribute('href');
-    if (!href || href.startsWith('#')) return;
+/* ---------------- Event Listeners ---------------- */
 
-    try {
-      const url = new URL(href, location.origin);
-      if (url.origin === location.origin) {
-        e.preventDefault();
-        router(url.pathname, true);
+document.addEventListener('click', e => {
+  const a = e.target.closest('a');
+  if (!a) return;
+  
+  const href = a.getAttribute('href');
+  if (!href || href.startsWith('#')) return;
+
+  try {
+    const url = new URL(href, location.origin);
+    
+    // PERBAIKAN: Jika link mengandung Hash, jangan e.preventDefault() secara kaku
+    // Biarkan browser menangani perubahan hash setelah navigasi ke /tags/
+    if (url.origin === location.origin) {
+      if (url.hash && url.pathname === '/tags/') {
+        // Biarkan link menuju halaman tags dengan hash tetap bekerja normal
+        // agar script di halaman tags bisa membaca hash-nya.
+        return; 
       }
-    } catch (err) {}
-  });
+      
+      e.preventDefault();
+      router(url.pathname, true);
+    }
+  } catch (err) {}
+});
 
   if (btnBlog) {
     btnBlog.addEventListener('click', (e) => {
