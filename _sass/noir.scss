@@ -175,7 +175,7 @@ hr {
 /* ===== Headings ===== */
 h1, h2, h3, h4, h5, h6 {
   margin: 0 0 20px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.3;
   /* text-transform: uppercase; */
   /* font-weight: 100; */
@@ -214,80 +214,6 @@ button {
 button:hover {
   background: var(--accent-hover);
   box-shadow: 0 0 20px var(--accent);
-}
-
-/* ===== Modern Lists (Pitch Black Theme) ===== */
-/* ===== Pitch Black OL ===== */
-ol {
-  margin: 0 0 1.25rem 40px;
-  padding: 0;
-  color: #e6e6e6;
-  font-size: 16px;
-  list-style: none; /* hilangkan default number */
-}
-
-ol > li {
-  position: relative;
-  margin-bottom: 12px;
-  background: #121217;
-  padding: 10px 14px 10px 14px;
-  border-radius: 8px;
-  line-height: 1.5;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-/* hide default marker */
-ol > li::marker {
-  color: transparent;
-}
-
-/* badge nomor (JS yang mengatur posisi) */
-.noir-badge {
-  position: absolute;
-  width: 28px;
-  height: 28px;
-  background: #222;
-  color: white;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 700;
-  margin-left: -20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-  pointer-events: none;
-}
-
-/* ===== Pitch Black UL ===== */
-ul {
-  margin: 0 0 1.25rem 40px;
-  padding: 0;
-  color: #e6e6e6;
-  font-size: 16px;
-  list-style: none; /* hilangkan default bullet */
-}
-
-ul > li {
-  position: relative;
-  margin-bottom: 12px;
-  background: #121217;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.05);
-  line-height: 1.5;
-}
-
-/* bullet custom — JS akan menambahkan posisi */
-.noir-bullet {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  margin-left: -20px;
-  background: linear-gradient(135deg, #000, #ff3366);
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(255,255,255,0.4);
-  pointer-events: none;
 }
 
 /* ===== Blockquote ===== */
@@ -367,8 +293,8 @@ nav {
 	right: 0;
 	padding: 15px 20px;
 	z-index: 1000;
-	background: rgba(0,0,0,0.35);
-	backdrop-filter: blur(10px);
+	background: rgba(0,0,0,0.5);
+	backdrop-filter: blur(8px);
 	transition: all 0.3s ease;
 	box-sizing: border-box;
 }
@@ -537,3 +463,4 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
