@@ -27,6 +27,44 @@
   word-break: break-word;
   overflow-wrap: anywhere;
 }
+
+#spa-debug {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  right: 15px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.9); /* Dark slate with transparency */
+  backdrop-filter: blur(8px); /* Efek blur kaca */
+  color: #e2e8f0;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  scrollbar-width: thin;
+}
+
+/* Scrollbar styling untuk Chrome/Safari */
+#spa-debug::-webkit-scrollbar { width: 4px; }
+#spa-debug::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+/* Log Label Styles */
+.log-entry { margin-bottom: 4px; line-height: 1.4; }
+.badge {
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-right: 5px;
+}
+.badge-route { background: #3b82f6; color: white; }
+.badge-state { background: #8b5cf6; color: white; }
+.badge-success { background: #10b981; color: white; }
+.badge-error { background: #ef4444; color: white; }
 </style>
 
 <div id="page-404" style="display:none;">
@@ -61,21 +99,7 @@
 {% endfor %}
 </div>
 
-<div id="spa-debug" style="
-  display: visible;
-  position: fixed;
-  max-height: 100px;
-  overflow: auto;
-  left: 10px;
-  bottom: 10px;
-  right: 10px;
-  padding: 8px 10px;
-  font: 12px monospace;
-  background: darkblue;
-  color: lightgreen;
-  z-index: 9;
-  border-radius: 4px;
-"></div>
+<div id="spa-debug"></div>
 
 <script>  
 document.addEventListener('DOMContentLoaded', () => {
@@ -200,7 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const cleanPath = path.replace(/\/$/, "").replace("/index.html", "") || "/";
     const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace("/index.html", "");
 
-    safe(debugBox, box => box.innerHTML = `<b>[ROUTING]</b> Path: ${cleanPath}<br>`);
+safe(debugBox, box => {
+  box.innerHTML = `<div class="log-entry">
+    <span class="badge badge-route">Routing</span> 
+    Path: <code style="color: #60a5fa">${cleanPath}</code>
+  </div>`;
+});
 
     if (cleanPath === '/' || cleanPath === '/index.html') {
       return renderHome(pushState);
@@ -253,23 +282,25 @@ document.addEventListener('DOMContentLoaded', () => {
     router(location.pathname, false);  
   });  
 
-  /* ---------------- Debug Overlay (Restored) ---------------- */  
-  
-  function debug() {  
-    if (!debugBox) return;  
-    debugBox.innerHTML += `<hr><b>STATE:</b> ${STATE}<br><b>PATH:</b> ${location.pathname}`;  
-  }  
+  /* ---------------- Debug Overlay (Restored) ---------------- */
 
-  if (debugBox) {  
-    debugBox.addEventListener('click', () => {  
-      const htmlToCopy = debugBox.innerHTML;  
-      navigator.clipboard.writeText(htmlToCopy).then(() => {  
-        const msg = document.createElement('div');
-        msg.innerHTML = `<i>Copied debug overlay! 📋</i>`;
-        debugBox.appendChild(msg);
-      });  
-    });  
-  }  
+function debug() {  
+  if (!debugBox) return;  
+  
+  // Tentukan warna berdasarkan state
+  let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
+  
+  debugBox.innerHTML += `
+    <div class="log-entry" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
+      <span class="badge ${stateClass}">State</span> ${STATE}
+    </div>
+    <div class="log-entry">
+      <span class="badge badge-success">URL</span> ${location.pathname}
+    </div>`;
+  
+  // Auto-scroll ke paling bawah setiap ada log baru
+  debugBox.scrollTop = debugBox.scrollHeight;
+}
 
   router(location.pathname, false);
 });  
