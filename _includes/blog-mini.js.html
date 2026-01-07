@@ -275,24 +275,36 @@ function router(path = location.pathname, pushState = false) {
 
   /* ---------------- Debug Overlay (Restored) ---------------- */
 
-function debug() {  
-  if (!debugBox) return;  
-  
-  // Tentukan warna berdasarkan state
-  let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
-  
-  debugBox.innerHTML += `
-    <div class="log-entry" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
-      <span class="badge ${stateClass}">State</span> ${STATE}
-    </div>
-    <div class="log-entry">
-      <span class="badge badge-success">URL</span> ${location.pathname}
-    </div>`;
-  
-  // Auto-scroll ke paling bawah setiap ada log baru
-  debugBox.scrollTop = debugBox.scrollHeight;
-}
+/* ---------------- Debug Overlay Logic ---------------- */
 
-  router(location.pathname, false);
-});  
-</script>
+  function debug() {  
+    if (!debugBox) return;  
+    
+    let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
+    
+    debugBox.innerHTML += `
+      <div class="log-entry" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
+        <span class="badge ${stateClass}">State</span> ${STATE}
+      </div>
+      <div class="log-entry">
+        <span class="badge badge-success">URL</span> ${location.pathname}
+      </div>`;
+    
+    debugBox.scrollTop = debugBox.scrollHeight;
+  }
+
+  // Masukkan bagian ini agar klik pada kotak debug bisa menyalin teks
+  if (debugBox) {  
+    debugBox.addEventListener('click', () => {  
+      const htmlToCopy = debugBox.innerHTML;  
+      navigator.clipboard.writeText(htmlToCopy).then(() => {  
+        const msg = document.createElement('div');
+        msg.style.color = '#10b981';
+        msg.style.fontSize = '10px';
+        msg.innerHTML = `<br><i>Copied debug overlay! 📋</i>`;
+        debugBox.appendChild(msg);
+        debugBox.scrollTop = debugBox.scrollHeight;
+      });  
+    });  
+  }
+  </script>
