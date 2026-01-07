@@ -254,10 +254,11 @@ function router(path = location.pathname, pushState = false) {
 
   // 2. CEK DAFTAR BLOG DULU (Gunakan Prioritas Utama)
   // Kita cek apakah path mengandung BLOG_PATH atau sebaliknya
-  if (cleanPath === cleanBlogPath || path.includes('blog.html')) {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
-    return renderList(pushState);
-  }
+  // Hapus deteksi path.includes('blog.html')
+if (cleanPath === cleanBlogPath) {
+  safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
+  return renderList(pushState);
+}
 
   // 3. CEK HALAMAN HOME
   if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
