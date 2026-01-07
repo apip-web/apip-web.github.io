@@ -181,27 +181,28 @@ function findPost(path) {
   return found;
 }
 
-  function router(path = location.pathname, pushState = false) {
-    safe(debugBox, box =>
-      box.innerHTML = `<b>[ROUTING]</b> ${path}<br>`
-    );
+function router(path = location.pathname, pushState = false) {
+  safe(debugBox, box =>
+    box.innerHTML =
+      `<b>[ROUTING]</b><br><br><hr><br>${path}<br>`
+  );
 
-    const clean = path.replace(/\/$/, '');
-    const cleanBlog = BLOG_PATH.replace(/\/$/, '');
+  const clean = path.replace(/\/$/, '');
+  const cleanBlog = BLOG_PATH.replace(/\/$/, '');
 
-    if (clean === '' || clean === '/' || clean === '/index.html') {
-      return renderHome(pushState);
-    }
-
-    if (clean === cleanBlog) {
-      return renderList(pushState);
-    }
-
-    const post = findPost(path);
-    if (post) return renderPost(post, pushState);
-
-    render404(path, pushState);
+  if (clean === '' || clean === '/' || clean === '/index.html') {
+    return renderHome(pushState);
   }
+
+  if (clean === cleanBlog) {
+    return renderList(pushState);
+  }
+
+  const post = findPost(path);
+  if (post) return renderPost(post, pushState);
+
+  render404(path, pushState);
+}
 
   /* ========= INTERCEPT ========= */
 
