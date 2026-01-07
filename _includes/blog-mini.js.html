@@ -158,39 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ========= ROUTER ========= */
 
-  function findPost(path) {
-    let found = null;
-    getPosts().forEach(p => {
-      const match = path.endsWith(p.dataset.url);
-      safe(debugBox, box =>
-        box.innerHTML += `[CHECK] ${path} vs ${p.dataset.url} → ${match}<br>`
-      );
-      if (match) found = p;
-    });
-    return found;
-  }
+function normalize(path) {
+  return path.replace(/\/$/, '');
+}
 
-  function router(path = location.pathname, pushState = false) {
+function findPost(path) {
+  const target = normalize(path);
+
+  let found = null;
+  getPosts().forEach(p => {
+    const postUrl = normalize(p.dataset.url);
+
+    const match = target === postUrl;
+
     safe(debugBox, box =>
-      box.innerHTML = `<b>[ROUTING]</b> ${path}<br>`
+      box.innerHTML += `[CHECK] ${target} === ${postUrl} → ${match}<br>`
     );
 
-    const clean = path.replace(/\/$/, '');
-    const cleanBlog = BLOG_PATH.replace(/\/$/, '');
+    if (match) found = p;
+  });
 
-    if (clean === '' || clean === '/' || clean === '/index.html') {
-      return renderHome(pushState);
-    }
-
-    if (clean === cleanBlog) {
-      return renderList(pushState);
-    }
-
-    const post = findPost(path);
-    if (post) return renderPost(post, pushState);
-
-    render404(path, pushState);
-  }
+  return found;
+}
 
   /* ========= INTERCEPT ========= */
 
