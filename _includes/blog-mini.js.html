@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const spaHome   = document.getElementById('spa-home');
   
   const BLOG_PATH = '/blog/';
+  const TAGS_PATH = '/tags/';
   let STATE       = '';
 
   const safe = (el, fn) => el && fn(el);
@@ -213,64 +214,131 @@ function findPostByPath(path) {
 
 /* --- Router yang lebih stabil --- */
 function router(path = location.pathname, pushState = false) {
-  // Hanya hapus trailing slash paling belakang agar /blog/ dan /blog terbaca sama
+
   const cleanPath = path.length > 1 ? path.replace(/\/$/, "") : path;
+
   const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
-  safe(debugBox, box => {
-  box.innerHTML = `<div class="log-entry">
-    <span class="badge badge-route">Routing</span> 
-    Path: <code style="color: #60a5fa">${cleanPath}</code>
-  </div>`;
-});
+  const cleanTagsPath = TAGS_PATH.replace(/\/$/, "");
 
-  // 1. Cek Home
-  if (cleanPath === '/' || cleanPath === '/index.html') {
-    return renderHome(pushState);
+
+
+  // 1. Cek Home & Blog List (Kode lama Anda...)
+
+  if (cleanPath === '' || cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
+
+  if (cleanPath === cleanBlogPath) return renderList(pushState);
+
+
+
+  // 2. TAMBAHKAN INI: Pengecekan khusus halaman Tags
+
+  if (cleanPath === cleanTagsPath) {
+
+    STATE = 'tags';
+
+    hideAll();
+
+    safe(postsWrap, el => {
+
+      el.style.display = 'block';
+
+      el.classList.add('animate-slide');
+
+    });
+
+    // Tampilkan semua artikel di halaman tags agar bisa difilter
+
+    getPosts().forEach(p => p.style.display = 'block'); 
+
+    if (pushState) push(path);
+
+    debug();
+
+    return; // Berhenti di sini, jangan lanjut ke cek "post"
+
   }
 
-  // 2. Cek List Blog (Gunakan perbandingan kaku, BUKAN .includes)
-  if (cleanPath === cleanBlogPath || cleanPath === BLOG_PATH) {
-    return renderList(pushState);
-  }
 
-  // 3. Cek Postingan (Cari yang datanya sama persis)
-  const post = findPostByPath(path); // Gunakan path asli (misal: /blog/post.html)
-  if (post) {
-    return renderPost(post, pushState);
-  }
 
-  // 4. Fallback 404
+  // 3. Cek Postingan (Kode lama Anda...)
+
+  const post = findPostByPath(path);
+
+  if (post) return renderPost(post, pushState);
+
+
+
   render404(path, pushState);
+
 }
 
   /* ---------------- Event Listeners ---------------- */
 
-/* ---------------- Event Listeners ---------------- */
-
 document.addEventListener('click', e => {
+
   const a = e.target.closest('a');
+
   if (!a) return;
-  
+
   const href = a.getAttribute('href');
-  if (!href || href.startsWith('#')) return;
+
+  if (!href) return;
+
+
+
+  // Jika klik link yang mengandung hash (#)
+
+  if (href.includes('#')) {
+
+    const [urlPath, hash] = href.split('#');
+
+    const cleanUrlPath = urlPath.replace(/\/$/, "") || "/";
+
+    const currentPath = location.pathname.replace(/\/$/, "") || "/";
+
+
+
+    // Jika kita sudah di halaman yang sama (misal di /tags/), cukup biarkan browser update hash
+
+    if (cleanUrlPath === currentPath || href.startsWith('#')) {
+
+      return; 
+
+    }
+
+    
+
+    // Jika dari halaman lain (misal home) mau ke /tags/#tag
+
+    e.preventDefault();
+
+    router(urlPath, true); // Pindah halaman dulu secara SPA
+
+    location.hash = hash;  // Baru set hash-nya
+
+    return;
+
+  }
+
+
+
+  // Logika navigasi SPA biasa...
 
   try {
+
     const url = new URL(href, location.origin);
-    
-    // PERBAIKAN: Jika link mengandung Hash, jangan e.preventDefault() secara kaku
-    // Biarkan browser menangani perubahan hash setelah navigasi ke /tags/
+
     if (url.origin === location.origin) {
-      if (url.hash && url.pathname === '/tags/') {
-        // Biarkan link menuju halaman tags dengan hash tetap bekerja normal
-        // agar script di halaman tags bisa membaca hash-nya.
-        return; 
-      }
-      
+
       e.preventDefault();
+
       router(url.pathname, true);
+
     }
+
   } catch (err) {}
+
 });
 
   if (btnBlog) {
