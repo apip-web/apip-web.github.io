@@ -195,9 +195,10 @@ function push(path) {
     if (cleanPath === cleanBlogPath) return renderList(pushState);
 
     // LOGIKA KHUSUS TAGS
-// LOGIKA KHUSUS TAGS
-    if (cleanPath === cleanTagsPath) {
-      STATE = 'tags'; hideAll();
+if (cleanPath === cleanTagsPath) {
+      STATE = 'tags'; 
+      hideAll();
+      
       safe(postsWrap, el => el.style.display = 'block');
       
       const allPosts = getPosts();
@@ -206,30 +207,29 @@ function push(path) {
       if (tagsController) {
         tagsController.style.display = 'block';
         safe(tagsController.querySelector('.post-content'), c => c.style.display = 'block');
-        
-        allPosts.forEach(p => {
-          if (p !== tagsController) {
-            p.style.display = 'block';
-            safe(p.querySelector('.post-content'), c => c.style.display = 'none');
-          }
-        });
+        allPosts.forEach(p => { if (p !== tagsController) p.style.display = 'block'; });
       }
 
-      // PERBAIKAN DI SINI: Sertakan hash saat push state
+      // 1. Ambil hash secara manual dari URL yang diklik (agar instan)
+      const urlObject = new URL(location.href);
+      const targetHash = decodeURIComponent(urlObject.hash.replace('#', ''));
+
       if (pushState) {
-          const pathWithHash = path + (location.hash || "");
-          push(pathWithHash); 
+        push(path + (targetHash ? '#' + targetHash : ''));
       }
       
       debug();
+
+      // 2. Panggil handleTags dengan paksa menggunakan targetHash tadi
+      setTimeout(() => {
+        if (typeof window.handleTags === 'function') {
+          window.handleTags(targetHash); 
+        }
+      }, 50); 
       
-      if (typeof window.handleTags === 'function') {
-          // Beri jeda sedikit agar DOM siap sebelum filter
-          setTimeout(window.handleTags, 50);
-      }
       return;
     }
-
+    
     const post = getPosts().find(p => p.dataset.url === path);
     if (post) return renderPost(post, pushState);
 
