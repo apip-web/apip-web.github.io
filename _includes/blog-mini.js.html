@@ -158,17 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ========= ROUTER ========= */
 
-  function findPost(path) {
-    let found = null;
-    getPosts().forEach(p => {
-      const match = path.endsWith(p.dataset.url);
-      safe(debugBox, box =>
-        box.innerHTML += `[CHECK] ${path} vs ${p.dataset.url} → ${match}<br>`
-      );
-      if (match) found = p;
-    });
-    return found;
-  }
+function normalize(path) {
+  return path.replace(/\/$/, '');
+}
+
+function findPost(path) {
+  const target = normalize(path);
+  let found = null;
+
+  getPosts().forEach(p => {
+    const postUrl = normalize(p.dataset.url);
+
+    const match = target === postUrl;
+
+    safe(debugBox, box =>
+      box.innerHTML += `[CHECK] ${target} === ${postUrl} → ${match}<br>`
+    );
+
+    if (match) found = p;
+  });
+
+  return found;
+}
 
   function router(path = location.pathname, pushState = false) {
     safe(debugBox, box =>
