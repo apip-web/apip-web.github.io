@@ -105,7 +105,7 @@
 
 <div id="spa-debug"></div>
 
-<script>  
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   const homepage  = document.querySelector('.homepage');
   const btnBlog   = document.getElementById('open-blog');
@@ -129,232 +129,126 @@ document.addEventListener('DOMContentLoaded', () => {
     containers.forEach(el => safe(el, e => {
       e.style.display = 'none';
       e.classList.remove('animate-slide');
-      void e.offsetWidth; 
     }));
 
     getPosts().forEach(p => {  
       p.style.display = 'none';
-      const c = p.querySelector('.post-content');  
-      const a = p.querySelector('.post-title a');  
-      const ex = p.querySelector('.post-excerpt');
-      if (c) c.style.display = 'none'; 
-      if (a) a.style.display = ''; 
-      if (ex) ex.style.display = 'block';
+      safe(p.querySelector('.post-content'), c => c.style.display = 'none'); 
+      safe(p.querySelector('.post-title a'), a => a.style.display = ''); 
+      safe(p.querySelector('.post-excerpt'), ex => ex.style.display = 'block');
     });  
   }
 
   function push(path) {  
-    if (location.pathname !== path) {  
-      history.pushState(null, '', path);  
-    }  
+    if (location.pathname !== path) history.pushState(null, '', path);  
   }  
   
   /* ---------------- Renderers ---------------- */  
   
   function renderHome(pushState) {  
-    STATE = 'home';  
-    hideAll(); 
+    STATE = 'home'; hideAll();
     [spaHome, homepage].forEach(el => safe(el, e => {
-      e.style.display = 'block';
-      e.classList.add('animate-slide');
-    })); 
-    if (pushState) push('/');  
-    debug();  
+      e.style.display = 'block'; e.classList.add('animate-slide');
+    }));
+    if (pushState) push('/'); debug();  
   }
 
   function renderList(pushState) {  
-    STATE = 'list';  
-    hideAll(); 
+    STATE = 'list'; hideAll();
     safe(listTitle, el => el.style.display = 'block');
-    safe(postsWrap, el => {
-        el.style.display = 'block';
-        el.classList.add('animate-slide');
-    });  
-    getPosts().forEach(p => p.style.display = 'block');
-    if (pushState) push(BLOG_PATH);  
-    debug();  
+    safe(postsWrap, el => { el.style.display = 'block'; el.classList.add('animate-slide'); });  
+    getPosts().forEach(p => {
+        // Jangan tampilkan file tags.md di dalam list blog biasa
+        if(p.dataset.url !== TAGS_PATH) p.style.display = 'block';
+    });
+    if (pushState) push(BLOG_PATH); debug();  
   }
 
   function renderPost(post, pushState) {  
-    STATE = 'post';  
-    hideAll();
-    safe(listTitle, el => el.style.display = 'none');
-    safe(postsWrap, el => {
-        el.style.display = 'block';
-        el.classList.add('animate-slide');
-    });
-    
+    STATE = 'post'; hideAll();
+    safe(postsWrap, el => { el.style.display = 'block'; el.classList.add('animate-slide'); });
     post.style.display = 'block';
-    const c = post.querySelector('.post-content');  
-    const a = post.querySelector('.post-title a');  
-    const ex = post.querySelector('.post-excerpt');
-
-    if (c) c.style.display = 'block';  
-    if (a) a.style.display = 'none';  
-    if (ex) ex.style.display = 'none';
-  
-    if (pushState) push(post.dataset.url);  
-    debug();  
+    safe(post.querySelector('.post-content'), c => c.style.display = 'block');  
+    safe(post.querySelector('.post-title a'), a => a.style.display = 'none');  
+    safe(post.querySelector('.post-excerpt'), ex => ex.style.display = 'none');
+    if (pushState) push(post.dataset.url); debug();  
   }
 
   function render404(path, pushState) {  
-    STATE = '404';  
-    hideAll();  
+    STATE = '404'; hideAll();
     safe(page404, el => el.style.display = 'block');  
-    if (pushState) push(path);  
-    debug();  
+    if (pushState) push(path); debug();  
   }
 
-/* --- Finder yang lebih sederhana dan aman --- */
-function findPostByPath(path) {
-  const posts = getPosts();
-  // Bandingkan path apa adanya dari browser dengan data-url di HTML
-  return posts.find(p => p.dataset.url === path);
-}
+  /* ---------------- Router ---------------- */
 
-/* --- Router yang lebih stabil --- */
-function router(path = location.pathname, pushState = false) {
+  function router(path = location.pathname, pushState = false) {
+    const cleanPath = path.length > 1 ? path.replace(/\/$/, "") : path;
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
+    const cleanTagsPath = TAGS_PATH.replace(/\/$/, "");
 
-  const cleanPath = path.length > 1 ? path.replace(/\/$/, "") : path;
+    if (cleanPath === '' || cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
+    if (cleanPath === cleanBlogPath) return renderList(pushState);
 
-  const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
-
-  const cleanTagsPath = TAGS_PATH.replace(/\/$/, "");
-
-
-
-  // 1. Cek Home & Blog List (Kode lama Anda...)
-
-  if (cleanPath === '' || cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
-
-  if (cleanPath === cleanBlogPath) return renderList(pushState);
-
-
-
-  // 2. TAMBAHKAN INI: Pengecekan khusus halaman Tags
-
-if (cleanPath === cleanTagsPath) {
-    STATE = 'tags';
-    hideAll(); 
-
-    // 1. Tampilkan kontainer utama (#posts)
-    safe(postsWrap, el => el.style.display = 'block');
-
-    // 2. Cari elemen "Halaman Tags" di dalam daftar postingan
-    const allPosts = getPosts();
-    const tagsPage = allPosts.find(p => p.dataset.url.includes('/tags/'));
-
-    if (tagsPage) {
-      tagsPage.style.display = 'block';
+    // LOGIKA KHUSUS TAGS
+    if (cleanPath === cleanTagsPath) {
+      STATE = 'tags'; hideAll();
+      safe(postsWrap, el => el.style.display = 'block');
       
-      // SUNTIKKAN: Paksa konten di dalamnya muncul
-      const content = tagsPage.querySelector('.post-content');
-      const title = tagsPage.querySelector('.post-title');
-      const excerpt = tagsPage.querySelector('.post-excerpt');
+      const allPosts = getPosts();
+      const tagsController = allPosts.find(p => p.dataset.url === TAGS_PATH);
 
-      if (content) content.style.display = 'block';
-      if (title) title.style.display = 'none'; // Sembunyikan judul aslinya agar rapi
-      if (excerpt) excerpt.style.display = 'none';
-
-      // 3. Tampilkan postingan lainnya DI BAWAH halaman tags sebagai daftar yang akan difilter
-      allPosts.forEach(p => {
-        if (p !== tagsPage) {
-          p.style.display = 'block';
-          // Pastikan postingan biasa hanya tampil judul & excerpt (gaya List)
-          safe(p.querySelector('.post-title a'), a => a.style.display = 'block');
-          safe(p.querySelector('.post-excerpt'), ex => ex.style.display = 'block');
-          safe(p.querySelector('.post-content'), c => c.style.display = 'none');
-        }
-      });
+      if (tagsController) {
+        tagsController.style.display = 'block';
+        safe(tagsController.querySelector('.post-content'), c => c.style.display = 'block');
+        
+        allPosts.forEach(p => {
+          if (p !== tagsController) {
+            p.style.display = 'block';
+            safe(p.querySelector('.post-content'), c => c.style.display = 'none');
+          }
+        });
+      }
+      if (pushState) push(path); debug();
+      // Panggil fungsi filter di tags.md jika ada
+      if (typeof window.handleTags === 'function') window.handleTags();
+      return;
     }
 
-    if (pushState) push(path);
-    debug();
-    
-    // Pemicu filter
-    if (typeof handleTags === 'function') handleTags();
-    return;
+    const post = getPosts().find(p => p.dataset.url === path);
+    if (post) return renderPost(post, pushState);
+
+    render404(path, pushState);
   }
-
-  // 3. Cek Postingan (Kode lama Anda...)
-
-  const post = findPostByPath(path);
-
-  if (post) return renderPost(post, pushState);
-
-
-
-  render404(path, pushState);
-
-}
 
   /* ---------------- Event Listeners ---------------- */
 
-document.addEventListener('click', e => {
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    if (!href) return;
 
-  const a = e.target.closest('a');
-
-  if (!a) return;
-
-  const href = a.getAttribute('href');
-
-  if (!href) return;
-
-
-
-  // Jika klik link yang mengandung hash (#)
-
-  if (href.includes('#')) {
-
-    const [urlPath, hash] = href.split('#');
-
-    const cleanUrlPath = urlPath.replace(/\/$/, "") || "/";
-
-    const currentPath = location.pathname.replace(/\/$/, "") || "/";
-
-
-
-    // Jika kita sudah di halaman yang sama (misal di /tags/), cukup biarkan browser update hash
-
-    if (cleanUrlPath === currentPath || href.startsWith('#')) {
-
-      return; 
-
+    // Handle link dengan hash (untuk Tags)
+    if (href.includes('#')) {
+      const [path, hash] = href.split('#');
+      const cleanH = path.replace(/\/$/, "");
+      if (cleanH === '/tags' || path === TAGS_PATH) {
+        e.preventDefault();
+        router(TAGS_PATH, true);
+        location.hash = hash;
+        return;
+      }
     }
 
-    
-
-    // Jika dari halaman lain (misal home) mau ke /tags/#tag
-
-    e.preventDefault();
-
-    router(urlPath, true); // Pindah halaman dulu secara SPA
-
-    location.hash = hash;  // Baru set hash-nya
-
-    return;
-
-  }
-
-
-
-  // Logika navigasi SPA biasa...
-
-  try {
-
-    const url = new URL(href, location.origin);
-
-    if (url.origin === location.origin) {
-
-      e.preventDefault();
-
-      router(url.pathname, true);
-
-    }
-
-  } catch (err) {}
-
-});
+    try {
+      const url = new URL(href, location.origin);
+      if (url.origin === location.origin) {
+        e.preventDefault();
+        router(url.pathname, true);
+      }
+    } catch (err) {}
+  });
 
   if (btnBlog) {
     btnBlog.addEventListener('click', (e) => {
@@ -363,53 +257,28 @@ document.addEventListener('click', e => {
     });
   }
 
-  window.addEventListener('popstate', () => {  
-    router(location.pathname, false);  
-  });  
+  window.addEventListener('popstate', () => router(location.pathname, false));
 
-/* ---------------- Debug Overlay Logic ---------------- */
+  /* ---------------- Debug ---------------- */
 
   function debug() {  
     if (!debugBox) return;  
-    
     let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
-    
     debugBox.innerHTML += `
       <div class="log-entry" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
-        <span class="badge ${stateClass}">State</span> ${STATE}
-      </div>
-      <div class="log-entry">
-        <span class="badge badge-success">URL</span> ${location.pathname}
+        <span class="badge ${stateClass}">State</span> ${STATE} | <span class="badge badge-success">URL</span> ${location.pathname}
       </div>`;
-    
     debugBox.scrollTop = debugBox.scrollHeight;
   }
 
-  // FITUR COPY: Menggunakan penanganan error agar lebih stabil
-  if (debugBox) {  
-    debugBox.addEventListener('click', function() {  
-      // Ambil teks bersih (tanpa tag HTML) agar hasil paste rapi
-      const contentToCopy = debugBox.innerText; 
-      
-      navigator.clipboard.writeText(contentToCopy).then(() => {  
-        const msg = document.createElement('div');
-        msg.style.color = '#10b981';
-        msg.style.fontSize = '10px';
-        msg.style.marginTop = '5px';
-        msg.innerHTML = `<i>✓ Copied to clipboard!</i>`;
-        debugBox.appendChild(msg);
-        debugBox.scrollTop = debugBox.scrollHeight;
-        
-        // Hapus pesan notifikasi setelah 2 detik
-        setTimeout(() => msg.remove(), 2000);
-      }).catch(err => {
-        console.error('Gagal menyalin: ', err);
-      });  
-    });  
+  if (debugBox) {
+    debugBox.addEventListener('click', () => {
+      navigator.clipboard.writeText(debugBox.innerText);
+      const m = document.createElement('div'); m.innerHTML = '<i>✓ Copied!</i>'; m.style.color='#10b981'; m.style.fontSize='10px';
+      debugBox.appendChild(m); setTimeout(() => m.remove(), 2000);
+    });
   }
 
-  // INISIALISASI: Jalankan router pertama kali saat halaman dimuat
   router(location.pathname, false);
-
-}); // Tutup DOMContentLoaded
+});
 </script>
