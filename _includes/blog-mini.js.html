@@ -1,26 +1,38 @@
+betulin
+
 <style>
-#spa-home, #posts, .homepage, #page-404, .post-content { 
-  display: none; 
-}
+#spa-home,
+#posts,
+.homepage,
+#page-404,
+.post-content { display: none; }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px); /* Mulai dari sedikit di atas */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Berakhir di posisi asli */
+  }
 }
 
+/* Class untuk memicu animasi */
+.animate-slide {
+  display: block !important;
+  animation: slideDown 2s ease-out forwards;
+}
+
+/* Tetap gunakan CSS kamu, tambahkan ini di bawahnya */
 @keyframes slideOut {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(20px); }
 }
 
-.animate-slide {
-  display: block !important;
-  animation: slideDown 4s ease-out forwards; /* Durasi dipercepat agar sinkron */
-}
-
 .animate-out {
   display: block !important;
-  animation: slideOut 3s ease-in forwards;
+  animation: slideOut 0.3s ease-in forwards;
 }
 </style>
 
@@ -91,21 +103,30 @@ function getPosts() {
   const safe = (el, fn) => el && fn(el);
 
 function hideAll() {  
+  // Hapus class animasi dari kontainer utama agar bisa diulang
   const containers = [document.getElementById('spa-home'), homepage, postsWrap, page404];
   containers.forEach(el => safe(el, e => {
     e.style.display = 'none';
-    e.classList.remove('animate-slide', 'animate-out'); // Tambahkan animate-out di sini
-    void e.offsetWidth; 
+    e.classList.remove('animate-slide');
+    void e.offsetWidth; // TRICK: Paksa browser reset state sebelum animasi dipasang lagi
   }));
 
+  // Sembunyikan semua kontainer utama
+  safe(document.getElementById('spa-home'), el => el.style.display = 'none');
+  safe(homepage, el => el.style.display = 'none');  
+  safe(postsWrap, el => el.style.display = 'none');  
+  safe(page404, el => el.style.display = 'none');  
+
+  // RESET semua elemen post ke kondisi default (tersembunyi)
   getPosts().forEach(p => {  
-    p.style.display = 'none';
-    p.classList.remove('animate-slide', 'animate-out'); // Dan di sini
+    p.style.display = 'none'; // Sembunyikan artikelnya
+    p.classList.remove('animate-slide');
     
     const c = p.querySelector('.post-content');  
     const a = p.querySelector('.post-title a');  
-    if (c) c.style.display = 'none'; 
-    if (a) a.style.display = '';     
+    
+    if (c) c.style.display = 'none'; // Sembunyikan isinya
+    if (a) a.style.display = '';     // KEMBALIKAN link agar muncul lagi (reset ke CSS default)
   });  
 }
 
@@ -229,10 +250,11 @@ function findPostByPath(path) {  
 /* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
 function router(path = location.pathname, pushState = false) {  
-  // Deteksi kontainer yang sedang tampil saat ini (berdasarkan class atau display)
+  // A. Cari tahu apakah ada halaman yang sedang tampil sekarang
   const currentActive = [document.getElementById('spa-home'), homepage, postsWrap, page404]
-                        .find(el => el && (el.classList.contains('animate-slide') || el.style.display === 'block'));
+                        .find(el => el && el.style.display === 'block');
 
+  // B. Fungsi internal untuk menjalankan kode asli kamu
   const runOriginalRouter = () => {
     safe(debugBox, box => { box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`; });
     const cleanPath = path.replace(/\/$/, "");
@@ -247,16 +269,18 @@ function router(path = location.pathname, pushState = false) {  
     render404(path, pushState);  
   };
 
-  // LOGIKA ANIMASI KELUAR
+  // C. LOGIKA ANIMASI KELUAR:
+  // Jika sedang berpindah halaman (pushState = true) dan ada halaman aktif
   if (pushState && currentActive) {
-    currentActive.classList.remove('animate-slide');
-    currentActive.classList.add('animate-out');
+    currentActive.classList.remove('animate-slide'); // Hapus animasi masuk
+    currentActive.classList.add('animate-out');      // Pasang animasi keluar
     
     setTimeout(() => {
       window.scrollTo(0, 0);
       runOriginalRouter();
-    }, 300); // 300ms sesuai durasi animate-out di CSS
+    }, 250); // Tunggu 0.25 detik (durasi animasi keluar)
   } else {
+    // Jika baru buka web atau klik Back, langsung jalankan tanpa delay
     runOriginalRouter();
   }
 }
