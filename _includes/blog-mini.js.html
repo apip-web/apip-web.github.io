@@ -8,6 +8,12 @@
   opacity: 0;
   transition: opacity 5s ease;
 }
+
+/* DEBUG HARUS BISA DICOPY */
+#spa-debug {
+  user-select: text;
+  cursor: text;
+}
 </style>
 
 <div id="page-404">
@@ -43,7 +49,7 @@
   {% endfor %}
 </div>
 
-<div id="spa-debug" style="
+<div id="spa-debug" data-no-spa style="
   position: fixed;
   left: 10px;
   bottom: 10px;
@@ -75,31 +81,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
 
-  /* ========= ANIMATION HELPERS ========= */
+  /* ========= HELPERS ========= */
+
+  const normalize = p => p.replace(/\/$/, '');
 
   function show(el) {
     if (!el) return;
     el.style.display = 'block';
-    el.style.opacity = '0';
     requestAnimationFrame(() => {
       el.style.opacity = '1';
     });
   }
 
-  function hideInstant(el) {
+  function hide(el) {
     if (!el) return;
     el.style.opacity = '0';
-    el.style.display = 'none';
+    setTimeout(() => {
+      el.style.display = 'none';
+    }, 400);
   }
 
-  /* ========= RESET STATE (NO ANIMATION) ========= */
-
   function hideAll() {
-    [spaHome, homepage, postsWrap, page404].forEach(hideInstant);
+    [spaHome, homepage, postsWrap, page404].forEach(hide);
 
     getPosts().forEach(p => {
-      hideInstant(p);
-      safe(p.querySelector('.post-content'), hideInstant);
+      hide(p);
+      safe(p.querySelector('.post-content'), hide);
       safe(p.querySelector('.post-title a'), a => a.style.display = '');
       safe(p.querySelector('.post-excerpt'), e => e.style.display = 'block');
     });
@@ -111,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* ========= RENDERERS ========= */
+  /* ========= RENDER ========= */
 
   function renderHome(pushState) {
     STATE = 'home';
@@ -158,55 +165,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ========= ROUTER ========= */
 
-function normalize(path) {
-  return path.replace(/\/$/, '');
-}
+  function findPost(path) {
+    const target = normalize(path);
+    let found = null;
 
-function findPost(path) {
-  const target = normalize(path);
-  let found = null;
+    getPosts().forEach(p => {
+      const postUrl = normalize(p.dataset.url);
+      const match = target === postUrl;
 
-  getPosts().forEach(p => {
-    const postUrl = normalize(p.dataset.url);
+      safe(debugBox, box =>
+        box.innerHTML += `[CHECK] ${target} === ${postUrl} → ${match}<br>`
+      );
 
-    const match = target === postUrl;
+      if (match) found = p;
+    });
 
+    return found;
+  }
+
+  function router(path = location.pathname, pushState = false) {
     safe(debugBox, box =>
-      box.innerHTML += `[CHECK] ${target} === ${postUrl} → ${match}<br>`
+      box.innerHTML =
+        `<b>[ROUTING]</b><br><hr><br>${path}<br><br>`
     );
 
-    if (match) found = p;
-  });
+    const clean = normalize(path);
+    const blogClean = normalize(BLOG_PATH);
 
-  return found;
-}
+    if (clean === '' || clean === '/' || clean === '/index.html') {
+      return renderHome(pushState);
+    }
 
-function router(path = location.pathname, pushState = false) {
-  safe(debugBox, box =>
-    box.innerHTML =
-      `<b>[ROUTING]</b><br><hr><br>${path}<br><br>`
-  );
+    if (clean === blogClean) {
+      return renderList(pushState);
+    }
 
-  const clean = path.replace(/\/$/, '');
-  const cleanBlog = BLOG_PATH.replace(/\/$/, '');
+    const post = findPost(path);
+    if (post) return renderPost(post, pushState);
 
-  if (clean === '' || clean === '/' || clean === '/index.html') {
-    return renderHome(pushState);
+    render404(path, pushState);
   }
-
-  if (clean === cleanBlog) {
-    return renderList(pushState);
-  }
-
-  const post = findPost(path);
-  if (post) return renderPost(post, pushState);
-
-  render404(path, pushState);
-}
 
   /* ========= INTERCEPT ========= */
 
   document.addEventListener('click', e => {
+
+    if (e.target.closest('[data-no-spa]')) return;
+
     const a = e.target.closest('a[href]');
     if (!a) return;
 
