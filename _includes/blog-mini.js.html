@@ -204,58 +204,45 @@ document.addEventListener('DOMContentLoaded', () => {
     debug();  
   }
 
-  /* ---------------- Path Finder ---------------- */
+/* --- Finder yang lebih sederhana dan aman --- */
+function findPostByPath(path) {
+  const posts = getPosts();
+  // Bandingkan path apa adanya dari browser dengan data-url di HTML
+  return posts.find(p => p.dataset.url === path);
+}
 
-  function findPostByPath(path) {  
-    const posts = getPosts();
-    const target = path.replace(/\/$/, "").replace(".html", "");
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace(".html", "");
-    
-    // Cegah URL blog list dianggap sebagai post
-    if (target === cleanBlogPath || target === "") return null;
+/* --- Router yang lebih stabil --- */
+function router(path = location.pathname, pushState = false) {
+  // Hanya hapus trailing slash paling belakang agar /blog/ dan /blog terbaca sama
+  const cleanPath = path.length > 1 ? path.replace(/\/$/, "") : path;
+  const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
-    return posts.find(p => {
-      const postUrl = p.dataset.url;
-      if (!postUrl) return false;
-      const cleanPostUrl = postUrl.replace(/\/$/, "").replace(".html", "");
-      return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
-    });
-  }
-
-  /* ---------------- Router ---------------- */  
-
-  function router(path = location.pathname, pushState = false) {  
-    const cleanPath = path.replace(/\/$/, "").replace("/index.html", "") || "/";
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace("/index.html", "");
-
-safe(debugBox, box => {
+  safe(debugBox, box => {
   box.innerHTML = `<div class="log-entry">
     <span class="badge badge-route">Routing</span> 
     Path: <code style="color: #60a5fa">${cleanPath}</code>
   </div>`;
 });
 
-    if (cleanPath === '/' || cleanPath === '/index.html') {
-      return renderHome(pushState);
-    }
-
-    // Prioritaskan cek List Mode dengan Exact Match
-    if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html") || path.includes('blog.html')) {
-      // Tambahan proteksi: jika ini bukan file blog utama, biarkan lanjut ke pengecekan post
-      if (cleanPath !== cleanBlogPath && findPostByPath(cleanPath)) {
-         // Lanjut ke bawah
-      } else {
-         return renderList(pushState);
-      }
-    }
-
-    const post = findPostByPath(cleanPath);  
-    if (post) {
-      return renderPost(post, pushState);
-    }
-
-    render404(path, pushState);  
+  // 1. Cek Home
+  if (cleanPath === '/' || cleanPath === '/index.html') {
+    return renderHome(pushState);
   }
+
+  // 2. Cek List Blog (Gunakan perbandingan kaku, BUKAN .includes)
+  if (cleanPath === cleanBlogPath || cleanPath === BLOG_PATH) {
+    return renderList(pushState);
+  }
+
+  // 3. Cek Postingan (Cari yang datanya sama persis)
+  const post = findPostByPath(path); // Gunakan path asli (misal: /blog/post.html)
+  if (post) {
+    return renderPost(post, pushState);
+  }
+
+  // 4. Fallback 404
+  render404(path, pushState);
+}
 
   /* ---------------- Event Listeners ---------------- */
 
