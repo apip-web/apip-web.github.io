@@ -129,12 +129,12 @@ hr {
 /* ===== ul li ol li ===== */
 li {
   margin-bottom: 10px;   /* Jarak antar item list */
-  padding-left: 50px;     /* Jarak teks dari marker */
+  padding-left: 20px;     /* Jarak teks dari marker */
 }
 
 ul, ol {
   font-size: 14px;
-  margin-left: 20px;
+  margin-left: 50px;
 }
 
 /* ===== Post ===== */
@@ -474,5 +474,6 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
