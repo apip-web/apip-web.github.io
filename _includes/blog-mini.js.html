@@ -1,295 +1,325 @@
 <style>
-#spa-home,
-#posts,
-.homepage,
-#page-404,
-.post-content { display: none; }
+#spa-home, #posts, .homepage, #page-404, .post-content { 
+  display: none; 
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+.animate-slide {
+  display: block !important;
+  animation: slideDown 4s ease-out forwards; /* Durasi dipercepat agar sinkron */
+}
+
+.animate-out {
+  display: block !important;
+  animation: slideOut 3s ease-in forwards;
+}
 </style>
 
 <div id="page-404" style="display:none;">
-    <h1>404</h1>
-    <p>Halaman tidak ditemukan.</p>
-    <a href="/">Kembali ke Home</a>
+    <h1>404</h1>
+    <p>Halaman tidak ditemukan.</p>
+    <a href="/">Kembali ke Home</a>
 </div>
 
 <div id="posts">
 <div class="list-title"><h1>Blog:</h1></div>
 {% for post in site.posts %}
-  <article class="post" data-url="{{ post.url | relative_url }}">
-    <h2 class="post-title">
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </h2>
+  <article class="post" data-url="{{ post.url | relative_url }}">
+    <h2 class="post-title">
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    </h2>
 
-    <div class="post-excerpt">
-      {% if post.description %}
-        {{ post.description }}
-      {% else %}
-        {{ post.excerpt | strip_html | truncatewords: 25 }}
-      {% endif %}
-    </div>
+    <div class="post-excerpt">
+      {% if post.description %}
+        {{ post.description }}
+      {% else %}
+        {{ post.excerpt | strip_html | truncatewords: 25 }}
+      {% endif %}
+    </div>
 
-    <div class="post-content">
-      {% include post-meta.html post=post %}
-      <div class="entry-content">
-        {{ post.content | markdownify }}
-      </div>
-    </div>
-  </article>
+    <div class="post-content">
+      {% include post-meta.html post=post %}
+      <div class="entry-content">
+        {{ post.content | markdownify }}
+      </div>
+    </div>
+  </article>
 {% endfor %}
 </div>
 
 <div id="spa-debug" style="
-  position: fixed;
-  max-height: 100px;
-  overflow: auto;
-  left: 10px;
-  bottom: 10px;
-  right: 10px;
-  padding: 8px 10px;
-  font: 12px monospace;
-  background: darkblue;
-  color: lightgreen;
-  z-index: 9;
-  border-radius: 4px;
+  display: visible;
+  position: fixed;
+  max-height: 100px;
+  overflow: auto;
+  left: 10px;
+  bottom: 10px;
+  right: 10px;
+  padding: 8px 10px;
+  font: 12px monospace;
+  background: darkblue;
+  color: lightgreen;
+  z-index: 9;
+  border-radius: 4px;
 "></div>
 
-<script>  
-document.addEventListener('DOMContentLoaded', () => {  
-  const homepage  = document.querySelector('.homepage');  
-  const btn       = document.getElementById('open-blog');  
-  const postsWrap = document.getElementById('posts');  
-  const page404   = document.getElementById('page-404');  
-  const debugBox  = document.getElementById('spa-debug');  
+<script>  
+document.addEventListener('DOMContentLoaded', () => {
+  const homepage  = document.querySelector('.homepage');
+  const btn       = document.getElementById('open-blog');
+  const postsWrap = document.getElementById('posts');
+  const page404   = document.getElementById('page-404');
+  const debugBox  = document.getElementById('spa-debug');
 
-  const listTitle = document.querySelector('.list-title');
-  const BLOG_PATH = '/blog/';
-  let STATE = '';
+  const listTitle = document.querySelector('.list-title');
+  const BLOG_PATH = '/blog/';
+  let STATE       = '';
 
 function getPosts() {
-    return [...document.querySelectorAll('.post')];  
-  }
+    return [...document.querySelectorAll('.post')];  
+  }
 
-  const safe = (el, fn) => el && fn(el);
+  const safe = (el, fn) => el && fn(el);
 
-function hideAll() {  
-  // Sembunyikan semua kontainer utama
-  safe(document.getElementById('spa-home'), el => el.style.display = 'none');
-  safe(homepage, el => el.style.display = 'none');  
-  safe(postsWrap, el => el.style.display = 'none');  
-  safe(page404, el => el.style.display = 'none');  
+function hideAll() {  
+  const containers = [document.getElementById('spa-home'), homepage, postsWrap, page404];
+  containers.forEach(el => safe(el, e => {
+    e.style.display = 'none';
+    e.classList.remove('animate-slide', 'animate-out'); // Tambahkan animate-out di sini
+    void e.offsetWidth; 
+  }));
 
-  // RESET semua elemen post ke kondisi default (tersembunyi)
-  getPosts().forEach(p => {  
-    p.style.display = 'none'; // Sembunyikan artikelnya
-    
-    const c = p.querySelector('.post-content');  
-    const a = p.querySelector('.post-title a');  
-    
-    if (c) c.style.display = 'none'; // Sembunyikan isinya
-    if (a) a.style.display = '';     // KEMBALIKAN link agar muncul lagi (reset ke CSS default)
-  });  
+  getPosts().forEach(p => {  
+    p.style.display = 'none';
+    p.classList.remove('animate-slide', 'animate-out'); // Dan di sini
+    
+    const c = p.querySelector('.post-content');  
+    const a = p.querySelector('.post-title a');  
+    if (c) c.style.display = 'none'; 
+    if (a) a.style.display = '';     
+  });  
 }
 
-  function push(path) {  
-    if (location.pathname !== path) {  
-      history.pushState(null, '', path);  
-    }  
-  }  
-  
-  /* ---------------- renderers ---------------- */  
-  
-function renderHome(pushState) {  
-  STATE = 'home';  
-  hideAll(); // Ini akan menyembunyikan #spa-home dulu
+  function push(path) {  
+    if (location.pathname !== path) {  
+      history.pushState(null, '', path);  
+    }  
+  }  
+  
+  /* ---------------- renderers ---------------- */  
+  
+function renderHome(pushState) {  
+  STATE = 'home';  
+  hideAll(); 
 
-  // Sekarang tampilkan kembali hanya untuk Home
-  const jekyllWrapper = document.getElementById('spa-home');
-  safe(jekyllWrapper, el => el.style.display = 'block'); 
-  safe(homepage, el => el.style.display = 'block');  
+  const jekyllWrapper = document.getElementById('spa-home');
+  safe(jekyllWrapper, el => {
+    el.style.display = 'block';
+    el.classList.add('animate-slide'); // Tambahkan ini
+  }); 
+  
+  safe(homepage, el => {
+    el.style.display = 'block';
+    el.classList.add('animate-slide'); // Tambahkan ini
+  });  
 
-  if (pushState) push('/');  
-  debug();  
+  if (pushState) push('/');  
+  debug();  
 }
 
-function renderList(pushState) {  
-    STATE = 'list';  
-    hideAll(); 
+function renderList(pushState) {  
+    STATE = 'list';  
+    hideAll(); 
 
-    safe(listTitle, el => el.style.display = 'block');
-    safe(postsWrap, el => el.style.display = 'block');  
-    
-    getPosts().forEach(p => {
-        p.style.display = 'block';
-        
-        // PASTIKAN excerpt muncul kembali di halaman daftar
-        const ex = p.querySelector('.post-excerpt');
-        if (ex) ex.style.display = 'block';
+    // Tampilkan judul tanpa animasi individu
+    safe(listTitle, el => el.style.display = 'block');
 
-        const c = p.querySelector('.post-content');
-        if (c) c.style.display = 'none';
-    });
+    // Tampilkan pembungkus utama (#posts) dan beri animasi di sini
+    safe(postsWrap, el => {
+        el.style.display = 'block';
+        el.classList.add('animate-slide'); // Seluruh area blog meluncur!
+    });  
+    
+    getPosts().forEach(p => {
+        p.style.display = 'block';
+        // Reset elemen dalam post
+        const ex = p.querySelector('.post-excerpt');
+        if (ex) ex.style.display = 'block';
+        const c = p.querySelector('.post-content');
+        if (c) c.style.display = 'none';
+    });
 
-    if (pushState) push(BLOG_PATH);  
-    debug();  
+    if (pushState) push(BLOG_PATH);  
+    debug();  
 }
 
-function renderPost(post, pushState) {  
-    STATE = 'post';  
-    hideAll();
-    
-    // Sembunyikan judul "Blog:"
-    safe(listTitle, el => el.style.display = 'none');
-    
-    // Tampilkan pembungkus postingan
-    safe(postsWrap, el => el.style.display = 'block');  
-    
-    // Tampilkan artikel yang diklik
-    post.style.display = 'block';  
+function renderPost(post, pushState) {  
+    STATE = 'post';  
+    hideAll();
+    
+    // Sembunyikan judul "Blog:"
+    safe(listTitle, el => el.style.display = 'none');
+    
+    // Tampilkan pembungkus postingan
+safe(postsWrap, el => {
+        el.style.display = 'block';
+        el.classList.add('animate-slide'); // Tambahkan animasi ke pembungkus
+    });
+    
+    // Tampilkan artikel yang diklik
+    post.style.display = 'block';
+    post.classList.add('animate-slide');
 
-    // CARI dan SEMBUNYIKAN excerpt khusus milik postingan ini saja
-    const thisExcerpt = post.querySelector('.post-excerpt');
-    if (thisExcerpt) thisExcerpt.style.display = 'none';
+    // CARI dan SEMBUNYIKAN excerpt khusus milik postingan ini saja
+    const thisExcerpt = post.querySelector('.post-excerpt');
+    if (thisExcerpt) thisExcerpt.style.display = 'none';
 
-    // Tampilkan konten utama
-    const c = post.querySelector('.post-content');  
-    const a = post.querySelector('.post-title a');  
-    if (c) c.style.display = 'block';  
-    if (a) a.style.display = 'none';  
-  
-    if (pushState) push(post.dataset.url);  
-    debug();  
+    // Tampilkan konten utama
+    const c = post.querySelector('.post-content');  
+    const a = post.querySelector('.post-title a');  
+    if (c) c.style.display = 'block';  
+    if (a) a.style.display = 'none';  
+  
+    if (pushState) push(post.dataset.url);  
+    debug();  
 }
 
-  function render404(path, pushState) {  
-    STATE = '404';  
-    hideAll();  
-    safe(page404, el => el.style.display = 'block');  
-    if (pushState) push(path);  
-    debug();  
-  }  
-  
-  /* ---------------- router + debug ---------------- */  
+  function render404(path, pushState) {  
+    STATE = '404';  
+    hideAll();  
+    safe(page404, el => el.style.display = 'block');  
+    if (pushState) push(path);  
+    debug();  
+  }  
+  
+  /* ---------------- router + debug ---------------- */  
 
-function findPostByPath(path) {  
-  const posts = getPosts();  
-  let found = null;  
+function findPostByPath(path) {  
+  const posts = getPosts();  
+  let found = null;  
 
-  posts.forEach(p => {  
-    const postUrl = p.dataset.url;  
-    if (!postUrl) return;
+  posts.forEach(p => {  
+    const postUrl = p.dataset.url;  
+    if (!postUrl) return;
 
-    // Pastikan kita tidak mencocokkan halaman daftar sebagai postingan
-    if (postUrl.includes('blog.html')) return; 
+    // Pastikan kita tidak mencocokkan halaman daftar sebagai postingan
+    if (postUrl.includes('blog.html')) return; 
 
-    const match = path.endsWith(postUrl);  
-    if (match) found = p;  
+    const match = path.endsWith(postUrl);  
+    if (match) found = p;  
 
-    // Logging ke Debug Box sesuai permintaan
-    safe(debugBox, box => {  
-      box.innerHTML += `[CHECK] path: ${path} | post: ${postUrl} | result: ${match}<br>`;  
-    });  
-  });  
+    // Logging ke Debug Box sesuai permintaan
+    safe(debugBox, box => {  
+      box.innerHTML += `[CHECK] path: ${path} | post: ${postUrl} | result: ${match}<br>`;  
+    });  
+  });  
 
-  return found;  
+  return found;  
 }
 
-/* ---------------- router (Sudah Diperbaiki) ---------------- */  
+/* ---------------- router (Sudah Diperbaiki) ---------------- */  
 
-function router(path = location.pathname, pushState = false) {  
-  // Reset Debug Box di awal setiap proses routing
-  safe(debugBox, box => {
-    box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`;
-  });
+function router(path = location.pathname, pushState = false) {  
+  // Deteksi kontainer yang sedang tampil saat ini (berdasarkan class atau display)
+  const currentActive = [document.getElementById('spa-home'), homepage, postsWrap, page404]
+                        .find(el => el && (el.classList.contains('animate-slide') || el.style.display === 'block'));
 
-  // 1. NORMALISASI PATH (Hapus trailing slash)
-  const cleanPath = path.replace(/\/$/, "");
-  const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
+  const runOriginalRouter = () => {
+    safe(debugBox, box => { box.innerHTML = `<b>[ROUTING]</b> Path: ${path}<br>`; });
+    const cleanPath = path.replace(/\/$/, "");
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "");
 
-  // 2. CEK DAFTAR BLOG DULU (Gunakan Prioritas Utama)
-  // Kita cek apakah path mengandung BLOG_PATH atau sebaliknya
-  if (cleanPath === cleanBlogPath || path.includes('blog.html')) {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: LIST MODE</span><br>`);
-    return renderList(pushState);
-  }
+    if (cleanPath === cleanBlogPath || path.includes('blog.html')) return renderList(pushState);
+    if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') return renderHome(pushState);
+    
+    const post = findPostByPath(path);  
+    if (post) return renderPost(post, pushState);
 
-  // 3. CEK HALAMAN HOME
-  if (cleanPath === '/' || cleanPath === '' || cleanPath === '/index.html') {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: HOME MODE</span><br>`);
-    return renderHome(pushState);
-  }
+    render404(path, pushState);  
+  };
 
-  // 4. CEK APAKAH INI POSTINGAN
-  // Jalankan pencarian post hanya jika path bukan home/blog
-  const post = findPostByPath(path);  
-  if (post) {
-    safe(debugBox, box => box.innerHTML += `<span style="color:yellow">Match: POST MODE</span><br>`);
-    return renderPost(post, pushState);
-  }
-
-  // 5. JIKA TIDAK ADA YANG COCOK -> 404
-  safe(debugBox, box => box.innerHTML += `<span style="color:red">Match: 404 NOT FOUND</span><br>`);
-  render404(path, pushState);  
+  // LOGIKA ANIMASI KELUAR
+  if (pushState && currentActive) {
+    currentActive.classList.remove('animate-slide');
+    currentActive.classList.add('animate-out');
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      runOriginalRouter();
+    }, 300); // 300ms sesuai durasi animate-out di CSS
+  } else {
+    runOriginalRouter();
+  }
 }
 
-  /* ---------------- link interception ---------------- */
+  /* ---------------- link interception ---------------- */
 
-  document.querySelectorAll('a[href]').forEach(a => {  
-    a.addEventListener('click', e => {  
-      const href = a.getAttribute('href');  
-      if (!href || href.startsWith('#')) return;  
-  
-      const url = new URL(href, location.origin);  
-      if (url.origin !== location.origin) return;  
-  
-      e.preventDefault();  
-      router(url.pathname, true);  
-    });  
-  });  
-  
-  if (btn) {  
-    btn.addEventListener('click', e => {  
-      e.preventDefault();  
-      router(BLOG_PATH, true);  
-    });  
-  }  
-  
-  getPosts().forEach(p => {  
-    const a = p.querySelector('.post-title a');  
-    if (!a) return;  
-    a.addEventListener('click', e => {  
-      e.preventDefault();  
-      router(p.dataset.url, true);  
-    });  
-  });  
-  
-  window.addEventListener('popstate', () => {  
-    router(location.pathname, false);  
-  });  
-  
-  /* ---------------- debug overlay ---------------- */  
-  
-  function debug() {  
-    if (!debugBox) return;  
-    debugBox.innerHTML +=  
-      `<hr><b>STATE:</b> ${STATE}<br>` +  
-      `<b>PATH:</b> ${location.pathname}<br>`;  
-  }  
-  
-  // klik overlay → copy seluruh HTML debug  
-  if (debugBox) {  
-    debugBox.addEventListener('click', () => {  
-      const htmlToCopy = debugBox.innerHTML;  
-      navigator.clipboard.writeText(htmlToCopy).then(() => {  
-        debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;  
-      });  
-    });  
-  }  
-  
-  /* ---------------- init ---------------- */
+  document.querySelectorAll('a[href]').forEach(a => {  
+    a.addEventListener('click', e => {  
+      const href = a.getAttribute('href');  
+      if (!href || href.startsWith('#')) return;  
+  
+      const url = new URL(href, location.origin);  
+      if (url.origin !== location.origin) return;  
+  
+      e.preventDefault();  
+      router(url.pathname, true);  
+    });  
+  });  
+  
+  if (btn) {  
+    btn.addEventListener('click', e => {  
+      e.preventDefault();  
+      router(BLOG_PATH, true);  
+    });  
+  }  
+  
+  getPosts().forEach(p => {  
+    const a = p.querySelector('.post-title a');  
+    if (!a) return;  
+    a.addEventListener('click', e => {  
+      e.preventDefault();  
+      router(p.dataset.url, true);  
+    });  
+  });  
+  
+  window.addEventListener('popstate', () => {  
+    router(location.pathname, false);  
+  });  
+  
+  /* ---------------- debug overlay ---------------- */  
+  
+  function debug() {  
+    if (!debugBox) return;  
+    debugBox.innerHTML +=  
+      `<hr><b>STATE:</b> ${STATE}<br>` +  
+      `<b>PATH:</b> ${location.pathname}<br>`;  
+  }  
+  
+  // klik overlay → copy seluruh HTML debug  
+  if (debugBox) {  
+    debugBox.addEventListener('click', () => {  
+      const htmlToCopy = debugBox.innerHTML;  
+      navigator.clipboard.writeText(htmlToCopy).then(() => {  
+        debugBox.innerHTML += `<br><i>Copied debug overlay! 📋</i>`;  
+      });  
+    });  
+  }  
+  
+  /* ---------------- init ---------------- */
 
 // Hapus block if(location.pathname === BLOG_PATH) lama
 // Cukup panggil router secara global
 router(location.pathname, false);
 
-});  
+});  
 </script>
