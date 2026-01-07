@@ -79,14 +79,16 @@
 
 <script>  
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Selektor Elemen
   const homepage  = document.querySelector('.homepage');
-  const btn       = document.getElementById('open-blog');
+  const btnBlog   = document.getElementById('open-blog'); // Tombol di Home
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
   const debugBox  = document.getElementById('spa-debug');
   const listTitle = document.querySelector('.list-title');
+  const spaHome   = document.getElementById('spa-home');
   
-  const BLOG_PATH = '/blog/';
+  const BLOG_PATH = '/blog/'; // Pastikan ini sesuai dengan URL daftar blog Anda
   let STATE       = '';
 
   const safe = (el, fn) => el && fn(el);
@@ -95,20 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- Core Functions ---------------- */
 
   function hideAll() {  
-    const containers = [document.getElementById('spa-home'), homepage, postsWrap, page404];
-    containers.forEach(el => safe(el, e => {
+    // Sembunyikan semua kontainer utama
+    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
       e.style.display = 'none';
       e.classList.remove('animate-slide');
       void e.offsetWidth; 
     }));
 
+    // Reset semua artikel
     getPosts().forEach(p => {  
       p.style.display = 'none';
-      p.classList.remove('animate-slide');
       const c = p.querySelector('.post-content');  
       const a = p.querySelector('.post-title a');  
+      const ex = p.querySelector('.post-excerpt');
       if (c) c.style.display = 'none'; 
-      if (a) a.style.display = '';     
+      if (a) a.style.display = ''; 
+      if (ex) ex.style.display = 'block';
     });  
   }
 
@@ -123,8 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderHome(pushState) {  
     STATE = 'home';  
     hideAll(); 
-    const jekyllWrapper = document.getElementById('spa-home');
-    [jekyllWrapper, homepage].forEach(el => safe(el, e => {
+    [spaHome, homepage].forEach(el => safe(el, e => {
       e.style.display = 'block';
       e.classList.add('animate-slide');
     })); 
@@ -142,8 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });  
     getPosts().forEach(p => {
         p.style.display = 'block';
-        const ex = p.querySelector('.post-excerpt');
-        if (ex) ex.style.display = 'block';
     });
     if (pushState) push(BLOG_PATH);  
     debug();  
@@ -157,40 +158,37 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.display = 'block';
         el.classList.add('animate-slide');
     });
+    
     post.style.display = 'block';
-    post.classList.add('animate-slide');
-
-    const thisExcerpt = post.querySelector('.post-excerpt');
-    if (thisExcerpt) thisExcerpt.style.display = 'none';
-
     const c = post.querySelector('.post-content');  
     const a = post.querySelector('.post-title a');  
+    const ex = post.querySelector('.post-excerpt');
+
     if (c) c.style.display = 'block';  
     if (a) a.style.display = 'none';  
+    if (ex) ex.style.display = 'none'; // Sembunyikan ringkasan saat baca penuh
   
     if (pushState) push(post.dataset.url);  
     debug();  
   }
 
-  function render404(path, pushState) {  
-    STATE = '404';  
-    hideAll();  
-    safe(page404, el => el.style.display = 'block');  
-    if (pushState) push(path);  
-    debug();  
-  }  
-
   /* ---------------- Helper: Path Finder ---------------- */
 
   function findPostByPath(path) {  
-    const posts = getPosts();  
-    const cleanTarget = path.replace(/\/$/, "").replace(".html", "");
+    const posts = getPosts();
+    // Normalisasi path yang dicari
+    const target = path.replace(/\/$/, "").replace(".html", "");
     
+    // Jangan deteksi jika ini adalah path blog list
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace(".html", "");
+    if (target === cleanBlogPath || target === "") return null;
+
     return posts.find(p => {
       const postUrl = p.dataset.url;
       if (!postUrl) return false;
       const cleanPostUrl = postUrl.replace(/\/$/, "").replace(".html", "");
-      return cleanTarget.endsWith(cleanPostUrl);
+      // Gunakan perbandingan yang lebih ketat
+      return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
     });
   }
 
@@ -202,42 +200,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     safe(debugBox, box => box.innerHTML = `<b>[ROUTING]</b> Path: ${cleanPath}<br>`);
 
-    // 1. Cek Home
+    // 1. CEK HOME
     if (cleanPath === '/' || cleanPath === '/index.html') {
       return renderHome(pushState);
     }
 
-    // 2. Cek Postingan (Prioritas lebih tinggi dari list agar tidak salah deteksi kata "blog")
+    // 2. CEK LIST BLOG (Exact Match)
+    // Sekarang dicek SEBELUM post agar URL /blog/ tidak dianggap postingan
+    if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html")) {
+      return renderList(pushState);
+    }
+
+    // 3. CEK POSTINGAN
     const post = findPostByPath(cleanPath);  
     if (post) {
       return renderPost(post, pushState);
     }
 
-    // 3. Cek List Blog (Exact Match)
-    if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html")) {
-      return renderList(pushState);
-    }
-
-    // 4. Fallback 404
+    // 4. FALLBACK 404
     render404(path, pushState);  
   }
 
-  /* ---------------- Event Listeners ---------------- */
+  /* ---------------- Link & Button Listeners ---------------- */
 
-  // Intercept semua link
+  // Menangani semua klik link secara global
   document.addEventListener('click', e => {
     const a = e.target.closest('a');
     if (!a) return;
     
     const href = a.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    if (!href || href.startsWith('#')) return;
 
-    const url = new URL(href, location.origin);
-    if (url.origin !== location.origin) return;
-
-    e.preventDefault();
-    router(url.pathname, true);
+    // Pastikan link internal
+    try {
+      const url = new URL(href, location.origin);
+      if (url.origin === location.origin) {
+        e.preventDefault();
+        router(url.pathname, true);
+      }
+    } catch (err) {
+      // Biarkan link eksternal atau invalid bekerja normal
+    }
   });
+
+  // Listener khusus tombol "Open Blog" (Jika tombolnya bukan tag <a>)
+  if (btnBlog) {
+    btnBlog.addEventListener('click', (e) => {
+      e.preventDefault();
+      router(BLOG_PATH, true);
+    });
+  }
 
   window.addEventListener('popstate', () => {  
     router(location.pathname, false);  
@@ -248,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     debugBox.innerHTML += `<hr><b>STATE:</b> ${STATE}<br><b>PATH:</b> ${location.pathname}`;  
   }  
 
-  // Init
+  // Jalankan Router pertama kali
   router(location.pathname, false);
 });  
 </script>
