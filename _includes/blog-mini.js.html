@@ -234,32 +234,41 @@ function router(path = location.pathname, pushState = false) {
   // 2. TAMBAHKAN INI: Pengecekan khusus halaman Tags
 
   if (cleanPath === cleanTagsPath) {
-
     STATE = 'tags';
+    hideAll(); 
 
-    hideAll();
-
+    // 1. Tampilkan kontainer utama
     safe(postsWrap, el => {
-
       el.style.display = 'block';
-
       el.classList.add('animate-slide');
-
     });
 
-    // Tampilkan semua artikel di halaman tags agar bisa difilter
+    // 2. CARI dan TAMPILKAN konten unik milik halaman Tags
+    // Kita mencari artikel yang data-url-nya adalah /tags/
+    const tagsPage = getPosts().find(p => p.dataset.url === TAGS_PATH || p.dataset.url === '/tags/');
+    
+    if (tagsPage) {
+      tagsPage.style.display = 'block';
+      // Tampilkan konten dalamnya (judul All Posts, tombol filter, dll)
+      safe(tagsPage.querySelector('.post-content'), c => c.style.display = 'block');
+      // Sembunyikan excerpt jika ada
+      safe(tagsPage.querySelector('.post-excerpt'), ex => ex.style.display = 'none');
+    }
 
-    getPosts().forEach(p => p.style.display = 'block'); 
+    // 3. Tampilkan semua postingan blog di bawahnya untuk difilter
+    getPosts().forEach(p => {
+      if (p !== tagsPage) { // Jangan sembunyikan halaman tags itu sendiri
+        p.style.display = 'block';
+      }
+    });
 
     if (pushState) push(path);
-
     debug();
-
-    return; // Berhenti di sini, jangan lanjut ke cek "post"
-
+    
+    // Jalankan filter hash jika ada
+    if (typeof handleTags === 'function') handleTags();
+    return;
   }
-
-
 
   // 3. Cek Postingan (Kode lama Anda...)
 
