@@ -273,8 +273,6 @@ function router(path = location.pathname, pushState = false) {
     router(location.pathname, false);  
   });  
 
-  /* ---------------- Debug Overlay (Restored) ---------------- */
-
 /* ---------------- Debug Overlay Logic ---------------- */
 
   function debug() {  
@@ -293,18 +291,31 @@ function router(path = location.pathname, pushState = false) {
     debugBox.scrollTop = debugBox.scrollHeight;
   }
 
-  // Masukkan bagian ini agar klik pada kotak debug bisa menyalin teks
+  // FITUR COPY: Menggunakan penanganan error agar lebih stabil
   if (debugBox) {  
-    debugBox.addEventListener('click', () => {  
-      const htmlToCopy = debugBox.innerHTML;  
-      navigator.clipboard.writeText(htmlToCopy).then(() => {  
+    debugBox.addEventListener('click', function() {  
+      // Ambil teks bersih (tanpa tag HTML) agar hasil paste rapi
+      const contentToCopy = debugBox.innerText; 
+      
+      navigator.clipboard.writeText(contentToCopy).then(() => {  
         const msg = document.createElement('div');
         msg.style.color = '#10b981';
         msg.style.fontSize = '10px';
-        msg.innerHTML = `<br><i>Copied debug overlay! 📋</i>`;
+        msg.style.marginTop = '5px';
+        msg.innerHTML = `<i>✓ Copied to clipboard!</i>`;
         debugBox.appendChild(msg);
         debugBox.scrollTop = debugBox.scrollHeight;
+        
+        // Hapus pesan notifikasi setelah 2 detik
+        setTimeout(() => msg.remove(), 2000);
+      }).catch(err => {
+        console.error('Gagal menyalin: ', err);
       });  
     });  
   }
-  </script>
+
+  // INISIALISASI: Jalankan router pertama kali saat halaman dimuat
+  router(location.pathname, false);
+
+}); // Tutup DOMContentLoaded
+</script>
