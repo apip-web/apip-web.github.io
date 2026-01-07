@@ -139,10 +139,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });  
   }
 
-  function push(path) {  
-    if (location.pathname !== path) history.pushState(null, '', path);  
+function push(path) {  
+  // Ambil URL lengkap (pathname + hash) jika ada
+  const fullPath = path + (location.hash || "");
+  if (location.pathname + location.hash !== fullPath) {  
+    history.pushState(null, '', fullPath);  
   }  
-  
+}
+
   /* ---------------- Renderers ---------------- */  
   
   function renderHome(pushState) {  
@@ -191,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cleanPath === cleanBlogPath) return renderList(pushState);
 
     // LOGIKA KHUSUS TAGS
+// LOGIKA KHUSUS TAGS
     if (cleanPath === cleanTagsPath) {
       STATE = 'tags'; hideAll();
       safe(postsWrap, el => el.style.display = 'block');
@@ -209,9 +214,19 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       }
-      if (pushState) push(path); debug();
-      // Panggil fungsi filter di tags.md jika ada
-      if (typeof window.handleTags === 'function') window.handleTags();
+
+      // PERBAIKAN DI SINI: Sertakan hash saat push state
+      if (pushState) {
+          const pathWithHash = path + (location.hash || "");
+          push(pathWithHash); 
+      }
+      
+      debug();
+      
+      if (typeof window.handleTags === 'function') {
+          // Beri jeda sedikit agar DOM siap sebelum filter
+          setTimeout(window.handleTags, 50);
+      }
       return;
     }
 
@@ -261,12 +276,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- Debug ---------------- */
 
-  function debug() {  
+function debug() {  
     if (!debugBox) return;  
     let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
+    // Menampilkan pathname dan hash di debug
+    const currentFullURL = location.pathname + location.hash;
+    
     debugBox.innerHTML += `
       <div class="log-entry" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
-        <span class="badge ${stateClass}">State</span> ${STATE} | <span class="badge badge-success">URL</span> ${location.pathname}
+        <span class="badge ${stateClass}">State</span> ${STATE} | <span class="badge badge-success">URL</span> ${currentFullURL}
       </div>`;
     debugBox.scrollTop = debugBox.scrollHeight;
   }
