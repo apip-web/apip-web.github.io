@@ -184,7 +184,7 @@ function findPost(path) {
 function router(path = location.pathname, pushState = false) {
   safe(debugBox, box =>
     box.innerHTML =
-      `<b>[ROUTING]</b><br><br><hr><br>${path}<br>`
+      `<b>[ROUTING]</b><br><hr><br>${path}<br><br>`
   );
 
   const clean = path.replace(/\/$/, '');
