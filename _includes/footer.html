@@ -5,3 +5,28 @@
         <small>Hosted on GitHub Pages &mdash; Theme by <a href="https://apip-web.github.io">NOIR</a></small></p>
 </div>
 </footer>
+
+<script>
+  // Gunakan IIFE atau bungkus agar variabel tidak bentrok
+  (function() {
+    const debugBtn = document.getElementById('toggle-debug');
+    // Ambil elemen debugBox lagi untuk memastikan script menemukannya
+    const debugBox = document.getElementById('spa-debug');
+
+    if (debugBtn && debugBox) {
+      debugBtn.addEventListener('click', () => {
+        // Cek status display saat ini
+        const isHidden = window.getComputedStyle(debugBox).display === 'none';
+        
+        if (isHidden) {
+          debugBox.style.display = 'block';
+          debugBtn.innerHTML = 'Hide <code>Debug</code>';
+          debugBox.scrollTop = debugBox.scrollHeight;
+        } else {
+          debugBox.style.display = 'none';
+          debugBtn.innerHTML = 'Show <code>Debug</code>';
+        }
+      });
+    }
+  })();
+</script>
