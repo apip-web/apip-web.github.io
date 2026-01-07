@@ -81,13 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
 
-  /* ========= HELPERS ========= */
-
-  const normalize = p => p.replace(/\/$/, '');
+  /* ========= ANIMATION ========= */
 
   function show(el) {
     if (!el) return;
     el.style.display = 'block';
+    el.style.opacity = '0';
     requestAnimationFrame(() => {
       el.style.opacity = '1';
     });
@@ -96,9 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function hide(el) {
     if (!el) return;
     el.style.opacity = '0';
-    setTimeout(() => {
-      el.style.display = 'none';
-    }, 400);
+    el.style.display = 'none';
   }
 
   function hideAll() {
@@ -165,6 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ========= ROUTER ========= */
 
+  function normalize(p) {
+    return p.replace(/\/$/, '');
+  }
+
   function findPost(path) {
     const target = normalize(path);
     let found = null;
@@ -174,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const match = target === postUrl;
 
       safe(debugBox, box =>
-        box.innerHTML += `[CHECK] ${target} === ${postUrl} → ${match}<br>`
+        box.innerHTML += `[CHECK POST] ${target} === ${postUrl} → ${match}<br>`
       );
 
       if (match) found = p;
@@ -190,18 +191,18 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     const clean = normalize(path);
-    const blogClean = normalize(BLOG_PATH);
+    const cleanBlog = normalize(BLOG_PATH);
 
     if (clean === '' || clean === '/' || clean === '/index.html') {
       return renderHome(pushState);
     }
 
-    if (clean === blogClean) {
-      return renderList(pushState);
-    }
-
     const post = findPost(path);
     if (post) return renderPost(post, pushState);
+
+    if (clean === cleanBlog) {
+      return renderList(pushState);
+    }
 
     render404(path, pushState);
   }
@@ -210,7 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('click', e => {
 
-    if (e.target.closest('[data-no-spa]')) return;
+    /* ⛔ JANGAN INTERCEPT DEBUG (BIAR BISA COPY) */
+    if (e.target.closest('#spa-debug')) return;
 
     const a = e.target.closest('a[href]');
     if (!a) return;
