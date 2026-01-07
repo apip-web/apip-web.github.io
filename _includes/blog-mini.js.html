@@ -79,16 +79,15 @@
 
 <script>  
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Selektor Elemen
   const homepage  = document.querySelector('.homepage');
-  const btnBlog   = document.getElementById('open-blog'); // Tombol di Home
+  const btnBlog   = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
   const debugBox  = document.getElementById('spa-debug');
   const listTitle = document.querySelector('.list-title');
   const spaHome   = document.getElementById('spa-home');
   
-  const BLOG_PATH = '/blog/'; // Pastikan ini sesuai dengan URL daftar blog Anda
+  const BLOG_PATH = '/blog/';
   let STATE       = '';
 
   const safe = (el, fn) => el && fn(el);
@@ -97,14 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------------- Core Functions ---------------- */
 
   function hideAll() {  
-    // Sembunyikan semua kontainer utama
-    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
+    const containers = [spaHome, homepage, postsWrap, page404];
+    containers.forEach(el => safe(el, e => {
       e.style.display = 'none';
       e.classList.remove('animate-slide');
       void e.offsetWidth; 
     }));
 
-    // Reset semua artikel
     getPosts().forEach(p => {  
       p.style.display = 'none';
       const c = p.querySelector('.post-content');  
@@ -143,9 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.display = 'block';
         el.classList.add('animate-slide');
     });  
-    getPosts().forEach(p => {
-        p.style.display = 'block';
-    });
+    getPosts().forEach(p => p.style.display = 'block');
     if (pushState) push(BLOG_PATH);  
     debug();  
   }
@@ -166,28 +162,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (c) c.style.display = 'block';  
     if (a) a.style.display = 'none';  
-    if (ex) ex.style.display = 'none'; // Sembunyikan ringkasan saat baca penuh
+    if (ex) ex.style.display = 'none';
   
     if (pushState) push(post.dataset.url);  
     debug();  
   }
 
-  /* ---------------- Helper: Path Finder ---------------- */
+  function render404(path, pushState) {  
+    STATE = '404';  
+    hideAll();  
+    safe(page404, el => el.style.display = 'block');  
+    if (pushState) push(path);  
+    debug();  
+  }
+
+  /* ---------------- Path Finder ---------------- */
 
   function findPostByPath(path) {  
     const posts = getPosts();
-    // Normalisasi path yang dicari
     const target = path.replace(/\/$/, "").replace(".html", "");
-    
-    // Jangan deteksi jika ini adalah path blog list
     const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace(".html", "");
+    
+    // Cegah URL blog list dianggap sebagai post
     if (target === cleanBlogPath || target === "") return null;
 
     return posts.find(p => {
       const postUrl = p.dataset.url;
       if (!postUrl) return false;
       const cleanPostUrl = postUrl.replace(/\/$/, "").replace(".html", "");
-      // Gunakan perbandingan yang lebih ketat
       return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
     });
   }
@@ -200,30 +202,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     safe(debugBox, box => box.innerHTML = `<b>[ROUTING]</b> Path: ${cleanPath}<br>`);
 
-    // 1. CEK HOME
     if (cleanPath === '/' || cleanPath === '/index.html') {
       return renderHome(pushState);
     }
 
-    // 2. CEK LIST BLOG (Exact Match)
-    // Sekarang dicek SEBELUM post agar URL /blog/ tidak dianggap postingan
-    if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html")) {
-      return renderList(pushState);
+    // Prioritaskan cek List Mode dengan Exact Match
+    if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html") || path.includes('blog.html')) {
+      // Tambahan proteksi: jika ini bukan file blog utama, biarkan lanjut ke pengecekan post
+      if (cleanPath !== cleanBlogPath && findPostByPath(cleanPath)) {
+         // Lanjut ke bawah
+      } else {
+         return renderList(pushState);
+      }
     }
 
-    // 3. CEK POSTINGAN
     const post = findPostByPath(cleanPath);  
     if (post) {
       return renderPost(post, pushState);
     }
 
-    // 4. FALLBACK 404
     render404(path, pushState);  
   }
 
-  /* ---------------- Link & Button Listeners ---------------- */
+  /* ---------------- Event Listeners ---------------- */
 
-  // Menangani semua klik link secara global
   document.addEventListener('click', e => {
     const a = e.target.closest('a');
     if (!a) return;
@@ -231,19 +233,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const href = a.getAttribute('href');
     if (!href || href.startsWith('#')) return;
 
-    // Pastikan link internal
     try {
       const url = new URL(href, location.origin);
       if (url.origin === location.origin) {
         e.preventDefault();
         router(url.pathname, true);
       }
-    } catch (err) {
-      // Biarkan link eksternal atau invalid bekerja normal
-    }
+    } catch (err) {}
   });
 
-  // Listener khusus tombol "Open Blog" (Jika tombolnya bukan tag <a>)
   if (btnBlog) {
     btnBlog.addEventListener('click', (e) => {
       e.preventDefault();
@@ -255,12 +253,24 @@ document.addEventListener('DOMContentLoaded', () => {
     router(location.pathname, false);  
   });  
 
+  /* ---------------- Debug Overlay (Restored) ---------------- */  
+  
   function debug() {  
     if (!debugBox) return;  
     debugBox.innerHTML += `<hr><b>STATE:</b> ${STATE}<br><b>PATH:</b> ${location.pathname}`;  
   }  
 
-  // Jalankan Router pertama kali
+  if (debugBox) {  
+    debugBox.addEventListener('click', () => {  
+      const htmlToCopy = debugBox.innerHTML;  
+      navigator.clipboard.writeText(htmlToCopy).then(() => {  
+        const msg = document.createElement('div');
+        msg.innerHTML = `<i>Copied debug overlay! 📋</i>`;
+        debugBox.appendChild(msg);
+      });  
+    });  
+  }  
+
   router(location.pathname, false);
 });  
 </script>
