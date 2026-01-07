@@ -126,6 +126,19 @@ hr {
   margin:0 0 20px;
 }
 
+/* ===== ul li ol li ===== */
+li {
+  margin-bottom: 10px;   /* Jarak antar item list */
+  padding-left: 5px;     /* Jarak teks dari marker */
+}
+
+ul, ol {
+  font-size: 14px;
+  margin-left: 10px;
+  list-style-position: inside; /* Marker masuk ke dalam blok teks */
+  /* Default adalah 'outside' (marker di luar blok teks) */
+}
+
 /* ===== Post ===== */
 .post-date {
   color: #777;
@@ -463,4 +476,5 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
