@@ -1,7 +1,25 @@
 <footer>
 <div class="footer-bottom">
         <p><span id="toggle-debug">Show <code>Debug</code></span>
-                This site is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a><br>
+                <br>This site is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a><br>
         <small>Hosted on GitHub Pages &mdash; Theme by <a href="https://apip-web.github.io">NOIR</a></small></p>
 </div>
 </footer>
+
+<script>
+const debugBtn = document.getElementById('toggle-debug');
+
+if (debugBtn && debugBox) {
+  debugBtn.addEventListener('click', () => {
+    if (debugBox.style.display === 'none' || debugBox.style.display === '') {
+      debugBox.style.display = 'block';
+      debugBtn.innerHTML = 'Hide <code>Debug</code>';
+      // Pastikan scroll berada di paling bawah saat dibuka
+      debugBox.scrollTop = debugBox.scrollHeight;
+    } else {
+      debugBox.style.display = 'none';
+      debugBtn.innerHTML = 'Show <code>Debug</code>';
+    }
+  });
+}
+</script>
