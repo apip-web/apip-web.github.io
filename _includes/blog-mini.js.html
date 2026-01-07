@@ -250,20 +250,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- link interception ---------------- */
 
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href]');
-    if (!a) return;
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-spa]');
+  if (!a) return;
 
-    const url = new URL(a.href, location.origin);
-    if (url.origin !== location.origin) return;
+  const href = a.getAttribute('href');
+  if (!href) return;
 
-    e.preventDefault();
-    router(url.pathname, true);
-  });
+  const url = new URL(href, location.origin);
+  if (url.origin !== location.origin) return;
 
-  window.addEventListener('popstate', () => {
-    router(location.pathname, false);
-  });
+  e.preventDefault();
+  router(url.pathname, true);
+});
 
   /* ---------------- debug ---------------- */
 
