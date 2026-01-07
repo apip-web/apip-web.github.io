@@ -233,39 +233,45 @@ function router(path = location.pathname, pushState = false) {
 
   // 2. TAMBAHKAN INI: Pengecekan khusus halaman Tags
 
-  if (cleanPath === cleanTagsPath) {
+if (cleanPath === cleanTagsPath) {
     STATE = 'tags';
     hideAll(); 
 
-    // 1. Tampilkan kontainer utama
-    safe(postsWrap, el => {
-      el.style.display = 'block';
-      el.classList.add('animate-slide');
-    });
+    // 1. Tampilkan kontainer utama (#posts)
+    safe(postsWrap, el => el.style.display = 'block');
 
-    // 2. CARI dan TAMPILKAN konten unik milik halaman Tags
-    // Kita mencari artikel yang data-url-nya adalah /tags/
-    const tagsPage = getPosts().find(p => p.dataset.url === TAGS_PATH || p.dataset.url === '/tags/');
-    
+    // 2. Cari elemen "Halaman Tags" di dalam daftar postingan
+    const allPosts = getPosts();
+    const tagsPage = allPosts.find(p => p.dataset.url.includes('/tags/'));
+
     if (tagsPage) {
       tagsPage.style.display = 'block';
-      // Tampilkan konten dalamnya (judul All Posts, tombol filter, dll)
-      safe(tagsPage.querySelector('.post-content'), c => c.style.display = 'block');
-      // Sembunyikan excerpt jika ada
-      safe(tagsPage.querySelector('.post-excerpt'), ex => ex.style.display = 'none');
-    }
+      
+      // SUNTIKKAN: Paksa konten di dalamnya muncul
+      const content = tagsPage.querySelector('.post-content');
+      const title = tagsPage.querySelector('.post-title');
+      const excerpt = tagsPage.querySelector('.post-excerpt');
 
-    // 3. Tampilkan semua postingan blog di bawahnya untuk difilter
-    getPosts().forEach(p => {
-      if (p !== tagsPage) { // Jangan sembunyikan halaman tags itu sendiri
-        p.style.display = 'block';
-      }
-    });
+      if (content) content.style.display = 'block';
+      if (title) title.style.display = 'none'; // Sembunyikan judul aslinya agar rapi
+      if (excerpt) excerpt.style.display = 'none';
+
+      // 3. Tampilkan postingan lainnya DI BAWAH halaman tags sebagai daftar yang akan difilter
+      allPosts.forEach(p => {
+        if (p !== tagsPage) {
+          p.style.display = 'block';
+          // Pastikan postingan biasa hanya tampil judul & excerpt (gaya List)
+          safe(p.querySelector('.post-title a'), a => a.style.display = 'block');
+          safe(p.querySelector('.post-excerpt'), ex => ex.style.display = 'block');
+          safe(p.querySelector('.post-content'), c => c.style.display = 'none');
+        }
+      });
+    }
 
     if (pushState) push(path);
     debug();
     
-    // Jalankan filter hash jika ada
+    // Pemicu filter
     if (typeof handleTags === 'function') handleTags();
     return;
   }
