@@ -1,7 +1,6 @@
 ---
 layout: default
 title: Tags
-permalink: /tags/
 ---
 
 <h1 id="tag-title">All Posts</h1>
