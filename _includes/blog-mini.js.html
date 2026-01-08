@@ -138,7 +138,6 @@
 
 <div id="spa-debug"></div>
 
-<!-- ---------------- JS SPA ---------------- -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -146,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnBlog   = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
-  const debugBox  = document.getElementById('spa-debug');
   const listTitle = document.querySelector('.list-title');
   const spaHome   = document.getElementById('spa-home');
   const BLOG_PATH = '/blog/';
@@ -170,13 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if(c) c.style.display = 'none';
       if(a) a.style.display = '';
       if(ex) ex.style.display = 'block';
-    });
-  }
-
-  function push(path) {  
-    if (location.pathname + location.search !== path) {  
-      history.pushState(null,'',path);
-    }
+    }));
+    if(btnBlog) btnBlog.style.display = 'none'; // sembunyikan tombol di awal
   }
 
   /* ---------------- RENDERERS ---------------- */
@@ -187,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
       e.style.display = 'block';
       e.classList.add('animate-slide');
     }));
-    if(pushState) push('/');
-    debug();
+    if(btnBlog) btnBlog.style.display = 'inline-block'; // tampilkan tombol hanya di homepage
+    if(pushState) history.pushState(null,'','/');
   }
 
   function renderList(pushState) {
@@ -200,81 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
       el.classList.add('animate-slide');
     });
     getPosts().forEach(p => p.style.display = 'block');
-    if(pushState) push(BLOG_PATH);
-    debug();
+    if(pushState) history.pushState(null,'',BLOG_PATH);
+    
+    // tombol homepage disembunyikan saat melihat daftar
+    if(btnBlog) btnBlog.style.display = 'none';
 
-    // Check if URL has ?tag
+    // jika URL ada ?tag, langsung filter
     const params = new URLSearchParams(location.search);
     const tag = params.get('tag');
     if(tag) filterByTag(tag,false);
-  }
-
-  function renderPost(post,pushState) {
-    STATE = 'post';
-    hideAll();
-    safe(listTitle, el => el.style.display = 'none');
-    safe(postsWrap, el => {
-      el.style.display = 'block';
-      el.classList.add('animate-slide');
-    });
-
-    post.style.display = 'block';
-    const c = post.querySelector('.post-content');
-    const a = post.querySelector('.post-title a');
-    const ex = post.querySelector('.post-excerpt');
-    if(c) c.style.display = 'block';
-    if(a) a.style.display = 'none';
-    if(ex) ex.style.display = 'none';
-
-    if(pushState) push(post.dataset.url);
-    debug();
-  }
-
-  function render404(path,pushState) {
-    STATE = '404';
-    hideAll();
-    safe(page404, el => el.style.display = 'block');
-    if(pushState) push(path);
-    debug();
-  }
-
-  function findPostByPath(path) {
-    const posts = getPosts();
-    const target = path.replace(/\/$/,'').replace('.html','');
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('.html','');
-    if(target === cleanBlogPath || target === '') return null;
-
-    return posts.find(p => {
-      const postUrl = p.dataset.url;
-      if(!postUrl) return false;
-      const cleanPostUrl = postUrl.replace(/\/$/,'').replace('.html','');
-      return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
-    });
-  }
-
-  /* ---------------- ROUTER ---------------- */
-  function router(path = location.pathname+location.search, pushState=false) {
-    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
-
-    safe(debugBox, box => {
-      box.innerHTML = `<div class="log-entry">
-        <span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath}</code>
-      </div>`;
-    });
-
-    if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
-
-    if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath+'.html' || path.includes('blog.html')) {
-      if(cleanPath !== cleanBlogPath && findPostByPath(cleanPath)) {
-        // lanjut ke bawah
-      } else return renderList(pushState);
-    }
-
-    const post = findPostByPath(cleanPath);
-    if(post) return renderPost(post,pushState);
-
-    render404(path,pushState);
   }
 
   /* ---------------- TAG FILTER ---------------- */
@@ -286,29 +213,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     if(tag){
       title.textContent = `Showing all posts under "${tag}"`;
-      if(pushState) push(`/blog?tag=${encodeURIComponent(tag)}`);
+      if(pushState) history.pushState(null,'',`/blog?tag=${encodeURIComponent(tag)}`);
     }else{
       title.textContent = 'All Posts';
-      if(pushState) push('/blog');
+      if(pushState) history.pushState(null,'','/blog');
     }
+
+    // tombol homepage tetap disembunyikan saat filter tag
+    if(btnBlog) btnBlog.style.display = 'none';
   }
 
   /* ---------------- EVENT LISTENERS ---------------- */
-  document.addEventListener('click', e=>{
-    const a = e.target.closest('a');
-    if(a){
-      const href = a.getAttribute('href');
-      if(href && !href.startsWith('#')){
-        try{
-          const url = new URL(href,location.origin);
-          if(url.origin===location.origin){
-            e.preventDefault();
-            router(url.pathname+url.search,true);
-          }
-        }catch(err){}
-      }
-    }
+  if(btnBlog){
+    btnBlog.addEventListener('click', e=>{
+      e.preventDefault();
+      router(BLOG_PATH,true);
+    });
+  }
 
+  document.addEventListener('click', e=>{
     const tagBtn = e.target.closest('.tag');
     if(tagBtn){
       e.preventDefault();
@@ -316,61 +239,56 @@ document.addEventListener('DOMContentLoaded', () => {
       renderList(false);
       filterByTag(tag,true);
     }
-  });
 
-  const showAllBtn = document.getElementById('show-all');
-  if(showAllBtn){
-    showAllBtn.addEventListener('click',e=>{
+    const showAllBtn = e.target.closest('#show-all');
+    if(showAllBtn){
       e.preventDefault();
       renderList(true);
       filterByTag(null,false);
+    }
+  });
+
+  /* ---------------- ROUTER ---------------- */
+  function router(path = location.pathname+location.search, pushState=false){
+    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
+
+    if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
+
+    if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath+'.html'){
+      return renderList(pushState);
+    }
+
+    const posts = getPosts();
+    const post = posts.find(p=>{
+      const postUrl = p.dataset.url.replace(/\/$/,'').replace('.html','');
+      return cleanPath.endsWith(postUrl);
     });
+    if(post) return renderPost(post,pushState);
+
+    render404(path,pushState);
   }
 
-  window.addEventListener('popstate',()=>{router(location.pathname+location.search,false);});
-
-  /* ---------------- DEBUG ---------------- */
-  function debug(){
-    if(!debugBox) return;
-    let stateClass = (STATE==='404')?'badge-error':'badge-state';
-    debugBox.innerHTML += `
-      <div class="log-entry" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
-        <span class="badge ${stateClass}">State</span> ${STATE}
-      </div>
-      <div class="log-entry">
-        <span class="badge badge-success">URL</span> ${location.pathname+location.search}
-      </div>`;
-    debugBox.scrollTop = debugBox.scrollHeight;
-  }
-
-  if(debugBox){
-    debugBox.addEventListener('click',()=>{
-      const logs = debugBox.querySelectorAll('.log-entry');
-      let markdownText='';
-      logs.forEach(log=>{
-        const rawText = log.innerText.replace(/\s+/g,' ').trim();
-        const routingMatch = rawText.match(/Routing\s+(Path:\s+\S+)/i);
-        const stateMatch   = rawText.match(/State\s+(\S+)/i);
-        const urlMatch     = rawText.match(/URL\s+(\S+)/i);
-        if(routingMatch) markdownText += `**ROUTING** \`${routingMatch[1]}\` \n`;
-        if(stateMatch) markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
-        if(urlMatch) markdownText += `**URL** \`${urlMatch[1]}\` \n`;
-        markdownText+='\n';
-      });
-      if(markdownText.trim()){
-        navigator.clipboard.writeText(markdownText.trim()).then(()=>{
-          const msg=document.createElement('div');
-          msg.style.cssText="color:#10b981;font-size:10px;margin-top:5px;";
-          msg.innerHTML='<i>✓ Copied (Routing, State, URL) as Markdown!</i>';
-          debugBox.appendChild(msg);
-          debugBox.scrollTop=debugBox.scrollHeight;
-          setTimeout(()=>msg.remove(),2000);
-        });
-      }
+  function renderPost(post,pushState){
+    STATE='post';
+    hideAll();
+    safe(postsWrap, el => {
+      el.style.display='block';
+      el.classList.add('animate-slide');
     });
+    post.style.display='block';
+    const c = post.querySelector('.post-content');
+    const a = post.querySelector('.post-title a');
+    const ex = post.querySelector('.post-excerpt');
+    if(c) c.style.display='block';
+    if(a) a.style.display='none';
+    if(ex) ex.style.display='none';
+    if(pushState) history.pushState(null,'',post.dataset.url);
+    if(btnBlog) btnBlog.style.display='none';
   }
 
   /* ---------------- INIT ---------------- */
   router(location.pathname+location.search,false);
+
 });
 </script>
