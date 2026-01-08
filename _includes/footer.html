@@ -8,34 +8,23 @@
 
 <script>
 (function () {
-  const debugBtn  = document.getElementById('toggle-debug');
-  const debugBox  = document.getElementById('spa-debug');
-  const closeBtn  = document.getElementById('debug-close');
+  document.addEventListener('DOMContentLoaded', () => {
+    const debugBtn = document.getElementById('toggle-debug');
+    const debugBox = document.getElementById('spa-debug');
 
-  if (!debugBtn || !debugBox) return;
+    if (!debugBtn || !debugBox) return;
 
-  function openDebug() {
-    debugBox.classList.add('is-open');
-    debugBtn.innerHTML = 'Hide <code>Debug</code>';
-    debugBox.scrollTop = debugBox.scrollHeight;
-  }
+    debugBtn.addEventListener('click', () => {
+      const isHidden = getComputedStyle(debugBox).display === 'none';
 
-  function closeDebug() {
-    debugBox.classList.remove('is-open');
-    debugBtn.innerHTML = 'Show <code>Debug</code>';
-  }
+      debugBox.style.display = isHidden ? 'block' : 'none';
+      debugBtn.innerHTML = isHidden
+        ? 'Hide <code>Debug</code>'
+        : 'Show <code>Debug</code>';
 
-  debugBtn.addEventListener('click', () => {
-    debugBox.classList.contains('is-open')
-      ? closeDebug()
-      : openDebug();
-  });
-
-  if (closeBtn) {
-    closeBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      closeDebug();
+      if (!isHidden) return;
+      debugBox.scrollTop = debugBox.scrollHeight;
     });
-  }
+  });
 })();
 </script>
