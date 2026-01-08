@@ -308,11 +308,10 @@ if(tagBtn){
 
   const showAllBtn=document.getElementById('show-all');
   if(showAllBtn){
-    showAllBtn.addEventListener('click',e=>{
-      e.preventDefault();
-      renderList(false);
-      filterByTag(null,true);
-    });
+    showAllBtn.addEventListener('click', e=>{
+  e.preventDefault();
+  router('/blog', true);
+});
   }
 
 if(btnBlog){
