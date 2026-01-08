@@ -120,24 +120,29 @@ document.addEventListener('DOMContentLoaded', () => {
   /* CORE */
 function hideAll() {
   [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
-    e.style.display='none';
+    e.style.display = 'none';
     e.classList.remove('animate-slide');
     void e.offsetWidth;
   }));
 
-  // sembunyikan tag-title dan show-all
-  if(listTitle) listTitle.style.display='none';
+  // 🔥 RESET SEMUA HEADER / TOOL
+  safe(listTitle, el => el.style.display = 'none');
+
+  const tagTitleEl = document.getElementById('tag-title');
+  if (tagTitleEl) tagTitleEl.style.display = 'none';
+
   const showAllBtn = document.getElementById('show-all');
-  if(showAllBtn) showAllBtn.style.display='none';
+  if (showAllBtn) showAllBtn.style.display = 'none';
 
   getPosts().forEach(p=>{
-    const c=p.querySelector('.post-content');
-    const a=p.querySelector('.post-title a');
-    const ex=p.querySelector('.post-excerpt');
-    p.style.display='none';
-    if(c) c.style.display='none';
-    if(a) a.style.display='';
-    if(ex) ex.style.display='block';
+    const c = p.querySelector('.post-content');
+    const a = p.querySelector('.post-title a');
+    const ex = p.querySelector('.post-excerpt');
+
+    p.style.display = 'none';
+    if (c) c.style.display = 'none';
+    if (a) a.style.display = '';
+    if (ex) ex.style.display = 'block';
   });
 }
 
