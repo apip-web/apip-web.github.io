@@ -66,34 +66,38 @@ document.addEventListener("DOMContentLoaded", function () {
       text = progress.querySelector(".app-progress-text");
 
       /* coba fetch untuk progress asli */
-      fetch(src)
-        .then(res => {
-          const total = +res.headers.get("Content-Length");
-          if (!res.ok || !res.body || !total) throw 0;
+      fetch(src)
+        .then(res => {
+          const total = +res.headers.get("Content-Length");
+          const type = res.headers.get("Content-Type"); // 1. Ambil tipe filenya
+          
+          if (!res.ok || !res.body || !total) throw 0;
 
-          const reader = res.body.getReader();
-          let loaded = 0;
-          const chunks = [];
+          const reader = res.body.getReader();
+          let loaded = 0;
+          const chunks = [];
 
-          function read() {
-            return reader.read().then(({ done, value }) => {
-              if (done) {
-                const blob = new Blob(chunks);
-                const url = URL.createObjectURL(blob);
-                img.onload = () => showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
-                img.src = url;
-                return;
-              }
-              loaded += value.length;
-              chunks.push(value);
-              const p = (loaded / total) * 100;
-              fill.style.width = p + "%";
-              text.textContent = Math.floor(p) + "%";
-              return read();
-            });
-          }
-          return read();
-        })
+          function read() {
+            return reader.read().then(({ done, value }) => {
+              if (done) {
+                // 2. Tambahkan { type } agar tidak jadi teks saat dibuka di tab baru
+                const blob = new Blob(chunks, { type: type || 'image/jpeg' });
+                
+                const url = URL.createObjectURL(blob);
+                img.onload = () => showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
+                img.src = url;
+                return;
+              }
+              loaded += value.length;
+              chunks.push(value);
+              const p = (loaded / total) * 100;
+              fill.style.width = p + "%";
+              text.textContent = Math.floor(p) + "%";
+              return read();
+            });
+          }
+          return read();
+        })
         .catch(() => {
           /* fallback fake progress */
           fakeTimer = startFakeProgress(fill, text);
