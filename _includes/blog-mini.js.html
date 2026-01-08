@@ -307,30 +307,41 @@ function debug() {
 }
 
 if (debugBox) {  
-  debugBox.addEventListener('click', () => {  
-    const htmlToCopy = debugBox.innerHTML;  
-    
-    navigator.clipboard.writeText(htmlToCopy).then(() => {  
-      // 1. Buat elemen pesan
-      const msg = document.createElement('div');
-      msg.style.color = '#10b981'; // Warna hijau agar kontras
-      msg.style.marginTop = '5px';
-      msg.innerHTML = `<i>✓ Copied debug overlay!</i>`;
-      
-      // 2. Tempelkan ke debugBox
-      debugBox.appendChild(msg);
-      debugBox.scrollTop = debugBox.scrollHeight;
+    debugBox.addEventListener('click', () => {  
+      // 1. Ambil semua log-entry
+      const logs = debugBox.querySelectorAll('.log-entry');
+      let markdownText = "";
 
-      // 3. Hapus elemen pesan setelah 2000ms (2 detik)
-      setTimeout(() => {
-        msg.remove();
-      }, 2000);
-      
-    }).catch(err => {
-      console.error('Gagal menyalin:', err);
+      logs.forEach(log => {
+        // Ambil teks dari badge (State/URL) dan isinya
+        const badges = log.querySelectorAll('.badge');
+        const stateText = badges[0]?.innerText || "STATE";
+        const urlText = badges[1]?.innerText || "URL";
+        
+        // Ambil isi teks setelah badge (menghapus spasi berlebih)
+        const content = log.innerText.replace(/STATE|URL/g, '').replace(/\s+/g, ' ').trim();
+        const parts = content.split('|');
+
+        // 2. Format ke Markdown: **STATE** `home` | **URL** `/`
+        markdownText += `**${stateText}** \`${parts[0]?.trim()}\` | **${urlText}** \`${parts[1]?.trim()}\` \n`;
+      });
+
+      // 3. Eksekusi Copy
+      navigator.clipboard.writeText(markdownText).then(() => {  
+        const msg = document.createElement('div');
+        msg.style.color = '#10b981';
+        msg.style.fontSize = '10px';
+        msg.style.marginTop = '8px';
+        msg.innerHTML = `<i>✓ Copied as Markdown!</i>`;
+        
+        debugBox.appendChild(msg);
+        debugBox.scrollTop = debugBox.scrollHeight;
+
+        // Hilang otomatis setelah 2 detik
+        setTimeout(() => msg.remove(), 2000);
+      });  
     });  
-  });  
-}
+  }
 
   router(location.pathname, false);
 });  
