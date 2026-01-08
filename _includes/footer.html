@@ -1,3 +1,49 @@
+<style>
+/* DEBUG */
+#spa-debug {
+  display:none;
+  position:fixed;
+  bottom:15px;
+  left:15px;
+  right:15px;
+  max-height:150px;
+  overflow-y:auto;
+  background:rgba(15,23,42,0.6);
+  backdrop-filter:blur(8px);
+  color:#e2e8f0;
+  font-family:'Fira Code', monospace;
+  font-size:11px;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.1);
+  z-index:9999;
+  scrollbar-width:thin;
+}
+#spa-debug code { font-size:11px; }
+.log-entry { margin-bottom:4px; line-height:1.4; }
+.badge { padding:2px 5px; border-radius:3px; font-weight:bold; text-transform:uppercase; margin-right:5px; }
+.badge-route { background:#3b82f6; color:white; }
+.badge-state { background:#8b5cf6; color:white; }
+.badge-success { background:#10b981; color:white; }
+.badge-error { background:#ef4444; color:white; }
+
+/* tombol close */
+#debug-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#debug-close:hover {
+  color: #ef4444;
+}
+</style>
+
 <footer>
 <div class="footer-bottom">
         <p><span id="toggle-debug">Show <code>Debug</code></span>
@@ -5,6 +51,10 @@
         <small>Hosted on GitHub Pages &mdash; Theme by <a href="https://apip-web.github.io">NOIR</a></small></p>
 </div>
 </footer>
+
+<div id="spa-debug">
+  <button id="debug-close" title="Close debug">×</button>
+</div>
 
 <script>
 (function () {
