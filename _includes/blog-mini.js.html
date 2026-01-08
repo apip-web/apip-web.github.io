@@ -163,34 +163,31 @@ function renderList(pushState){
   const params = new URLSearchParams(location.search);
   const tag = params.get('tag');
 
-  safe(listTitle, el => el.style.display = 'block');
-  
+  // list-title muncul hanya kalau list biasa tanpa tag
+  const listTitleEl = document.querySelector('.list-title');
+  if(listTitleEl) listTitleEl.style.display = tag ? 'none' : 'block';
+
+  // tag-title dan show-all hanya muncul kalau ada query tag
+  const tagTitleEl = document.getElementById('tag-title');
+  if(tagTitleEl) tagTitleEl.style.display = tag ? 'block' : 'none';
+
+  const showAllBtn = document.getElementById('show-all');
+  if(showAllBtn) showAllBtn.style.display = tag ? 'inline-block' : 'none';
+
   safe(postsWrap, el=>{
     el.style.display='block';
     el.classList.add('animate-slide');
   });
 
-  getPosts().forEach(p=>p.style.display='block');
+  getPosts().forEach(p=>{
+    p.style.display='block';
+  });
 
-  if(tag){
-    // halaman tag
-    const tagTitle = document.getElementById('tag-title');
-    if(tagTitle){
-      tagTitle.style.display = 'block';
-      tagTitle.textContent = `Showing all posts under "${tag}"`;
-    }
-
-    const showAllBtn = document.getElementById('show-all');
-    if(showAllBtn) showAllBtn.style.display = 'inline-block';
-
-    filterByTag(tag,false);
-  }
-
-  if(pushState){
-    push(tag ? `/blog?tag=${encodeURIComponent(tag)}` : BLOG_PATH);
-  }
-
+  if(pushState) push(BLOG_PATH);
   debug();
+
+  // filter posts kalau ada tag
+  if(tag) filterByTag(tag,false);
 }
 
   function renderPost(post,pushState){
@@ -235,25 +232,31 @@ function renderList(pushState){
   }
 
   /* ROUTER */
-  function router(path=location.pathname+location.search,pushState=false){
-    const cleanPath=path.replace(/\/$/,'').replace('/index.html','')||'/';
-    const cleanBlogPath=BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
+function router(path=location.pathname+location.search, pushState=false){
+  const url = new URL(path, location.origin);
+  const cleanPath = url.pathname.replace(/\/$/,'').replace('/index.html','') || '/';
+  const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
 
-    safe(debugBox,box=>{box.innerHTML=`<div class="log-entry"><span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath}</code></div>`;});
+  const params = url.searchParams;
+  const tag = params.get('tag');
 
-    if(cleanPath==='/'||cleanPath==='/index.html') return renderHome(pushState);
+  // debug
+  safe(debugBox, box => {
+    box.innerHTML += `<div class="log-entry"><span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath + url.search}</code></div>`;
+  });
 
-    if(cleanPath===cleanBlogPath||cleanPath===cleanBlogPath+'.html'||path.includes('blog.html')){
-      if(cleanPath!==cleanBlogPath && findPostByPath(cleanPath)){
-        // lanjut ke bawah
-      }else return renderList(pushState);
-    }
+  if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
 
-    const post=findPostByPath(cleanPath);
-    if(post) return renderPost(post,pushState);
-
-    render404(path,pushState);
+  // list atau tag list
+  if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath + '.html' || path.includes('blog.html')){
+    return renderList(pushState); // renderList sendiri yg cek query tag
   }
+
+  const post = findPostByPath(cleanPath);
+  if(post) return renderPost(post, pushState);
+
+  render404(path, pushState);
+}
 
   /* TAG FILTER */
   function filterByTag(tag,pushState=false){
