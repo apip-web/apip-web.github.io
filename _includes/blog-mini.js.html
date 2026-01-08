@@ -160,22 +160,39 @@ function renderList(pushState){
   hideAll();
 
   // tampilkan tag-title dan show-all hanya di list/tag
-  safe(listTitle, el => el.style.display = 'block');
-  const showAllBtn = document.getElementById('show-all');
-  if(showAllBtn) showAllBtn.style.display = 'inline-block';
+function renderList(pushState){
+  STATE='list';
+  hideAll();
 
-  safe(postsWrap,el=>{
+  const params = new URLSearchParams(location.search);
+  const tag = params.get('tag');
+
+  safe(postsWrap, el=>{
     el.style.display='block';
     el.classList.add('animate-slide');
   });
 
   getPosts().forEach(p=>p.style.display='block');
-  if(pushState) push(BLOG_PATH);
-  debug();
 
-  const params = new URLSearchParams(location.search);
-  const tag = params.get('tag');
-  if(tag) filterByTag(tag,false);
+  if(tag){
+    // halaman tag
+    const tagTitle = document.getElementById('tag-title');
+    if(tagTitle){
+      tagTitle.style.display = 'block';
+      tagTitle.textContent = `Showing all posts under "${tag}"`;
+    }
+
+    const showAllBtn = document.getElementById('show-all');
+    if(showAllBtn) showAllBtn.style.display = 'inline-block';
+
+    filterByTag(tag,false);
+  }
+
+  if(pushState){
+    push(tag ? `/blog?tag=${encodeURIComponent(tag)}` : BLOG_PATH);
+  }
+
+  debug();
 }
 
   function renderPost(post,pushState){
