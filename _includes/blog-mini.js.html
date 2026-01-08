@@ -1,24 +1,25 @@
 <style>
+/* ---------------- HIDE DEFAULT ---------------- */
 #spa-home,
 #posts,
 .homepage,
 #page-404,
 .post-content { display: none; }
 
+/* ---------------- ANIMASI ---------------- */
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-20px); /* Mulai dari sedikit di atas */
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0); /* Berakhir di posisi asli */
+    transform: translateY(0);
   }
 }
 
-/* Class untuk memicu animasi */
 .animate-slide {
-  animation: slideDown 2s ease-out forwards;
+  animation: slideDown 0.6s ease-out forwards;
 }
 
 .post-content p {
@@ -27,10 +28,7 @@
   overflow-wrap: anywhere;
 }
 
-#spa-button {
-
-}
-
+/* ---------------- DEBUG ---------------- */
 #spa-debug {
   display: none;
   position: fixed;
@@ -39,24 +37,19 @@
   right: 15px;
   max-height: 150px;
   overflow-y: auto;
-  background: rgba(15, 23, 42, 0.6); /* Dark slate with transparency */
-  backdrop-filter: blur(8px); /* Efek blur kaca */
+  background: rgba(15,23,42,0.6);
+  backdrop-filter: blur(8px);
   color: #e2e8f0;
-  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-family: 'Fira Code', monospace;
   font-size: 11px;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.1);
   z-index: 9999;
   scrollbar-width: thin;
 }
 
-#spa-debug code {
-  font-size: 11px;
-}
-
-/* Log Label Styles */
+#spa-debug code { font-size: 11px; }
 .log-entry { margin-bottom: 4px; line-height: 1.4; }
 .badge {
   padding: 2px 5px;
@@ -69,44 +62,86 @@
 .badge-state { background: #8b5cf6; color: white; }
 .badge-success { background: #10b981; color: white; }
 .badge-error { background: #ef4444; color: white; }
+
+/* ---------------- TAG BUTTON ---------------- */
+.post-tags { margin-top: 6px; }
+.post-tags .tag {
+  cursor: pointer;
+  padding: 2px 6px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin-right: 4px;
+  background: #f0f0f0;
+  font-size: 12px;
+}
+.post-tags .tag:hover { background: #d1d5db; }
+
+#show-all {
+  margin-top: 10px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
 </style>
 
-<div id="page-404" style="display:none;">
-    <h1>404</h1>
-    <p>Halaman tidak ditemukan.</p>
-    <a href="/">Kembali ke Home</a>
+<!-- ---------------- HTML ---------------- -->
+<div id="spa-home" class="homepage">
+  <h1>Welcome to Home</h1>
+  <a href="/blog/" id="open-blog">Open Blog</a>
 </div>
 
+<h1 id="tag-title">All Posts</h1>
+
 <div id="posts">
-<div class="list-title"><h1>Blog:</h1></div>
-{% for post in site.posts %}
-  <article class="post" data-url="{{ post.url | relative_url }}">
-    <h2 class="post-title">
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </h2>
+  <div class="list-title"><h1>Blog:</h1></div>
+  
+  {% for post in site.posts %}
+    <article class="post"
+      data-url="{{ post.url | relative_url }}"
+      data-tags="{{ post.tags | join: ',' }}">
+      
+      <h2 class="post-title">
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      </h2>
 
-    <div class="post-excerpt">
-      {% if post.description %}
-        {{ post.description }}
-      {% else %}
-        {{ post.excerpt | strip_html | truncatewords: 25 }}
-      {% endif %}
-    </div>
-
-    <div class="post-content">
-      {% include post-meta.html post=post %}
-      <div class="entry-content">
-        {{ post.content | markdownify }}
+      <div class="post-tags">
+        {% for tag in post.tags %}
+          <button class="tag" data-tag="{{ tag }}">#{{ tag }}</button>
+        {% endfor %}
       </div>
-    </div>
-  </article>
-{% endfor %}
+
+      <div class="post-excerpt">
+        {% if post.description %}
+          {{ post.description }}
+        {% else %}
+          {{ post.excerpt | strip_html | truncatewords: 25 }}
+        {% endif %}
+      </div>
+
+      <div class="post-content">
+        {% include post-meta.html post=post %}
+        <div class="entry-content">
+          {{ post.content | markdownify }}
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+</div>
+
+<button id="show-all">All</button>
+
+<div id="page-404">
+  <h1>404</h1>
+  <p>Halaman tidak ditemukan.</p>
+  <a href="/">Kembali ke Home</a>
 </div>
 
 <div id="spa-debug"></div>
 
-<script>  
+<!-- ---------------- JS SPA ---------------- -->
+<script>
 document.addEventListener('DOMContentLoaded', () => {
+
   const homepage  = document.querySelector('.homepage');
   const btnBlog   = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
@@ -114,244 +149,228 @@ document.addEventListener('DOMContentLoaded', () => {
   const debugBox  = document.getElementById('spa-debug');
   const listTitle = document.querySelector('.list-title');
   const spaHome   = document.getElementById('spa-home');
-  
   const BLOG_PATH = '/blog/';
-  let STATE       = '';
+  let STATE = '';
 
   const safe = (el, fn) => el && fn(el);
-  const getPosts = () => [...document.querySelectorAll('.post')];  
+  const getPosts = () => [...document.querySelectorAll('.post')];
 
-  /* ---------------- Core Functions ---------------- */
-
-  function hideAll() {  
-    const containers = [spaHome, homepage, postsWrap, page404];
-    containers.forEach(el => safe(el, e => {
+  /* ---------------- CORE ---------------- */
+  function hideAll() {
+    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
       e.style.display = 'none';
       e.classList.remove('animate-slide');
-      void e.offsetWidth; 
+      void e.offsetWidth;
     }));
-
-    getPosts().forEach(p => {  
+    getPosts().forEach(p => {
       p.style.display = 'none';
-      const c = p.querySelector('.post-content');  
-      const a = p.querySelector('.post-title a');  
+      const c = p.querySelector('.post-content');
+      const a = p.querySelector('.post-title a');
       const ex = p.querySelector('.post-excerpt');
-      if (c) c.style.display = 'none'; 
-      if (a) a.style.display = ''; 
-      if (ex) ex.style.display = 'block';
-    });  
+      if(c) c.style.display = 'none';
+      if(a) a.style.display = '';
+      if(ex) ex.style.display = 'block';
+    });
   }
 
   function push(path) {  
-    if (location.pathname !== path) {  
-      history.pushState(null, '', path);  
-    }  
-  }  
-  
-  /* ---------------- Renderers ---------------- */  
-  
-  function renderHome(pushState) {  
-    STATE = 'home';  
-    hideAll(); 
+    if (location.pathname + location.search !== path) {  
+      history.pushState(null,'',path);
+    }
+  }
+
+  /* ---------------- RENDERERS ---------------- */
+  function renderHome(pushState) {
+    STATE = 'home';
+    hideAll();
     [spaHome, homepage].forEach(el => safe(el, e => {
       e.style.display = 'block';
       e.classList.add('animate-slide');
-    })); 
-    if (pushState) push('/');  
-    debug();  
+    }));
+    if(pushState) push('/');
+    debug();
   }
 
-  function renderList(pushState) {  
-    STATE = 'list';  
-    hideAll(); 
+  function renderList(pushState) {
+    STATE = 'list';
+    hideAll();
     safe(listTitle, el => el.style.display = 'block');
     safe(postsWrap, el => {
-        el.style.display = 'block';
-        el.classList.add('animate-slide');
-    });  
+      el.style.display = 'block';
+      el.classList.add('animate-slide');
+    });
     getPosts().forEach(p => p.style.display = 'block');
-    if (pushState) push(BLOG_PATH);  
-    debug();  
+    if(pushState) push(BLOG_PATH);
+    debug();
+
+    // Check if URL has ?tag
+    const params = new URLSearchParams(location.search);
+    const tag = params.get('tag');
+    if(tag) filterByTag(tag,false);
   }
 
-  function renderPost(post, pushState) {  
-    STATE = 'post';  
+  function renderPost(post,pushState) {
+    STATE = 'post';
     hideAll();
     safe(listTitle, el => el.style.display = 'none');
     safe(postsWrap, el => {
-        el.style.display = 'block';
-        el.classList.add('animate-slide');
+      el.style.display = 'block';
+      el.classList.add('animate-slide');
     });
-    
+
     post.style.display = 'block';
-    const c = post.querySelector('.post-content');  
-    const a = post.querySelector('.post-title a');  
+    const c = post.querySelector('.post-content');
+    const a = post.querySelector('.post-title a');
     const ex = post.querySelector('.post-excerpt');
+    if(c) c.style.display = 'block';
+    if(a) a.style.display = 'none';
+    if(ex) ex.style.display = 'none';
 
-    if (c) c.style.display = 'block';  
-    if (a) a.style.display = 'none';  
-    if (ex) ex.style.display = 'none';
-  
-    if (pushState) push(post.dataset.url);  
-    debug();  
+    if(pushState) push(post.dataset.url);
+    debug();
   }
 
-  function render404(path, pushState) {  
-    STATE = '404';  
-    hideAll();  
-    safe(page404, el => el.style.display = 'block');  
-    if (pushState) push(path);  
-    debug();  
+  function render404(path,pushState) {
+    STATE = '404';
+    hideAll();
+    safe(page404, el => el.style.display = 'block');
+    if(pushState) push(path);
+    debug();
   }
 
-  /* ---------------- Path Finder ---------------- */
-
-  function findPostByPath(path) {  
+  function findPostByPath(path) {
     const posts = getPosts();
-    const target = path.replace(/\/$/, "").replace(".html", "");
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace(".html", "");
-    
-    // Cegah URL blog list dianggap sebagai post
-    if (target === cleanBlogPath || target === "") return null;
+    const target = path.replace(/\/$/,'').replace('.html','');
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('.html','');
+    if(target === cleanBlogPath || target === '') return null;
 
     return posts.find(p => {
       const postUrl = p.dataset.url;
-      if (!postUrl) return false;
-      const cleanPostUrl = postUrl.replace(/\/$/, "").replace(".html", "");
+      if(!postUrl) return false;
+      const cleanPostUrl = postUrl.replace(/\/$/,'').replace('.html','');
       return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
     });
   }
 
-  /* ---------------- Router ---------------- */  
+  /* ---------------- ROUTER ---------------- */
+  function router(path = location.pathname+location.search, pushState=false) {
+    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
 
-  function router(path = location.pathname, pushState = false) {  
-    const cleanPath = path.replace(/\/$/, "").replace("/index.html", "") || "/";
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace("/index.html", "");
+    safe(debugBox, box => {
+      box.innerHTML = `<div class="log-entry">
+        <span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath}</code>
+      </div>`;
+    });
 
-safe(debugBox, box => {
-  box.innerHTML = `<div class="log-entry">
-    <span class="badge badge-route">Routing</span> 
-    Path: <code style="color: #60a5fa">${cleanPath}</code>
-  </div>`;
-});
+    if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
 
-    if (cleanPath === '/' || cleanPath === '/index.html') {
-      return renderHome(pushState);
+    if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath+'.html' || path.includes('blog.html')) {
+      if(cleanPath !== cleanBlogPath && findPostByPath(cleanPath)) {
+        // lanjut ke bawah
+      } else return renderList(pushState);
     }
 
-    // Prioritaskan cek List Mode dengan Exact Match
-    if (cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html") || path.includes('blog.html')) {
-      // Tambahan proteksi: jika ini bukan file blog utama, biarkan lanjut ke pengecekan post
-      if (cleanPath !== cleanBlogPath && findPostByPath(cleanPath)) {
-         // Lanjut ke bawah
-      } else {
-         return renderList(pushState);
-      }
-    }
+    const post = findPostByPath(cleanPath);
+    if(post) return renderPost(post,pushState);
 
-    const post = findPostByPath(cleanPath);  
-    if (post) {
-      return renderPost(post, pushState);
-    }
-
-    render404(path, pushState);  
+    render404(path,pushState);
   }
 
-  /* ---------------- Event Listeners ---------------- */
+  /* ---------------- TAG FILTER ---------------- */
+  function filterByTag(tag,pushState=false){
+    const title = document.getElementById('tag-title');
+    getPosts().forEach(post=>{
+      const tags = (post.dataset.tags||'').split(',');
+      post.style.display = (!tag || tags.includes(tag))?'block':'none';
+    });
+    if(tag){
+      title.textContent = `Showing all posts under "${tag}"`;
+      if(pushState) push(`/blog?tag=${encodeURIComponent(tag)}`);
+    }else{
+      title.textContent = 'All Posts';
+      if(pushState) push('/blog');
+    }
+  }
 
-  document.addEventListener('click', e => {
+  /* ---------------- EVENT LISTENERS ---------------- */
+  document.addEventListener('click', e=>{
     const a = e.target.closest('a');
-    if (!a) return;
-    
-    const href = a.getAttribute('href');
-    if (!href || href.startsWith('#')) return;
-
-    try {
-      const url = new URL(href, location.origin);
-      if (url.origin === location.origin) {
-        e.preventDefault();
-        router(url.pathname, true);
+    if(a){
+      const href = a.getAttribute('href');
+      if(href && !href.startsWith('#')){
+        try{
+          const url = new URL(href,location.origin);
+          if(url.origin===location.origin){
+            e.preventDefault();
+            router(url.pathname+url.search,true);
+          }
+        }catch(err){}
       }
-    } catch (err) {}
+    }
+
+    const tagBtn = e.target.closest('.tag');
+    if(tagBtn){
+      e.preventDefault();
+      const tag = tagBtn.dataset.tag;
+      renderList(false);
+      filterByTag(tag,true);
+    }
   });
 
-  if (btnBlog) {
-    btnBlog.addEventListener('click', (e) => {
+  const showAllBtn = document.getElementById('show-all');
+  if(showAllBtn){
+    showAllBtn.addEventListener('click',e=>{
       e.preventDefault();
-      router(BLOG_PATH, true);
+      renderList(true);
+      filterByTag(null,false);
     });
   }
 
-  window.addEventListener('popstate', () => {  
-    router(location.pathname, false);  
-  });  
+  window.addEventListener('popstate',()=>{router(location.pathname+location.search,false);});
 
-  /* ---------------- Debug Overlay (Restored) ---------------- */
+  /* ---------------- DEBUG ---------------- */
+  function debug(){
+    if(!debugBox) return;
+    let stateClass = (STATE==='404')?'badge-error':'badge-state';
+    debugBox.innerHTML += `
+      <div class="log-entry" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
+        <span class="badge ${stateClass}">State</span> ${STATE}
+      </div>
+      <div class="log-entry">
+        <span class="badge badge-success">URL</span> ${location.pathname+location.search}
+      </div>`;
+    debugBox.scrollTop = debugBox.scrollHeight;
+  }
 
-function debug() {  
-  if (!debugBox) return;  
-  
-  // Tentukan warna berdasarkan state
-  let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
-  
-  debugBox.innerHTML += `
-    <div class="log-entry" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 8px;">
-      <span class="badge ${stateClass}">State</span> ${STATE}
-    </div>
-    <div class="log-entry">
-      <span class="badge badge-success">URL</span> ${location.pathname}
-    </div>`;
-  
-  // Auto-scroll ke paling bawah setiap ada log baru
-  debugBox.scrollTop = debugBox.scrollHeight;
-}
-
-if (debugBox) {  
-    debugBox.addEventListener('click', () => {  
+  if(debugBox){
+    debugBox.addEventListener('click',()=>{
       const logs = debugBox.querySelectorAll('.log-entry');
-      let markdownText = "";
-
-      logs.forEach(log => {
-        // 1. Ambil teks asli dan bersihkan spasi
-        const rawText = log.innerText.replace(/\s+/g, ' ').trim();
-        
-        // 2. Deteksi tiap baris menggunakan Regex yang lebih spesifik
-        // Mencari "Routing Path: /", "State home", dan "URL /"
+      let markdownText='';
+      logs.forEach(log=>{
+        const rawText = log.innerText.replace(/\s+/g,' ').trim();
         const routingMatch = rawText.match(/Routing\s+(Path:\s+\S+)/i);
         const stateMatch   = rawText.match(/State\s+(\S+)/i);
         const urlMatch     = rawText.match(/URL\s+(\S+)/i);
-
-        // 3. Susun ke Markdown baris demi baris jika ditemukan
-        if (routingMatch) {
-          markdownText += `**ROUTING** \`${routingMatch[1]}\` \n`;
-        }
-        if (stateMatch) {
-          markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
-        }
-        if (urlMatch) {
-          markdownText += `**URL** \`${urlMatch[1]}\` \n`;
-        }
-        
-        // Tambah pemisah antar log entry agar tidak menyambung semua
-        markdownText += `\n`; 
+        if(routingMatch) markdownText += `**ROUTING** \`${routingMatch[1]}\` \n`;
+        if(stateMatch) markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
+        if(urlMatch) markdownText += `**URL** \`${urlMatch[1]}\` \n`;
+        markdownText+='\n';
       });
-
-      // 4. Proses Copy
-      if (markdownText.trim()) {
-        navigator.clipboard.writeText(markdownText.trim()).then(() => {  
-          const msg = document.createElement('div');
-          msg.style.cssText = "color: #10b981; font-size: 10px; margin-top: 5px;";
-          msg.innerHTML = `<i>✓ Copied (Routing, State, URL) as Markdown!</i>`;
-          
+      if(markdownText.trim()){
+        navigator.clipboard.writeText(markdownText.trim()).then(()=>{
+          const msg=document.createElement('div');
+          msg.style.cssText="color:#10b981;font-size:10px;margin-top:5px;";
+          msg.innerHTML='<i>✓ Copied (Routing, State, URL) as Markdown!</i>';
           debugBox.appendChild(msg);
-          debugBox.scrollTop = debugBox.scrollHeight;
-
-          setTimeout(() => msg.remove(), 2000);
+          debugBox.scrollTop=debugBox.scrollHeight;
+          setTimeout(()=>msg.remove(),2000);
         });
       }
-    });  
+    });
   }
 
-  router(location.pathname, false);
-});  
+  /* ---------------- INIT ---------------- */
+  router(location.pathname+location.search,false);
+});
 </script>
