@@ -6,14 +6,6 @@
   {{ include.post.title }}
 </h1>
 
-{% if include.post.tags %}
-<div class="post-tags">
-  {% for tag in include.post.tags %}
-    <a class="tag" href="/tags/#{{ tag }}">#{{ tag }}</a>
-  {% endfor %}
-</div>
-{% endif %}
-
 <div class="post-author">
   <img
     src="{{ '/assets/img/profile.webp' | relative_url }}"
