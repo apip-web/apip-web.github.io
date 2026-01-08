@@ -8,19 +8,11 @@
 
 /* ---------------- ANIMASI ---------------- */
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-slide {
-  animation: slideDown 0.6s ease-out forwards;
-}
+.animate-slide { animation: slideDown 0.6s ease-out forwards; }
 
 .post-content p {
   white-space: normal;
@@ -48,16 +40,9 @@
   z-index: 9999;
   scrollbar-width: thin;
 }
-
 #spa-debug code { font-size: 11px; }
 .log-entry { margin-bottom: 4px; line-height: 1.4; }
-.badge {
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-right: 5px;
-}
+.badge { padding: 2px 5px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-right: 5px; }
 .badge-route { background: #3b82f6; color: white; }
 .badge-state { background: #8b5cf6; color: white; }
 .badge-success { background: #10b981; color: white; }
@@ -138,6 +123,7 @@
 
 <div id="spa-debug"></div>
 
+<!-- ---------------- JS SPA ---------------- -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -147,6 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const page404   = document.getElementById('page-404');
   const listTitle = document.querySelector('.list-title');
   const spaHome   = document.getElementById('spa-home');
+  const showAllBtn = document.getElementById('show-all');
+  const debugBox  = document.getElementById('spa-debug');
   const BLOG_PATH = '/blog/';
   let STATE = '';
 
@@ -169,113 +157,43 @@ document.addEventListener('DOMContentLoaded', () => {
       if(a) a.style.display = '';
       if(ex) ex.style.display = 'block';
     }));
-    if(btnBlog) btnBlog.style.display = 'none'; // sembunyikan tombol di awal
+    // Jangan sembunyikan tombol homepage di sini
   }
 
   /* ---------------- RENDERERS ---------------- */
-  function renderHome(pushState) {
-    STATE = 'home';
+  function renderHome(pushState){
+    STATE='home';
     hideAll();
     [spaHome, homepage].forEach(el => safe(el, e => {
-      e.style.display = 'block';
+      e.style.display='block';
       e.classList.add('animate-slide');
     }));
-    if(btnBlog) btnBlog.style.display = 'inline-block'; // tampilkan tombol hanya di homepage
+    if(btnBlog) btnBlog.style.display='inline-block';
     if(pushState) history.pushState(null,'','/');
   }
 
-  function renderList(pushState) {
-    STATE = 'list';
+  function renderList(pushState){
+    STATE='list';
     hideAll();
-    safe(listTitle, el => el.style.display = 'block');
+    safe(listTitle, el => el.style.display='block');
     safe(postsWrap, el => {
-      el.style.display = 'block';
+      el.style.display='block';
       el.classList.add('animate-slide');
     });
-    getPosts().forEach(p => p.style.display = 'block');
+    getPosts().forEach(p=>p.style.display='block');
     if(pushState) history.pushState(null,'',BLOG_PATH);
-    
-    // tombol homepage disembunyikan saat melihat daftar
-    if(btnBlog) btnBlog.style.display = 'none';
+    if(btnBlog) btnBlog.style.display='none';
 
-    // jika URL ada ?tag, langsung filter
+    // filter ?tag
     const params = new URLSearchParams(location.search);
     const tag = params.get('tag');
     if(tag) filterByTag(tag,false);
   }
 
-  /* ---------------- TAG FILTER ---------------- */
-  function filterByTag(tag,pushState=false){
-    const title = document.getElementById('tag-title');
-    getPosts().forEach(post=>{
-      const tags = (post.dataset.tags||'').split(',');
-      post.style.display = (!tag || tags.includes(tag))?'block':'none';
-    });
-    if(tag){
-      title.textContent = `Showing all posts under "${tag}"`;
-      if(pushState) history.pushState(null,'',`/blog?tag=${encodeURIComponent(tag)}`);
-    }else{
-      title.textContent = 'All Posts';
-      if(pushState) history.pushState(null,'','/blog');
-    }
-
-    // tombol homepage tetap disembunyikan saat filter tag
-    if(btnBlog) btnBlog.style.display = 'none';
-  }
-
-  /* ---------------- EVENT LISTENERS ---------------- */
-  if(btnBlog){
-    btnBlog.addEventListener('click', e=>{
-      e.preventDefault();
-      router(BLOG_PATH,true);
-    });
-  }
-
-  document.addEventListener('click', e=>{
-    const tagBtn = e.target.closest('.tag');
-    if(tagBtn){
-      e.preventDefault();
-      const tag = tagBtn.dataset.tag;
-      renderList(false);
-      filterByTag(tag,true);
-    }
-
-    const showAllBtn = e.target.closest('#show-all');
-    if(showAllBtn){
-      e.preventDefault();
-      renderList(true);
-      filterByTag(null,false);
-    }
-  });
-
-  /* ---------------- ROUTER ---------------- */
-  function router(path = location.pathname+location.search, pushState=false){
-    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
-
-    if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
-
-    if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath+'.html'){
-      return renderList(pushState);
-    }
-
-    const posts = getPosts();
-    const post = posts.find(p=>{
-      const postUrl = p.dataset.url.replace(/\/$/,'').replace('.html','');
-      return cleanPath.endsWith(postUrl);
-    });
-    if(post) return renderPost(post,pushState);
-
-    render404(path,pushState);
-  }
-
   function renderPost(post,pushState){
     STATE='post';
     hideAll();
-    safe(postsWrap, el => {
-      el.style.display='block';
-      el.classList.add('animate-slide');
-    });
+    safe(postsWrap, el => { el.style.display='block'; el.classList.add('animate-slide'); });
     post.style.display='block';
     const c = post.querySelector('.post-content');
     const a = post.querySelector('.post-title a');
@@ -287,8 +205,67 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnBlog) btnBlog.style.display='none';
   }
 
+  function render404(path,pushState){
+    STATE='404';
+    hideAll();
+    safe(page404, el => el.style.display='block');
+    if(pushState) history.pushState(null,'',path);
+  }
+
+  /* ---------------- TAG FILTER ---------------- */
+  function filterByTag(tag,pushState=false){
+    const title = document.getElementById('tag-title');
+    getPosts().forEach(post=>{
+      const tags = (post.dataset.tags||'').split(',');
+      post.style.display = (!tag || tags.includes(tag)) ? 'block' : 'none';
+    });
+    if(tag){
+      title.textContent = `Showing all posts under "${tag}"`;
+      if(pushState) history.pushState(null,'',`/blog?tag=${encodeURIComponent(tag)}`);
+    }else{
+      title.textContent = 'All Posts';
+      if(pushState) history.pushState(null,'','/blog');
+    }
+    if(btnBlog) btnBlog.style.display='none';
+  }
+
+  /* ---------------- ROUTER ---------------- */
+  function router(path = location.pathname+location.search, pushState=false){
+    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
+
+    if(cleanPath==='/'||cleanPath==='/index.html') return renderHome(pushState);
+    if(cleanPath===cleanBlogPath || cleanPath===cleanBlogPath+'.html') return renderList(pushState);
+
+    const posts = getPosts();
+    const post = posts.find(p=>{
+      const postUrl = p.dataset.url.replace(/\/$/,'').replace('.html','');
+      return cleanPath.endsWith(postUrl);
+    });
+    if(post) return renderPost(post,pushState);
+
+    render404(path,pushState);
+  }
+
+  /* ---------------- EVENTS ---------------- */
+  if(btnBlog){
+    btnBlog.addEventListener('click', e=>{ e.preventDefault(); router(BLOG_PATH,true); });
+  }
+
+  document.addEventListener('click', e=>{
+    const tagBtn = e.target.closest('.tag');
+    if(tagBtn){ e.preventDefault(); renderList(false); filterByTag(tagBtn.dataset.tag,true); }
+
+    if(e.target.closest('#show-all')){
+      e.preventDefault();
+      renderList(true);
+      filterByTag(null,false);
+    }
+  });
+
+  window.addEventListener('popstate', ()=>{ router(location.pathname+location.search,false); });
+
   /* ---------------- INIT ---------------- */
   router(location.pathname+location.search,false);
-
 });
 </script>
