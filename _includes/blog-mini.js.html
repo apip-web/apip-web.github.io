@@ -308,38 +308,44 @@ function debug() {
 
 if (debugBox) {  
     debugBox.addEventListener('click', () => {  
-      // 1. Ambil semua log-entry
       const logs = debugBox.querySelectorAll('.log-entry');
       let markdownText = "";
 
       logs.forEach(log => {
-        // Ambil teks dari badge (State/URL) dan isinya
-        const badges = log.querySelectorAll('.badge');
-        const stateText = badges[0]?.innerText || "STATE";
-        const urlText = badges[1]?.innerText || "URL";
+        // 1. Ambil teks mentah dan rapikan spasi
+        const rawText = log.innerText.replace(/\s+/g, ' ').trim();
         
-        // Ambil isi teks setelah badge (menghapus spasi berlebih)
-        const content = log.innerText.replace(/STATE|URL/g, '').replace(/\s+/g, ' ').trim();
-        const parts = content.split('|');
-
-        // 2. Format ke Markdown: **STATE** `home` | **URL** `/`
-        markdownText += `**${stateText}** \`${parts[0]?.trim()}\` | **${urlText}** \`${parts[1]?.trim()}\` \n`;
+        // 2. Ekstrak informasi menggunakan Regex
+        const stateMatch = rawText.match(/State\s+(\S+)/i);
+        const urlMatch = rawText.match(/URL\s+(\S+)/i);
+        
+        // 3. Format per baris sesuai keinginanmu
+        if (stateMatch) {
+          markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
+        }
+        if (urlMatch) {
+          // Jika URL adalah "/", kita bisa tambahkan "Path: " secara manual jika itu Routing
+          // Namun agar akurat sesuai teks log:
+          markdownText += `**URL** \`${urlMatch[1]}\` \n`;
+        }
+        
+        // Tambahkan baris kosong antar entry log agar rapi saat di-paste
+        markdownText += `\n`; 
       });
 
-      // 3. Eksekusi Copy
-      navigator.clipboard.writeText(markdownText).then(() => {  
-        const msg = document.createElement('div');
-        msg.style.color = '#10b981';
-        msg.style.fontSize = '10px';
-        msg.style.marginTop = '8px';
-        msg.innerHTML = `<i>✓ Copied as Markdown!</i>`;
-        
-        debugBox.appendChild(msg);
-        debugBox.scrollTop = debugBox.scrollHeight;
+      // 4. Proses Copy
+      if (markdownText.trim()) {
+        navigator.clipboard.writeText(markdownText.trim()).then(() => {  
+          const msg = document.createElement('div');
+          msg.style.cssText = "color: #10b981; font-size: 10px; margin-top: 5px;";
+          msg.innerHTML = `<i>✓ Copied as Markdown list!</i>`;
+          
+          debugBox.appendChild(msg);
+          debugBox.scrollTop = debugBox.scrollHeight;
 
-        // Hilang otomatis setelah 2 detik
-        setTimeout(() => msg.remove(), 2000);
-      });  
+          setTimeout(() => msg.remove(), 2000);
+        });
+      }
     });  
   }
 
