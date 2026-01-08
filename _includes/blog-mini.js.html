@@ -312,24 +312,27 @@ if (debugBox) {
       let markdownText = "";
 
       logs.forEach(log => {
-        // 1. Ambil teks mentah dan rapikan spasi
+        // 1. Ambil teks asli dan bersihkan spasi
         const rawText = log.innerText.replace(/\s+/g, ' ').trim();
         
-        // 2. Ekstrak informasi menggunakan Regex
-        const stateMatch = rawText.match(/State\s+(\S+)/i);
-        const urlMatch = rawText.match(/URL\s+(\S+)/i);
-        
-        // 3. Format per baris sesuai keinginanmu
+        // 2. Deteksi tiap baris menggunakan Regex yang lebih spesifik
+        // Mencari "Routing Path: /", "State home", dan "URL /"
+        const routingMatch = rawText.match(/Routing\s+(Path:\s+\S+)/i);
+        const stateMatch   = rawText.match(/State\s+(\S+)/i);
+        const urlMatch     = rawText.match(/URL\s+(\S+)/i);
+
+        // 3. Susun ke Markdown baris demi baris jika ditemukan
+        if (routingMatch) {
+          markdownText += `**ROUTING** \`${routingMatch[1]}\` \n`;
+        }
         if (stateMatch) {
           markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
         }
         if (urlMatch) {
-          // Jika URL adalah "/", kita bisa tambahkan "Path: " secara manual jika itu Routing
-          // Namun agar akurat sesuai teks log:
           markdownText += `**URL** \`${urlMatch[1]}\` \n`;
         }
         
-        // Tambahkan baris kosong antar entry log agar rapi saat di-paste
+        // Tambah pemisah antar log entry agar tidak menyambung semua
         markdownText += `\n`; 
       });
 
@@ -338,7 +341,7 @@ if (debugBox) {
         navigator.clipboard.writeText(markdownText.trim()).then(() => {  
           const msg = document.createElement('div');
           msg.style.cssText = "color: #10b981; font-size: 10px; margin-top: 5px;";
-          msg.innerHTML = `<i>✓ Copied as Markdown list!</i>`;
+          msg.innerHTML = `<i>✓ Copied (Routing, State, URL) as Markdown!</i>`;
           
           debugBox.appendChild(msg);
           debugBox.scrollTop = debugBox.scrollHeight;
