@@ -243,18 +243,19 @@ function router(path, pushState){
   }
 
   const url = new URL(path, location.origin);
-  const pathname = url.pathname;
+  const pathname = url.pathname.replace(/\/$/, '');
+  const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
   const tag = url.searchParams.get('tag');
 
-  if(pathname === '/' || pathname === '/index.html'){
+  if(pathname === '' || pathname === '/' || pathname === '/index.html'){
     return renderHome();
   }
 
-  if(pathname === BLOG_PATH){
+  if(pathname === cleanBlogPath){
     if(tag){
-      return renderTag(tag);   // 🔥 BEDA
+      return renderTag(tag);
     }
-    return renderList();       // 🔥 BEDA
+    return renderList();
   }
 
   const post = findPostByPath(pathname);
