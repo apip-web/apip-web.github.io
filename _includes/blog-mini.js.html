@@ -276,6 +276,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+if(btnBlog){
+  btnBlog.addEventListener('click', e => {
+    e.preventDefault();
+    router(BLOG_PATH, true);
+  });
+}
+
   window.addEventListener('popstate',()=>{router(location.pathname+location.search,false);});
 
   /* DEBUG & COPY */
