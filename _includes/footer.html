@@ -3,7 +3,6 @@
 #spa-debug {
   display:none;
   position:fixed;
-  position: relative;
   bottom:15px;
   left:15px;
   right:15px;
@@ -30,7 +29,7 @@
 
 /* tombol close */
 #debug-close {
-  position: absolute;
+  position: fixed;
   top: 4px;
   right: 6px;
   background: purple;
@@ -53,9 +52,10 @@
 </div>
 </footer>
 
-<div id="spa-debug">
-  <button id="debug-close" title="Close debug">×</button>
-</div>
+<div id="spa-debug"></div>
+
+<button id="debug-close" 
+  title="Close debug">×</button>
 
 <script>
 (function () {
