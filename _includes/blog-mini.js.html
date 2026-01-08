@@ -1,17 +1,14 @@
 <style>
-/* ---------------- HIDE DEFAULT ---------------- */
 #spa-home,
 #posts,
 .homepage,
 #page-404,
 .post-content { display: none; }
 
-/* ---------------- ANIMASI ---------------- */
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity:0; transform:translateY(-20px);}
+  to { opacity:1; transform:translateY(0);}
 }
-
 .animate-slide { animation: slideDown 0.6s ease-out forwards; }
 
 .post-content p {
@@ -20,55 +17,53 @@
   overflow-wrap: anywhere;
 }
 
-/* ---------------- DEBUG ---------------- */
+/* DEBUG */
 #spa-debug {
-  display: none;
-  position: fixed;
-  bottom: 15px;
-  left: 15px;
-  right: 15px;
-  max-height: 150px;
-  overflow-y: auto;
-  background: rgba(15,23,42,0.6);
-  backdrop-filter: blur(8px);
-  color: #e2e8f0;
-  font-family: 'Fira Code', monospace;
-  font-size: 11px;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.1);
-  z-index: 9999;
-  scrollbar-width: thin;
+  display:none;
+  position:fixed;
+  bottom:15px;
+  left:15px;
+  right:15px;
+  max-height:150px;
+  overflow-y:auto;
+  background:rgba(15,23,42,0.6);
+  backdrop-filter:blur(8px);
+  color:#e2e8f0;
+  font-family:'Fira Code', monospace;
+  font-size:11px;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.1);
+  z-index:9999;
+  scrollbar-width:thin;
 }
-#spa-debug code { font-size: 11px; }
-.log-entry { margin-bottom: 4px; line-height: 1.4; }
-.badge { padding: 2px 5px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-right: 5px; }
-.badge-route { background: #3b82f6; color: white; }
-.badge-state { background: #8b5cf6; color: white; }
-.badge-success { background: #10b981; color: white; }
-.badge-error { background: #ef4444; color: white; }
+#spa-debug code { font-size:11px; }
+.log-entry { margin-bottom:4px; line-height:1.4; }
+.badge { padding:2px 5px; border-radius:3px; font-weight:bold; text-transform:uppercase; margin-right:5px; }
+.badge-route { background:#3b82f6; color:white; }
+.badge-state { background:#8b5cf6; color:white; }
+.badge-success { background:#10b981; color:white; }
+.badge-error { background:#ef4444; color:white; }
 
-/* ---------------- TAG BUTTON ---------------- */
-.post-tags { margin-top: 6px; }
+/* TAG BUTTON */
+.post-tags { margin-top:6px; }
 .post-tags .tag {
-  cursor: pointer;
-  padding: 2px 6px;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  margin-right: 4px;
-  background: #f0f0f0;
-  font-size: 12px;
+  cursor:pointer;
+  padding:2px 6px;
+  border:1px solid #ddd;
+  border-radius:3px;
+  margin-right:4px;
+  background:#f0f0f0;
+  font-size:12px;
 }
-.post-tags .tag:hover { background: #d1d5db; }
-#show-all { margin-top: 10px; padding: 4px 8px; font-size: 12px; cursor: pointer; }
+.post-tags .tag:hover { background:#d1d5db; }
+
+#show-all { margin-top:10px; padding:4px 8px; font-size:12px; cursor:pointer; }
 </style>
 
-<!-- ---------------- HTML ---------------- -->
-<div class="homepage">
-  <h2>Selamat Datang di Situs Saya</h2>
-  <p>Ini adalah blog pribadi saya tentang teknologi dan coding.</p>
-  <hr>
-  <button id="open-blog">Lihat Blog</button>
+<div id="spa-home" class="homepage">
+  <h1>Welcome to Home</h1>
+  <a href="/blog/" id="open-blog">Open Blog</a>
 </div>
 
 <h1 id="tag-title">All Posts</h1>
@@ -76,25 +71,25 @@
 <div id="posts">
   <div class="list-title"><h1>Blog:</h1></div>
   {% for post in site.posts %}
-    <article class="post" data-url="{{ post.url | relative_url }}" data-tags="{{ post.tags | join: ',' }}">
-      <h2 class="post-title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
-      <div class="post-tags">
-        {% for tag in post.tags %}
-          <button class="tag" data-tag="{{ tag }}">#{{ tag }}</button>
-        {% endfor %}
-      </div>
-      <div class="post-excerpt">
-        {% if post.description %}
-          {{ post.description }}
-        {% else %}
-          {{ post.excerpt | strip_html | truncatewords: 25 }}
-        {% endif %}
-      </div>
-      <div class="post-content">
-        {% include post-meta.html post=post %}
-        <div class="entry-content">{{ post.content | markdownify }}</div>
-      </div>
-    </article>
+  <article class="post" data-url="{{ post.url | relative_url }}" data-tags="{{ post.tags | join: ',' }}">
+    <h2 class="post-title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h2>
+    <div class="post-tags">
+      {% for tag in post.tags %}
+      <button class="tag" data-tag="{{ tag }}">#{{ tag }}</button>
+      {% endfor %}
+    </div>
+    <div class="post-excerpt">
+      {% if post.description %}
+        {{ post.description }}
+      {% else %}
+        {{ post.excerpt | strip_html | truncatewords:25 }}
+      {% endif %}
+    </div>
+    <div class="post-content">
+      {% include post-meta.html post=post %}
+      <div class="entry-content">{{ post.content | markdownify }}</div>
+    </div>
+  </article>
   {% endfor %}
 </div>
 
@@ -110,54 +105,60 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
   const homepage  = document.querySelector('.homepage');
   const btnBlog   = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
   const debugBox  = document.getElementById('spa-debug');
   const listTitle = document.querySelector('.list-title');
+  const spaHome   = document.getElementById('spa-home');
   const BLOG_PATH = '/blog/';
   let STATE = '';
 
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
 
-  /* ---------------- CORE ---------------- */
+  /* CORE */
   function hideAll() {
-    [homepage, postsWrap, page404].forEach(el => safe(el, e => {
-      e.style.display = 'none';
+    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
+      e.style.display='none';
       e.classList.remove('animate-slide');
       void e.offsetWidth;
     }));
-    getPosts().forEach(p => {
-      p.style.display = 'none';
-      const c = p.querySelector('.post-content');
-      const a = p.querySelector('.post-title a');
-      const ex = p.querySelector('.post-excerpt');
+    getPosts().forEach(p=>{
+      const c=p.querySelector('.post-content');
+      const a=p.querySelector('.post-title a');
+      const ex=p.querySelector('.post-excerpt');
+      p.style.display='none';
       if(c) c.style.display='none';
       if(a) a.style.display='';
       if(ex) ex.style.display='block';
     });
   }
 
-  function push(path) {  
-    if (location.pathname + location.search !== path) history.pushState(null,'',path);
-  }
+  function push(path) { if(location.pathname+location.search!==path) history.pushState(null,'',path); }
 
-  /* ---------------- RENDERERS ---------------- */
-  function renderHome(pushState) {
-    STATE='home'; hideAll();
-    safe(homepage, e => { e.style.display='block'; e.classList.add('animate-slide'); });
+  /* RENDERERS */
+  function renderHome(pushState){
+    STATE='home';
+    hideAll();
+    [spaHome, homepage].forEach(el=>safe(el,e=>{
+      e.style.display='block';
+      e.classList.add('animate-slide');
+    }));
     if(pushState) push('/');
     debug();
   }
 
   function renderList(pushState){
-    STATE='list'; hideAll();
-    safe(listTitle, e => e.style.display='block');
-    safe(postsWrap, e => { e.style.display='block'; e.classList.add('animate-slide'); });
-    getPosts().forEach(p => p.style.display='block');
+    STATE='list';
+    hideAll();
+    safe(listTitle,el=>el.style.display='block');
+    safe(postsWrap,el=>{
+      el.style.display='block';
+      el.classList.add('animate-slide');
+    });
+    getPosts().forEach(p=>p.style.display='block');
     if(pushState) push(BLOG_PATH);
     debug();
 
@@ -167,9 +168,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderPost(post,pushState){
-    STATE='post'; hideAll();
-    safe(listTitle, e => e.style.display='none');
-    safe(postsWrap, e => { e.style.display='block'; e.classList.add('animate-slide'); });
+    STATE='post';
+    hideAll();
+    safe(listTitle,el=>el.style.display='none');
+    safe(postsWrap,el=>{
+      el.style.display='block';
+      el.classList.add('animate-slide');
+    });
     post.style.display='block';
     const c=post.querySelector('.post-content');
     const a=post.querySelector('.post-title a');
@@ -182,89 +187,142 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function render404(path,pushState){
-    STATE='404'; hideAll();
-    safe(page404, e=>e.style.display='block');
+    STATE='404';
+    hideAll();
+    safe(page404,el=>el.style.display='block');
     if(pushState) push(path);
     debug();
   }
 
-  /* ---------------- PATH ---------------- */
+  /* PATH FINDER */
   function findPostByPath(path){
-    const posts = getPosts();
-    const target = path.replace(/\/$/,'').replace('.html','');
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('.html','');
-    if(target===cleanBlogPath || target==='') return null;
+    const posts=getPosts();
+    const target=path.replace(/\/$/,'').replace('.html','');
+    const cleanBlogPath=BLOG_PATH.replace(/\/$/,'').replace('.html','');
+    if(target===cleanBlogPath||target==='') return null;
     return posts.find(p=>{
-      const postUrl = p.dataset.url;
+      const postUrl=p.dataset.url;
       if(!postUrl) return false;
-      const cleanPostUrl = postUrl.replace(/\/$/,'').replace('.html','');
-      return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
+      const cleanPostUrl=postUrl.replace(/\/$/,'').replace('.html','');
+      return cleanPostUrl.endsWith(target)||target.endsWith(cleanPostUrl);
     });
   }
 
-  /* ---------------- ROUTER ---------------- */
+  /* ROUTER */
   function router(path=location.pathname+location.search,pushState=false){
-    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
+    const cleanPath=path.replace(/\/$/,'').replace('/index.html','')||'/';
+    const cleanBlogPath=BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
 
-    safe(debugBox, box => box.innerHTML=`<div class="log-entry"><span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath}</code></div>`);
+    safe(debugBox,box=>{box.innerHTML=`<div class="log-entry"><span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath}</code></div>`;});
 
     if(cleanPath==='/'||cleanPath==='/index.html') return renderHome(pushState);
+
     if(cleanPath===cleanBlogPath||cleanPath===cleanBlogPath+'.html'||path.includes('blog.html')){
-      if(cleanPath!==cleanBlogPath && findPostByPath(cleanPath)){} else return renderList(pushState);
+      if(cleanPath!==cleanBlogPath && findPostByPath(cleanPath)){
+        // lanjut ke bawah
+      }else return renderList(pushState);
     }
+
     const post=findPostByPath(cleanPath);
     if(post) return renderPost(post,pushState);
+
     render404(path,pushState);
   }
 
-  /* ---------------- TAG FILTER ---------------- */
+  /* TAG FILTER */
   function filterByTag(tag,pushState=false){
-    const title = document.getElementById('tag-title');
+    const title=document.getElementById('tag-title');
     getPosts().forEach(post=>{
-      const tags = (post.dataset.tags||'').split(',');
-      post.style.display = (!tag || tags.includes(tag))?'block':'none';
+      const tags=(post.dataset.tags||'').split(',');
+      post.style.display = (!tag || tags.includes(tag)) ? 'block':'none';
     });
-    if(tag){ title.textContent=`Showing all posts under "${tag}"`; if(pushState) push(`/blog?tag=${encodeURIComponent(tag)}`); }
-    else { title.textContent='All Posts'; if(pushState) push('/blog'); }
+    if(tag){
+      title.textContent=`Showing all posts under "${tag}"`;
+      if(pushState) push(`/blog?tag=${encodeURIComponent(tag)}`);
+    }else{
+      title.textContent='All Posts';
+      if(pushState) push('/blog');
+    }
   }
 
-  /* ---------------- EVENT LISTENERS ---------------- */
+  /* EVENT LISTENERS */
   document.addEventListener('click',e=>{
     const a=e.target.closest('a');
     if(a){
       const href=a.getAttribute('href');
       if(href && !href.startsWith('#')){
-        try{ const url=new URL(href,location.origin);
-          if(url.origin===location.origin){ e.preventDefault(); router(url.pathname+url.search,true); }
+        try{
+          const url=new URL(href,location.origin);
+          if(url.origin===location.origin){
+            e.preventDefault();
+            router(url.pathname+url.search,true);
+          }
         }catch(err){}
       }
     }
 
     const tagBtn=e.target.closest('.tag');
-    if(tagBtn){ e.preventDefault(); filterByTag(tagBtn.dataset.tag,true); }
-
+    if(tagBtn){
+      e.preventDefault();
+      const tag=tagBtn.dataset.tag;
+      renderList(false); // renderList dulu agar debug tetap jalan
+      filterByTag(tag,true);
+    }
   });
 
   const showAllBtn=document.getElementById('show-all');
-  if(showAllBtn){ showAllBtn.addEventListener('click',e=>{ e.preventDefault(); filterByTag(null,true); }); }
-
-  if(btnBlog){ btnBlog.addEventListener('click',e=>{ e.preventDefault(); router(BLOG_PATH,true); }); }
-
-  window.addEventListener('popstate',()=>router(location.pathname+location.search,false));
-
-  /* ---------------- DEBUG ---------------- */
-  function debug(){
-    if(!debugBox) return;
-    let stateClass = (STATE==='404')?'badge-error':'badge-state';
-    debugBox.innerHTML+=`<div class="log-entry" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
-      <span class="badge ${stateClass}">State</span> ${STATE}
-    </div>
-    <div class="log-entry"><span class="badge badge-success">URL</span> ${location.pathname+location.search}</div>`;
-    debugBox.scrollTop = debugBox.scrollHeight;
+  if(showAllBtn){
+    showAllBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      renderList(false);
+      filterByTag(null,true);
+    });
   }
 
-  router(location.pathname+location.search,false);
+  window.addEventListener('popstate',()=>{router(location.pathname+location.search,false);});
 
+  /* DEBUG & COPY */
+  function debug(){
+    if(!debugBox) return;
+    let stateClass=(STATE==='404')?'badge-error':'badge-state';
+    debugBox.innerHTML+=`
+      <div class="log-entry" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
+        <span class="badge ${stateClass}">State</span> ${STATE}
+      </div>
+      <div class="log-entry">
+        <span class="badge badge-success">URL</span> ${location.pathname+location.search}
+      </div>`;
+    debugBox.scrollTop=debugBox.scrollHeight;
+  }
+
+  if(debugBox){
+    debugBox.addEventListener('click',()=>{
+      const logs=debugBox.querySelectorAll('.log-entry');
+      let markdownText='';
+      logs.forEach(log=>{
+        const rawText=log.innerText.replace(/\s+/g,' ').trim();
+        const routingMatch=rawText.match(/Routing\s+(Path:\s+\S+)/i);
+        const stateMatch=rawText.match(/State\s+(\S+)/i);
+        const urlMatch=rawText.match(/URL\s+(\S+)/i);
+        if(routingMatch) markdownText+=`**ROUTING** \`${routingMatch[1]}\` \n`;
+        if(stateMatch) markdownText+=`**STATE** \`${stateMatch[1]}\` \n`;
+        if(urlMatch) markdownText+=`**URL** \`${urlMatch[1]}\` \n`;
+        markdownText+='\n';
+      });
+      if(markdownText.trim()){
+        navigator.clipboard.writeText(markdownText.trim()).then(()=>{
+          const msg=document.createElement('div');
+          msg.style.cssText="color:#10b981;font-size:10px;margin-top:5px;";
+          msg.innerHTML='<i>✓ Copied (Routing, State, URL) as Markdown!</i>';
+          debugBox.appendChild(msg);
+          debugBox.scrollTop=debugBox.scrollHeight;
+          setTimeout(()=>msg.remove(),2000);
+        });
+      }
+    });
+  }
+
+  /* INIT */
+  router(location.pathname+location.search,false);
 });
 </script>
