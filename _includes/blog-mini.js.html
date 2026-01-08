@@ -160,16 +160,14 @@ function renderList(){
   STATE = 'list';
   hideAll();
 
+  safe(listTitle, el => el.style.display = 'block');
+
   safe(postsWrap, el => {
     el.style.display = 'block';
     el.classList.add('animate-slide');
   });
 
   getPosts().forEach(p => p.style.display = 'block');
-
-  // ✅ list-title HANYA di halaman list
-  safe(listTitle, el => el.style.display = 'block');
-
   debug();
 }
 
@@ -177,18 +175,19 @@ function renderTag(tag){
   STATE = 'tag';
   hideAll();
 
+  const tagTitle = document.getElementById('tag-title');
+  if(tagTitle){
+    tagTitle.style.display = 'block';
+    tagTitle.textContent = `Showing all posts under "${tag}"`;
+  }
+
+  const showAllBtn = document.getElementById('show-all');
+  if(showAllBtn) showAllBtn.style.display = 'inline-block';
+
   safe(postsWrap, el => {
     el.style.display = 'block';
     el.classList.add('animate-slide');
   });
-
-  getPosts().forEach(p => p.style.display = 'block');
-
-  const tagTitleEl = document.getElementById('tag-title');
-  if(tagTitleEl) tagTitleEl.style.display = 'inline-block';
-
-  const showAllBtn = document.getElementById('show-all');
-  if(showAllBtn) showAllBtn.style.display = 'inline-block';
 
   filterByTag(tag, false);
   debug();
@@ -238,31 +237,29 @@ function renderTag(tag){
   /* ROUTER */
 function router(path, pushState){
   if(debugBox) debugBox.innerHTML = '';
+
   if(pushState){
-    history.pushState(null, '', path);
+    history.pushState(null,'',path);
   }
 
-  const params = new URLSearchParams(location.search);
-  const tag = params.get('tag');
+  const url = new URL(path, location.origin);
+  const pathname = url.pathname;
+  const tag = url.searchParams.get('tag');
 
-  if(path === '/' || path === '/index.html'){
-    renderHome();
-    return;
+  if(pathname === '/' || pathname === '/index.html'){
+    return renderHome();
   }
 
-  if(path.startsWith(BLOG_PATH)){
+  if(pathname === BLOG_PATH){
     if(tag){
-      renderTag(tag);
-    } else {
-      renderList();
+      return renderTag(tag);   // 🔥 BEDA
     }
-    return;
+    return renderList();       // 🔥 BEDA
   }
 
-  const post = findPostByPath(path);
+  const post = findPostByPath(pathname);
   if(post){
-    renderPost(post, false);
-    return;
+    return renderPost(post, false);
   }
 
   render404(path, false);
