@@ -66,9 +66,15 @@ document.addEventListener("DOMContentLoaded", function () {
       text = progress.querySelector(".app-progress-text");
 
       /* coba fetch untuk progress asli */
+/* ... kode Map dan fake progress tetap sama ... */
+
+      /* coba fetch untuk progress asli */
       fetch(src)
         .then(res => {
           const total = +res.headers.get("Content-Length");
+          // 1. Ambil format asli dari header (misal: image/avif atau image/jpeg)
+          const contentType = res.headers.get("Content-Type"); 
+
           if (!res.ok || !res.body || !total) throw 0;
 
           const reader = res.body.getReader();
@@ -78,7 +84,9 @@ document.addEventListener("DOMContentLoaded", function () {
           function read() {
             return reader.read().then(({ done, value }) => {
               if (done) {
-                const blob = new Blob(chunks);
+                // 2. Berikan format tersebut ke Blob
+                const blob = new Blob(chunks, { type: contentType || 'image/jpeg' });
+                
                 const url = URL.createObjectURL(blob);
                 img.onload = () => showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
                 img.src = url;
@@ -94,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           return read();
         })
+
         .catch(() => {
           /* fallback fake progress */
           fakeTimer = startFakeProgress(fill, text);
