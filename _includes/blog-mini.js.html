@@ -156,13 +156,9 @@ function hideAll() {
   }
 
   // tampilkan tag-title dan show-all hanya di list/tag
-function renderList(pushState){
+function renderList(){
   STATE = 'list';
   hideAll();
-
-  const params = new URLSearchParams(location.search);
-  const tag = params.get('tag');
-  const isBlogRoot = location.pathname === BLOG_PATH;
 
   safe(postsWrap, el => {
     el.style.display = 'block';
@@ -171,29 +167,31 @@ function renderList(pushState){
 
   getPosts().forEach(p => p.style.display = 'block');
 
-  // ✅ list-title HANYA di /blog
-  if(isBlogRoot && !tag){
-    safe(listTitle, el => el.style.display = 'block');
-  }
-
-  // ✅ halaman tag
-  if(isBlogRoot && tag){
-    const tagTitleEl = document.getElementById('tag-title');
-    if(tagTitleEl) tagTitleEl.style.display = 'inline-block';
-
-    const showAllBtn = document.getElementById('show-all');
-    if(showAllBtn) showAllBtn.style.display = 'inline-block';
-  }
-
-  if(pushState && isBlogRoot){
-    push(BLOG_PATH + (tag ? `?tag=${encodeURIComponent(tag)}` : ''));
-  }
+  // ✅ list-title HANYA di halaman list
+  safe(listTitle, el => el.style.display = 'block');
 
   debug();
+}
 
-  if(tag && isBlogRoot){
-    filterByTag(tag, false);
-  }
+function renderTag(tag){
+  STATE = 'tag';
+  hideAll();
+
+  safe(postsWrap, el => {
+    el.style.display = 'block';
+    el.classList.add('animate-slide');
+  });
+
+  getPosts().forEach(p => p.style.display = 'block');
+
+  const tagTitleEl = document.getElementById('tag-title');
+  if(tagTitleEl) tagTitleEl.style.display = 'inline-block';
+
+  const showAllBtn = document.getElementById('show-all');
+  if(showAllBtn) showAllBtn.style.display = 'inline-block';
+
+  filterByTag(tag, false);
+  debug();
 }
 
   function renderPost(post,pushState){
@@ -238,30 +236,35 @@ function renderList(pushState){
   }
 
   /* ROUTER */
-function router(path=location.pathname+location.search, pushState=false){
-  const url = new URL(path, location.origin);
-  const cleanPath = url.pathname.replace(/\/$/,'').replace('/index.html','') || '/';
-  const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
-
-  const params = url.searchParams;
-  const tag = params.get('tag');
-
-  // debug
-  safe(debugBox, box => {
-    box.innerHTML += `<div class="log-entry"><span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath + url.search}</code></div>`;
-  });
-
-  if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
-
-  // list atau tag list
-  if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath + '.html' || path.includes('blog.html')){
-    return renderList(pushState); // renderList sendiri yg cek query tag
+function router(path, pushState){
+  if(pushState){
+    history.pushState(null, '', path);
   }
 
-  const post = findPostByPath(cleanPath);
-  if(post) return renderPost(post, pushState);
+  const params = new URLSearchParams(location.search);
+  const tag = params.get('tag');
 
-  render404(path, pushState);
+  if(path === '/' || path === '/index.html'){
+    renderHome();
+    return;
+  }
+
+  if(path.startsWith(BLOG_PATH)){
+    if(tag){
+      renderTag(tag);
+    } else {
+      renderList();
+    }
+    return;
+  }
+
+  const post = findPostByPath(path);
+  if(post){
+    renderPost(post, false);
+    return;
+  }
+
+  render404(path, false);
 }
 
   /* TAG FILTER */
