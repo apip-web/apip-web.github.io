@@ -297,13 +297,12 @@ function router(path, pushState){
       }
     }
 
-    const tagBtn=e.target.closest('.tag');
-    if(tagBtn){
-      e.preventDefault();
-      const tag=tagBtn.dataset.tag;
-      renderList(false); // renderList dulu agar debug tetap jalan
-      filterByTag(tag,true);
-    }
+const tagBtn = e.target.closest('.tag');
+if(tagBtn){
+  e.preventDefault();
+  const tag = tagBtn.dataset.tag;
+  router(`/blog?tag=${encodeURIComponent(tag)}`, true);
+}
   });
 
   const showAllBtn=document.getElementById('show-all');
