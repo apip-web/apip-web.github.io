@@ -237,6 +237,7 @@ function renderTag(tag){
 
   /* ROUTER */
 function router(path, pushState){
+  if(debugBox) debugBox.innerHTML = '';
   if(pushState){
     history.pushState(null, '', path);
   }
