@@ -306,6 +306,17 @@ function debug() {
   debugBox.scrollTop = debugBox.scrollHeight;
 }
 
+if (debugBox) {  
+    debugBox.addEventListener('click', () => {  
+      const htmlToCopy = debugBox.innerHTML;  
+      navigator.clipboard.writeText(htmlToCopy).then(() => {  
+        const msg = document.createElement('div');
+        msg.innerHTML = `<i>Copied debug overlay! 📋</i>`;
+        debugBox.appendChild(msg);
+      });  
+    });  
+  }
+
   router(location.pathname, false);
 });  
 </script>
