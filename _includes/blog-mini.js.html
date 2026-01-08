@@ -47,6 +47,27 @@
 .badge-success { background:#10b981; color:white; }
 .badge-error { background:#ef4444; color:white; }
 
+/* tombol close */
+#debug-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#debug-close:hover {
+  color: #ef4444;
+}
+
+/* hidden state */
+#spa-debug.is-hidden {
+  display: none;
+}
+
 /* TAG BUTTON */
 .post-tags { margin-top:6px; }
 .post-tags .tag {
@@ -103,7 +124,9 @@
   <a href="/">Kembali ke Home</a>
 </div>
 
-<div id="spa-debug"></div>
+<div id="spa-debug">
+  <button id="debug-close" title="Close debug">×</button>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -119,6 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
+
+  const debugCloseBtn = document.getElementById('debug-close');
+
+if(debugCloseBtn && debugBox){
+  debugCloseBtn.addEventListener('click', () => {
+    debugBox.classList.add('is-hidden');
+  });
+}
 
   /* CORE */
 function hideAll() {
