@@ -162,8 +162,8 @@ function renderList(pushState){
 
   const params = new URLSearchParams(location.search);
   const tag = params.get('tag');
+  const isBlogRoot = location.pathname === BLOG_PATH;
 
-  // posts wrapper selalu ditampilkan
   safe(postsWrap, el => {
     el.style.display = 'block';
     el.classList.add('animate-slide');
@@ -171,22 +171,29 @@ function renderList(pushState){
 
   getPosts().forEach(p => p.style.display = 'block');
 
-  // list-title hanya untuk list utama (tanpa tag)
-  if(!tag){
+  // ✅ list-title HANYA di /blog
+  if(isBlogRoot && !tag){
     safe(listTitle, el => el.style.display = 'block');
   }
 
-  // tag-title & tombol show-all hanya muncul kalau ada tag
-  const tagTitleEl = document.getElementById('tag-title');
-  if(tag && tagTitleEl) tagTitleEl.style.display = 'inline-block';
+  // ✅ halaman tag
+  if(isBlogRoot && tag){
+    const tagTitleEl = document.getElementById('tag-title');
+    if(tagTitleEl) tagTitleEl.style.display = 'inline-block';
 
-  const showAllBtn = document.getElementById('show-all');
-  if(tag && showAllBtn) showAllBtn.style.display = 'inline-block';
+    const showAllBtn = document.getElementById('show-all');
+    if(showAllBtn) showAllBtn.style.display = 'inline-block';
+  }
 
-  if(pushState) push(BLOG_PATH + (tag ? `?tag=${encodeURIComponent(tag)}` : ''));
+  if(pushState && isBlogRoot){
+    push(BLOG_PATH + (tag ? `?tag=${encodeURIComponent(tag)}` : ''));
+  }
+
   debug();
 
-  if(tag) filterByTag(tag, false);
+  if(tag && isBlogRoot){
+    filterByTag(tag, false);
+  }
 }
 
   function renderPost(post,pushState){
