@@ -3,7 +3,9 @@
 #posts,
 .homepage,
 #page-404,
-.post-content { display: none; }
+.post-content,
+#tag-title,
+#show-all { display: none; }
 
 @keyframes slideDown {
   from { opacity:0; transform:translateY(-20px);}
@@ -116,22 +118,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const getPosts = () => [...document.querySelectorAll('.post')];
 
   /* CORE */
-  function hideAll() {
-    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
-      e.style.display='none';
-      e.classList.remove('animate-slide');
-      void e.offsetWidth;
-    }));
-    getPosts().forEach(p=>{
-      const c=p.querySelector('.post-content');
-      const a=p.querySelector('.post-title a');
-      const ex=p.querySelector('.post-excerpt');
-      p.style.display='none';
-      if(c) c.style.display='none';
-      if(a) a.style.display='';
-      if(ex) ex.style.display='block';
-    });
-  }
+function hideAll() {
+  [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
+    e.style.display='none';
+    e.classList.remove('animate-slide');
+    void e.offsetWidth;
+  }));
+
+  // sembunyikan tag-title dan show-all
+  if(listTitle) listTitle.style.display='none';
+  const showAllBtn = document.getElementById('show-all');
+  if(showAllBtn) showAllBtn.style.display='none';
+
+  getPosts().forEach(p=>{
+    const c=p.querySelector('.post-content');
+    const a=p.querySelector('.post-title a');
+    const ex=p.querySelector('.post-excerpt');
+    p.style.display='none';
+    if(c) c.style.display='none';
+    if(a) a.style.display='';
+    if(ex) ex.style.display='block';
+  });
+}
 
   function push(path) { if(location.pathname+location.search!==path) history.pushState(null,'',path); }
 
@@ -147,22 +155,28 @@ document.addEventListener('DOMContentLoaded', () => {
     debug();
   }
 
-  function renderList(pushState){
-    STATE='list';
-    hideAll();
-    safe(listTitle,el=>el.style.display='block');
-    safe(postsWrap,el=>{
-      el.style.display='block';
-      el.classList.add('animate-slide');
-    });
-    getPosts().forEach(p=>p.style.display='block');
-    if(pushState) push(BLOG_PATH);
-    debug();
+function renderList(pushState){
+  STATE='list';
+  hideAll();
 
-    const params = new URLSearchParams(location.search);
-    const tag = params.get('tag');
-    if(tag) filterByTag(tag,false);
-  }
+  // tampilkan tag-title dan show-all hanya di list/tag
+  safe(listTitle, el => el.style.display = 'block');
+  const showAllBtn = document.getElementById('show-all');
+  if(showAllBtn) showAllBtn.style.display = 'inline-block';
+
+  safe(postsWrap,el=>{
+    el.style.display='block';
+    el.classList.add('animate-slide');
+  });
+
+  getPosts().forEach(p=>p.style.display='block');
+  if(pushState) push(BLOG_PATH);
+  debug();
+
+  const params = new URLSearchParams(location.search);
+  const tag = params.get('tag');
+  if(tag) filterByTag(tag,false);
+}
 
   function renderPost(post,pushState){
     STATE='post';
