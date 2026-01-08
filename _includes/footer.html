@@ -7,26 +7,35 @@
 </footer>
 
 <script>
-  // Gunakan IIFE atau bungkus agar variabel tidak bentrok
-  (function() {
-    const debugBtn = document.getElementById('toggle-debug');
-    // Ambil elemen debugBox lagi untuk memastikan script menemukannya
-    const debugBox = document.getElementById('spa-debug');
+(function () {
+  const debugBtn  = document.getElementById('toggle-debug');
+  const debugBox  = document.getElementById('spa-debug');
+  const closeBtn  = document.getElementById('debug-close');
 
-    if (debugBtn && debugBox) {
-      debugBtn.addEventListener('click', () => {
-        // Cek status display saat ini
-        const isHidden = window.getComputedStyle(debugBox).display === 'none';
-        
-        if (isHidden) {
-          debugBox.style.display = 'block';
-          debugBtn.innerHTML = 'Hide <code>Debug</code>';
-          debugBox.scrollTop = debugBox.scrollHeight;
-        } else {
-          debugBox.style.display = 'none';
-          debugBtn.innerHTML = 'Show <code>Debug</code>';
-        }
-      });
-    }
-  })();
+  if (!debugBtn || !debugBox) return;
+
+  function openDebug() {
+    debugBox.classList.add('is-open');
+    debugBtn.innerHTML = 'Hide <code>Debug</code>';
+    debugBox.scrollTop = debugBox.scrollHeight;
+  }
+
+  function closeDebug() {
+    debugBox.classList.remove('is-open');
+    debugBtn.innerHTML = 'Show <code>Debug</code>';
+  }
+
+  debugBtn.addEventListener('click', () => {
+    debugBox.classList.contains('is-open')
+      ? closeDebug()
+      : openDebug();
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      closeDebug();
+    });
+  }
+})();
 </script>
