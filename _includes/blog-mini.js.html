@@ -19,50 +19,6 @@
   overflow-wrap: anywhere;
 }
 
-/* DEBUG */
-#spa-debug {
-  display:none;
-  position:fixed;
-  bottom:15px;
-  left:15px;
-  right:15px;
-  max-height:150px;
-  overflow-y:auto;
-  background:rgba(15,23,42,0.6);
-  backdrop-filter:blur(8px);
-  color:#e2e8f0;
-  font-family:'Fira Code', monospace;
-  font-size:11px;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.1);
-  z-index:9999;
-  scrollbar-width:thin;
-}
-#spa-debug code { font-size:11px; }
-.log-entry { margin-bottom:4px; line-height:1.4; }
-.badge { padding:2px 5px; border-radius:3px; font-weight:bold; text-transform:uppercase; margin-right:5px; }
-.badge-route { background:#3b82f6; color:white; }
-.badge-state { background:#8b5cf6; color:white; }
-.badge-success { background:#10b981; color:white; }
-.badge-error { background:#ef4444; color:white; }
-
-/* tombol close */
-#debug-close {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  background: transparent;
-  border: none;
-  color: #9ca3af;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-#debug-close:hover {
-  color: #ef4444;
-}
-
 /* TAG BUTTON */
 .post-tags { margin-top:6px; }
 .post-tags .tag {
@@ -117,10 +73,6 @@
   <h1>404</h1>
   <p>Halaman tidak ditemukan.</p>
   <a href="/">Kembali ke Home</a>
-</div>
-
-<div id="spa-debug">
-  <button id="debug-close" title="Close debug">×</button>
 </div>
 
 <script>
