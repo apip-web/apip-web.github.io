@@ -69,12 +69,6 @@
 }
 </style>
 
-<!-- ---------------- HTML ---------------- -->
-<div id="spa-home" class="homepage">
-  <h1>Welcome to Home</h1>
-  <a href="/blog/" id="open-blog">Open Blog</a>
-</div>
-
 <h1 id="tag-title">All Posts</h1>
 
 <div id="posts">
@@ -123,18 +117,15 @@
 
 <div id="spa-debug"></div>
 
-<!-- ---------------- JS SPA ---------------- -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  const homepage  = document.querySelector('.homepage');
+  const homepage  = document.querySelector('.homepage'); // sudah ada di _includes/homepage.html
   const btnBlog   = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
   const page404   = document.getElementById('page-404');
   const listTitle = document.querySelector('.list-title');
-  const spaHome   = document.getElementById('spa-home');
   const showAllBtn = document.getElementById('show-all');
-  const debugBox  = document.getElementById('spa-debug');
   const BLOG_PATH = '/blog/';
   let STATE = '';
 
@@ -143,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------------- CORE ---------------- */
   function hideAll() {
-    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
+    [homepage, postsWrap, page404].forEach(el => safe(el, e => {
       e.style.display = 'none';
       e.classList.remove('animate-slide');
       void e.offsetWidth;
@@ -157,18 +148,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if(a) a.style.display = '';
       if(ex) ex.style.display = 'block';
     }));
-    // Jangan sembunyikan tombol homepage di sini
+    // jangan sembunyikan btnBlog di sini
   }
 
   /* ---------------- RENDERERS ---------------- */
   function renderHome(pushState){
     STATE='home';
     hideAll();
-    [spaHome, homepage].forEach(el => safe(el, e => {
+    safe(homepage, e => {
       e.style.display='block';
       e.classList.add('animate-slide');
-    }));
-    if(btnBlog) btnBlog.style.display='inline-block';
+    });
+    if(btnBlog) btnBlog.style.display='inline-block'; // tampilkan tombol di homepage
     if(pushState) history.pushState(null,'','/');
   }
 
