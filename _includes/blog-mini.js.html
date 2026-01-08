@@ -307,15 +307,30 @@ function debug() {
 }
 
 if (debugBox) {  
-    debugBox.addEventListener('click', () => {  
-      const htmlToCopy = debugBox.innerHTML;  
-      navigator.clipboard.writeText(htmlToCopy).then(() => {  
-        const msg = document.createElement('div');
-        msg.innerHTML = `<i>Copied debug overlay! 📋</i>`;
-        debugBox.appendChild(msg);
-      });  
+  debugBox.addEventListener('click', () => {  
+    const htmlToCopy = debugBox.innerHTML;  
+    
+    navigator.clipboard.writeText(htmlToCopy).then(() => {  
+      // 1. Buat elemen pesan
+      const msg = document.createElement('div');
+      msg.style.color = '#10b981'; // Warna hijau agar kontras
+      msg.style.marginTop = '5px';
+      msg.innerHTML = `<i>✓ Copied debug overlay!</i>`;
+      
+      // 2. Tempelkan ke debugBox
+      debugBox.appendChild(msg);
+      debugBox.scrollTop = debugBox.scrollHeight;
+
+      // 3. Hapus elemen pesan setelah 2000ms (2 detik)
+      setTimeout(() => {
+        msg.remove();
+      }, 2000);
+      
+    }).catch(err => {
+      console.error('Gagal menyalin:', err);
     });  
-  }
+  });  
+}
 
   router(location.pathname, false);
 });  
