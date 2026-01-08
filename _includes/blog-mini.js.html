@@ -1,34 +1,21 @@
 <style>
-/* ---------------- HIDE DEFAULT ---------------- */
 #spa-home,
 #posts,
 .homepage,
 #page-404,
-.post-content { display: none; }
+.post-content,
+#tag-title,
+#show-all { display: none; }
 
-/* ---------------- ANIMASI ---------------- */
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-slide {
-  animation: slideDown 0.6s ease-out forwards;
-}
+.animate-slide { animation: slideDown 2s ease-out forwards; }
 
-.post-content p {
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
+.post-content p { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
 
-/* ---------------- DEBUG ---------------- */
 #spa-debug {
   display: none;
   position: fixed;
@@ -37,98 +24,36 @@
   right: 15px;
   max-height: 150px;
   overflow-y: auto;
-  background: rgba(15,23,42,0.6);
+  background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(8px);
   color: #e2e8f0;
-  font-family: 'Fira Code', monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
   font-size: 11px;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
   z-index: 9999;
   scrollbar-width: thin;
 }
 
 #spa-debug code { font-size: 11px; }
+
 .log-entry { margin-bottom: 4px; line-height: 1.4; }
-.badge {
-  padding: 2px 5px;
-  border-radius: 3px;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-right: 5px;
-}
+.badge { padding: 2px 5px; border-radius: 3px; font-weight: bold; text-transform: uppercase; margin-right: 5px; }
 .badge-route { background: #3b82f6; color: white; }
 .badge-state { background: #8b5cf6; color: white; }
 .badge-success { background: #10b981; color: white; }
 .badge-error { background: #ef4444; color: white; }
 
-/* ---------------- TAG BUTTON ---------------- */
-.post-tags { margin-top: 6px; }
-.post-tags .tag {
-  cursor: pointer;
-  padding: 2px 6px;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  margin-right: 4px;
-  background: #f0f0f0;
-  font-size: 12px;
-}
-.post-tags .tag:hover { background: #d1d5db; }
-
-#show-all {
-  margin-top: 10px;
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
-}
+.post-tags { margin-top: 5px; }
+.post-tags .tag { cursor: pointer; margin-right: 4px; padding: 2px 5px; border-radius: 3px; background: #ddd; border: none; }
 </style>
 
-<!-- ---------------- HTML ---------------- -->
 <div id="spa-home" class="homepage">
   <h1>Welcome to Home</h1>
   <a href="/blog/" id="open-blog">Open Blog</a>
 </div>
-
-<h1 id="tag-title">All Posts</h1>
-
-<div id="posts">
-  <div class="list-title"><h1>Blog:</h1></div>
-  
-  {% for post in site.posts %}
-    <article class="post"
-      data-url="{{ post.url | relative_url }}"
-      data-tags="{{ post.tags | join: ',' }}">
-      
-      <h2 class="post-title">
-        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-      </h2>
-
-      <div class="post-tags">
-        {% for tag in post.tags %}
-          <button class="tag" data-tag="{{ tag }}">#{{ tag }}</button>
-        {% endfor %}
-      </div>
-
-      <div class="post-excerpt">
-        {% if post.description %}
-          {{ post.description }}
-        {% else %}
-          {{ post.excerpt | strip_html | truncatewords: 25 }}
-        {% endif %}
-      </div>
-
-      <div class="post-content">
-        {% include post-meta.html post=post %}
-        <div class="entry-content">
-          {{ post.content | markdownify }}
-        </div>
-      </div>
-    </article>
-  {% endfor %}
-</div>
-
-<button id="show-all">All</button>
 
 <div id="page-404">
   <h1>404</h1>
@@ -136,12 +61,45 @@
   <a href="/">Kembali ke Home</a>
 </div>
 
+<h1 id="tag-title">All Posts</h1>
+<button id="show-all">All</button>
+
+<div id="posts">
+  <div class="list-title"><h1>Blog:</h1></div>
+  {% for post in site.posts %}
+  <article class="post" data-url="{{ post.url | relative_url }}" data-tags="{{ post.tags | join: ',' }}">
+    <h2 class="post-title">
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    </h2>
+
+    <div class="post-excerpt">
+      {% if post.description %}
+        {{ post.description }}
+      {% else %}
+        {{ post.excerpt | strip_html | truncatewords: 25 }}
+      {% endif %}
+    </div>
+
+    <div class="post-tags">
+      {% for tag in post.tags %}
+      <button class="tag" data-tag="{{ tag }}">#{{ tag }}</button>
+      {% endfor %}
+    </div>
+
+    <div class="post-content">
+      {% include post-meta.html post=post %}
+      <div class="entry-content">
+        {{ post.content | markdownify }}
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
 <div id="spa-debug"></div>
 
-<!-- ---------------- JS SPA ---------------- -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
   const homepage  = document.querySelector('.homepage');
   const btnBlog   = document.getElementById('open-blog');
   const postsWrap = document.getElementById('posts');
@@ -149,37 +107,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const debugBox  = document.getElementById('spa-debug');
   const listTitle = document.querySelector('.list-title');
   const spaHome   = document.getElementById('spa-home');
+  const tagTitle  = document.getElementById('tag-title');
+  const showAllBtn = document.getElementById('show-all');
+
   const BLOG_PATH = '/blog/';
-  let STATE = '';
+  let STATE       = '';
 
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
 
-  /* ---------------- CORE ---------------- */
+  /* ---------------- Core Functions ---------------- */
   function hideAll() {
-    [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
+    const containers = [spaHome, homepage, postsWrap, page404];
+    containers.forEach(el => safe(el, e => {
       e.style.display = 'none';
       e.classList.remove('animate-slide');
       void e.offsetWidth;
     }));
+
+    safe(tagTitle, el => el.style.display = 'none');
+    safe(showAllBtn, el => el.style.display = 'none');
+
     getPosts().forEach(p => {
       p.style.display = 'none';
       const c = p.querySelector('.post-content');
       const a = p.querySelector('.post-title a');
       const ex = p.querySelector('.post-excerpt');
-      if(c) c.style.display = 'none';
-      if(a) a.style.display = '';
-      if(ex) ex.style.display = 'block';
+      if (c) c.style.display = 'none';
+      if (a) a.style.display = '';
+      if (ex) ex.style.display = 'block';
     });
   }
 
-  function push(path) {  
-    if (location.pathname + location.search !== path) {  
-      history.pushState(null,'',path);
+  function push(path) {
+    if (location.pathname !== path) {
+      history.pushState(null, '', path);
     }
   }
 
-  /* ---------------- RENDERERS ---------------- */
+  /* ---------------- Renderers ---------------- */
   function renderHome(pushState) {
     STATE = 'home';
     hideAll();
@@ -187,190 +153,163 @@ document.addEventListener('DOMContentLoaded', () => {
       e.style.display = 'block';
       e.classList.add('animate-slide');
     }));
-    if(pushState) push('/');
+    if (pushState) push('/');
     debug();
   }
 
-  function renderList(pushState) {
+  function renderList(pushState, filterTag=null) {
     STATE = 'list';
     hideAll();
     safe(listTitle, el => el.style.display = 'block');
-    safe(postsWrap, el => {
-      el.style.display = 'block';
-      el.classList.add('animate-slide');
-    });
-    getPosts().forEach(p => p.style.display = 'block');
-    if(pushState) push(BLOG_PATH);
-    debug();
+    safe(postsWrap, el => { el.style.display = 'block'; el.classList.add('animate-slide'); });
+    safe(tagTitle, el => el.style.display = 'block');
+    safe(showAllBtn, el => el.style.display = 'inline-block');
 
-    // Check if URL has ?tag
-    const params = new URLSearchParams(location.search);
-    const tag = params.get('tag');
-    if(tag) filterByTag(tag,false);
+    getPosts().forEach(p => {
+      if(filterTag){
+        const tags = p.dataset.tags.split(',');
+        p.style.display = tags.includes(filterTag) ? '' : 'none';
+      } else {
+        p.style.display = 'block';
+      }
+    });
+
+    if(filterTag){
+      tagTitle.textContent = `Showing posts under "${filterTag}"`;
+      location.hash = filterTag;
+    } else {
+      tagTitle.textContent = 'All Posts';
+      location.hash = '';
+    }
+
+    if (pushState) push(BLOG_PATH);
+    debug();
   }
 
-  function renderPost(post,pushState) {
+  function renderPost(post, pushState) {
     STATE = 'post';
     hideAll();
-    safe(listTitle, el => el.style.display = 'none');
-    safe(postsWrap, el => {
-      el.style.display = 'block';
-      el.classList.add('animate-slide');
-    });
+    safe(postsWrap, el => { el.style.display = 'block'; el.classList.add('animate-slide'); });
 
     post.style.display = 'block';
     const c = post.querySelector('.post-content');
     const a = post.querySelector('.post-title a');
     const ex = post.querySelector('.post-excerpt');
-    if(c) c.style.display = 'block';
-    if(a) a.style.display = 'none';
-    if(ex) ex.style.display = 'none';
+    if (c) c.style.display = 'block';
+    if (a) a.style.display = 'none';
+    if (ex) ex.style.display = 'none';
 
-    if(pushState) push(post.dataset.url);
+    if (pushState) push(post.dataset.url);
     debug();
   }
 
-  function render404(path,pushState) {
+  function render404(path, pushState) {
     STATE = '404';
     hideAll();
     safe(page404, el => el.style.display = 'block');
-    if(pushState) push(path);
+    if (pushState) push(path);
     debug();
   }
 
+  /* ---------------- Router ---------------- */
   function findPostByPath(path) {
     const posts = getPosts();
-    const target = path.replace(/\/$/,'').replace('.html','');
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('.html','');
-    if(target === cleanBlogPath || target === '') return null;
-
+    const target = path.replace(/\/$/, "").replace(".html", "");
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace(".html", "");
+    if (target === cleanBlogPath || target === "") return null;
     return posts.find(p => {
       const postUrl = p.dataset.url;
       if(!postUrl) return false;
-      const cleanPostUrl = postUrl.replace(/\/$/,'').replace('.html','');
+      const cleanPostUrl = postUrl.replace(/\/$/, "").replace(".html", "");
       return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
     });
   }
 
-  /* ---------------- ROUTER ---------------- */
-  function router(path = location.pathname+location.search, pushState=false) {
-    const cleanPath = path.replace(/\/$/,'').replace('/index.html','') || '/';
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/,'').replace('/index.html','');
+  function router(path = location.pathname, pushState = false) {
+    const cleanPath = path.replace(/\/$/, "").replace("/index.html", "") || "/";
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, "").replace("/index.html", "");
 
     safe(debugBox, box => {
       box.innerHTML = `<div class="log-entry">
-        <span class="badge badge-route">Routing</span> Path: <code style="color:#60a5fa">${cleanPath}</code>
+        <span class="badge badge-route">Routing</span>
+        Path: <code style="color: #60a5fa">${cleanPath}</code>
       </div>`;
     });
 
     if(cleanPath === '/' || cleanPath === '/index.html') return renderHome(pushState);
 
-    if(cleanPath === cleanBlogPath || cleanPath === cleanBlogPath+'.html' || path.includes('blog.html')) {
-      if(cleanPath !== cleanBlogPath && findPostByPath(cleanPath)) {
-        // lanjut ke bawah
-      } else return renderList(pushState);
+    if(cleanPath === cleanBlogPath || cleanPath === (cleanBlogPath + ".html") || path.includes('blog.html')){
+      if(cleanPath !== cleanBlogPath && findPostByPath(cleanPath)){
+        // lanjut ke post
+      } else {
+        // cek query string tag
+        const params = new URLSearchParams(location.search);
+        const tag = params.get('tag');
+        return renderList(pushState, tag);
+      }
     }
 
     const post = findPostByPath(cleanPath);
-    if(post) return renderPost(post,pushState);
+    if(post) return renderPost(post, pushState);
 
-    render404(path,pushState);
+    render404(path, pushState);
   }
 
-  /* ---------------- TAG FILTER ---------------- */
-  function filterByTag(tag,pushState=false){
-    const title = document.getElementById('tag-title');
-    getPosts().forEach(post=>{
-      const tags = (post.dataset.tags||'').split(',');
-      post.style.display = (!tag || tags.includes(tag))?'block':'none';
-    });
-    if(tag){
-      title.textContent = `Showing all posts under "${tag}"`;
-      if(pushState) push(`/blog?tag=${encodeURIComponent(tag)}`);
-    }else{
-      title.textContent = 'All Posts';
-      if(pushState) push('/blog');
-    }
-  }
-
-  /* ---------------- EVENT LISTENERS ---------------- */
-  document.addEventListener('click', e=>{
+  /* ---------------- Event Listeners ---------------- */
+  document.addEventListener('click', e => {
     const a = e.target.closest('a');
-    if(a){
-      const href = a.getAttribute('href');
-      if(href && !href.startsWith('#')){
-        try{
-          const url = new URL(href,location.origin);
-          if(url.origin===location.origin){
-            e.preventDefault();
-            router(url.pathname+url.search,true);
-          }
-        }catch(err){}
-      }
-    }
+    if(!a) return;
+    const href = a.getAttribute('href');
+    if(!href || href.startsWith('#')) return;
 
-    const tagBtn = e.target.closest('.tag');
-    if(tagBtn){
-      e.preventDefault();
-      const tag = tagBtn.dataset.tag;
-      renderList(false);
-      filterByTag(tag,true);
-    }
+    try {
+      const url = new URL(href, location.origin);
+      if(url.origin === location.origin){
+        e.preventDefault();
+        router(url.pathname, true);
+      }
+    } catch(err){}
   });
 
-  const showAllBtn = document.getElementById('show-all');
-  if(showAllBtn){
-    showAllBtn.addEventListener('click',e=>{
+  if(btnBlog){
+    btnBlog.addEventListener('click', e=>{
       e.preventDefault();
-      renderList(true);
-      filterByTag(null,false);
+      router(BLOG_PATH, true);
     });
   }
 
-  window.addEventListener('popstate',()=>{router(location.pathname+location.search,false);});
+  window.addEventListener('popstate', ()=>{ router(location.pathname, false); });
 
-  /* ---------------- DEBUG ---------------- */
+  /* ---------------- Tag Filter ---------------- */
+  function filterByTag(tag){
+    renderList(false, tag);
+  }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.tag');
+    if(!btn) return;
+    e.preventDefault();
+    const tag = btn.dataset.tag;
+    filterByTag(tag);
+  });
+
+  if(showAllBtn){
+    showAllBtn.addEventListener('click', ()=>{
+      renderList(true, null);
+    });
+  }
+
+  /* ---------------- Debug ---------------- */
   function debug(){
     if(!debugBox) return;
     let stateClass = (STATE==='404')?'badge-error':'badge-state';
-    debugBox.innerHTML += `
-      <div class="log-entry" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
-        <span class="badge ${stateClass}">State</span> ${STATE}
-      </div>
-      <div class="log-entry">
-        <span class="badge badge-success">URL</span> ${location.pathname+location.search}
-      </div>`;
+    debugBox.innerHTML += `<div class="log-entry" style="border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;padding-top:8px;">
+      <span class="badge ${stateClass}">State</span> ${STATE}
+    </div>
+    <div class="log-entry"><span class="badge badge-success">URL</span> ${location.pathname}</div>`;
     debugBox.scrollTop = debugBox.scrollHeight;
   }
 
-  if(debugBox){
-    debugBox.addEventListener('click',()=>{
-      const logs = debugBox.querySelectorAll('.log-entry');
-      let markdownText='';
-      logs.forEach(log=>{
-        const rawText = log.innerText.replace(/\s+/g,' ').trim();
-        const routingMatch = rawText.match(/Routing\s+(Path:\s+\S+)/i);
-        const stateMatch   = rawText.match(/State\s+(\S+)/i);
-        const urlMatch     = rawText.match(/URL\s+(\S+)/i);
-        if(routingMatch) markdownText += `**ROUTING** \`${routingMatch[1]}\` \n`;
-        if(stateMatch) markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
-        if(urlMatch) markdownText += `**URL** \`${urlMatch[1]}\` \n`;
-        markdownText+='\n';
-      });
-      if(markdownText.trim()){
-        navigator.clipboard.writeText(markdownText.trim()).then(()=>{
-          const msg=document.createElement('div');
-          msg.style.cssText="color:#10b981;font-size:10px;margin-top:5px;";
-          msg.innerHTML='<i>✓ Copied (Routing, State, URL) as Markdown!</i>';
-          debugBox.appendChild(msg);
-          debugBox.scrollTop=debugBox.scrollHeight;
-          setTimeout(()=>msg.remove(),2000);
-        });
-      }
-    });
-  }
-
-  /* ---------------- INIT ---------------- */
-  router(location.pathname+location.search,false);
+  router(location.pathname,false);
 });
 </script>
