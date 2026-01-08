@@ -138,14 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const safe = (el, fn) => el && fn(el);
   const getPosts = () => [...document.querySelectorAll('.post')];
 
-  const debugCloseBtn = document.getElementById('debug-close');
-
-if(debugCloseBtn && debugBox){
-  debugCloseBtn.addEventListener('click', () => {
-    debugBox.classList.add('is-hidden');
-  });
-}
-
   /* CORE */
 function hideAll() {
   [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
