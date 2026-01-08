@@ -163,6 +163,8 @@ function renderList(pushState){
   const params = new URLSearchParams(location.search);
   const tag = params.get('tag');
 
+  safe(listTitle, el => el.style.display = 'block');
+  
   safe(postsWrap, el=>{
     el.style.display='block';
     el.classList.add('animate-slide');
