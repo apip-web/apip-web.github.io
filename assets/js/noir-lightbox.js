@@ -69,6 +69,10 @@ document.addEventListener("DOMContentLoaded", function () {
       fetch(src)
         .then(res => {
           const total = +res.headers.get("Content-Length");
+          
+          // 1. TANGKAP jenis filenya di sini
+          const contentType = res.headers.get("Content-Type"); 
+
           if (!res.ok || !res.body || !total) throw 0;
 
           const reader = res.body.getReader();
@@ -78,7 +82,9 @@ document.addEventListener("DOMContentLoaded", function () {
           function read() {
             return reader.read().then(({ done, value }) => {
               if (done) {
-                const blob = new Blob(chunks);
+                // 2. MASUKKAN type ke dalam Blob agar tidak dianggap teks
+                const blob = new Blob(chunks, { type: contentType || 'image/jpeg' });
+                
                 const url = URL.createObjectURL(blob);
                 img.onload = () => showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
                 img.src = url;
