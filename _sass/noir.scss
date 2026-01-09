@@ -77,39 +77,51 @@ body {
 
 /* --- Modal Theme Settings --- */
 .modal {
-    display: none; /* Awalnya sembunyi */
+    display: none;
     position: fixed;
     z-index: 2000;
     left: 0; 
     top: 0;
     width: 100%; 
     height: 100%;
-    background: var(--bg-sidebar); /* Mengikuti variabel sidebar kamu */
+    background: var(--bg-sidebar);
     backdrop-filter: blur(20px);
-    
-    /* Gunakan Flexbox untuk centering */
-    align-items: center;     /* Tengah Vertikal */
-    justify-content: center; /* Tengah Horisontal */
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
     background-color: var(--modal-bg);
     color: var(--text-main);
-    /* margin: 15% auto; <-- DIHAPUS */
     padding: 25px;
     border-radius: 15px;
     width: 90%;
     max-width: 350px;
     border: 1px solid var(--hr);
     text-align: center;
-    
-    /* Tambahan: Efek muncul sedikit dari bawah agar halus */
-    animation: modalPop 0.3s ease-out;
 }
 
-@keyframes modalPop {
+.modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.animate-in {
+    animation: modalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-out {
+    animation: modalOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes modalIn {
     from { transform: translateY(200px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes modalOut {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(200px); opacity: 0; }
 }
 
 .theme-options {
@@ -625,6 +637,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
