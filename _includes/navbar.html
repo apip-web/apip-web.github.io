@@ -55,7 +55,7 @@
         <div class="theme-options">
             <button class="theme-btn" onclick="setTheme('light')">☀️ Light Mode</button>
             <button class="theme-btn" onclick="setTheme('dark')">🌙 Dark Mode</button>
-            <button class="theme-btn" onclick="setTheme('system')">💻 System Default</button>
+            <button class="theme-btn" onclick="setTheme('darkblue')">🔵 Dark Blue</button>
         </div>
         <button onclick="closeModal()" style="background:none; border:none; color:var(--text-muted); margin-top:15px; cursor:pointer;">Close</button>
     </div>
@@ -93,21 +93,9 @@ window.onclick = (event) => {
 
 // Theme Logic
 function setTheme(mode) {
-    if (mode === 'system') {
-        localStorage.removeItem('theme');
-        applySystemTheme();
-    } else {
-        document.documentElement.setAttribute('data-theme', mode);
-        localStorage.setItem('theme', mode);
-    }
+    document.documentElement.setAttribute('data-theme', mode);
+    localStorage.setItem('theme', mode);
     closeModal();
-}
-
-function applySystemTheme() {
-    if (!localStorage.getItem('theme')) {
-        const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    }
 }
 
 // Init on Load
@@ -115,9 +103,7 @@ const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {
     document.documentElement.setAttribute('data-theme', savedTheme);
 } else {
-    applySystemTheme();
+    // Jika tidak ada tema tersimpan, set default ke 'light' atau 'dark'
+    document.documentElement.setAttribute('data-theme', 'light');
 }
-
-// Watch System Change
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySystemTheme);
 </script>
