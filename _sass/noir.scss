@@ -533,7 +533,7 @@ nav.scrolled {
 }
 
 .mobile-nav-links a {
-	color: #ffffff;
+	color: var(--text-main);
 	text-decoration: none;
 	font-size: 28px;
 	font-weight: 700;
@@ -575,5 +575,6 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
