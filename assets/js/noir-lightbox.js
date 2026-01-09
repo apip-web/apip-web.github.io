@@ -1,6 +1,6 @@
 const loadedImages = new Map(); // src → Image object
 
-/* fake progress (fallback CORS) */
+/* helper untuk fake progress jika fetch gagal/CORS */
 function startFakeProgress(fill, text) {
   let p = 0;
   return setInterval(() => {
@@ -22,35 +22,40 @@ document.addEventListener("DOMContentLoaded", function () {
     const src = el.tagName === "A" ? el.getAttribute("href") : el.getAttribute("src");
     if (!src) return;
 
-    /* overlay */
+    /* 1. Buat overlay dulu */
     const overlay = document.createElement("div");
     overlay.className = "app-lightbox-overlay";
     document.body.appendChild(overlay);
-
     document.body.style.overflow = "hidden";
 
-    /* posisi awal */
+    /* 2. Ambil data posisi untuk animasi */
     const rect = el.getBoundingClientRect();
     const elemCenterX = rect.left + rect.width / 2;
     const elemCenterY = rect.top + rect.height / 2;
     const centerX = innerWidth / 2;
     const centerY = innerHeight / 2;
 
-    /* buat image / ambil dari cache */
-    let img, progress = null, fill = null, text = null, fakeTimer = null;
+    let img;
+    let progress = null, fill = null, text = null, fakeTimer = null;
 
+    /* 3. Logika Cache & Progress Bar */
     if (loadedImages.has(src)) {
       img = loadedImages.get(src);
-      if (img.complete) {
-        showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
-      } else {
-        img.onload = () => showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
-      }
     } else {
       img = new Image();
-      loadedImages.set(src, img); // <-- catat segera agar klik berikutnya tidak download ulang
+      // Kita set src original sebentar untuk memancing status 'complete' dari browser
+      img.src = src; 
+      loadedImages.set(src, img);
+    }
 
-      /* progress popup */
+    // JIKA SUDAH ADA DI CACHE (img.complete)
+    if (img.complete && img.naturalWidth > 0) {
+      // Langsung tampilkan tanpa membuat elemen progress bar
+      showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
+    } 
+    // JIKA BELUM ADA (Harus Download)
+    else {
+      /* Buat elemen progress popup hanya jika diperlukan */
       progress = document.createElement("div");
       progress.className = "app-lightbox-progress";
       progress.innerHTML = `
@@ -65,14 +70,10 @@ document.addEventListener("DOMContentLoaded", function () {
       fill = progress.querySelector(".app-progress-fill");
       text = progress.querySelector(".app-progress-text");
 
-      /* coba fetch untuk progress asli */
-/* ... kode Map dan fake progress tetap sama ... */
-
-      /* coba fetch untuk progress asli */
+      /* Mulai Fetch untuk progress asli */
       fetch(src)
         .then(res => {
           const total = +res.headers.get("Content-Length");
-          // 1. Ambil format asli dari header (misal: image/avif atau image/jpeg)
           const contentType = res.headers.get("Content-Type"); 
 
           if (!res.ok || !res.body || !total) throw 0;
@@ -84,10 +85,10 @@ document.addEventListener("DOMContentLoaded", function () {
           function read() {
             return reader.read().then(({ done, value }) => {
               if (done) {
-                // 2. Berikan format tersebut ke Blob
+                // Konversi ke Blob dengan Type agar tidak jadi teks
                 const blob = new Blob(chunks, { type: contentType || 'image/jpeg' });
-                
                 const url = URL.createObjectURL(blob);
+                
                 img.onload = () => showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay);
                 img.src = url;
                 return;
@@ -102,9 +103,8 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           return read();
         })
-
         .catch(() => {
-          /* fallback fake progress */
+          /* Fallback jika fetch gagal (misal masalah CORS) */
           fakeTimer = startFakeProgress(fill, text);
           img.onload = () => {
             if (fakeTimer) clearInterval(fakeTimer);
@@ -118,8 +118,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /* tutup lightbox */
-    const close = () => {
+    /* Fungsi tutup */
+    overlay.onclick = () => {
       overlay.classList.remove("visible");
       if (img) img.style.transform = "translate(0,0) scale(1)";
       document.body.style.overflow = "";
@@ -128,28 +128,32 @@ document.addEventListener("DOMContentLoaded", function () {
         if (img) img.remove();
       }, 300);
     };
-
-    overlay.onclick = close;
   });
 
 });
 
-/* fungsi tampilkan image dengan animasi */
+/* Fungsi tampilkan image dengan animasi (mekar) */
 function showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overlay) {
-
+  // Hapus progress bar jika ada
   const progress = document.querySelector(".app-lightbox-progress");
   if (progress) progress.remove();
 
   document.body.appendChild(img);
 
+  // Set posisi awal (menempel di thumbnail)
   img.style.position = "fixed";
   img.style.top = rect.top + "px";
   img.style.left = rect.left + "px";
   img.style.width = rect.width + "px";
   img.style.height = rect.height + "px";
   img.style.transform = "translate(0,0) scale(1)";
+  img.style.transition = "none"; // Matikan transisi untuk posisi awal
   img.classList.add("app-lightbox-img");
 
+  // Paksa browser menghitung posisi (reflow)
+  img.offsetHeight;
+
+  // Hitung ukuran akhir (mekar)
   let finalW = innerWidth;
   let finalH = finalW / (img.naturalWidth / img.naturalHeight);
   if (finalH > innerHeight * 0.9) {
@@ -162,12 +166,14 @@ function showImage(img, rect, elemCenterX, elemCenterY, centerX, centerY, overla
   const tx = centerX - elemCenterX;
   const ty = centerY - elemCenterY;
 
+  // Jalankan animasi
   requestAnimationFrame(() => {
     overlay.classList.add("visible");
+    img.style.transition = "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
     img.style.transform = `translate(${tx}px, ${ty}px) scale(${scaleX}, ${scaleY})`;
   });
 
-  /* klik gambar juga menutup */
+  // Klik pada gambar juga menutup lightbox
   img.onclick = () => {
     overlay.classList.remove("visible");
     img.style.transform = "translate(0,0) scale(1)";
