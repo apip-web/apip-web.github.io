@@ -32,6 +32,8 @@ https://templatemo.com/tm-599-noir-fashion
     --border-tag: rgba(0, 0, 0, 0.1);
 	--bg-sidebar: rgba(255, 255, 255, 0.2);
     --font-size: 16px;
+    --logo-gradient: linear-gradient(135deg, #1a1a1a, var(--accent));
+    --toggle-gradient: linear-gradient(135deg, #1a1a1a, var(--accent));
 }
 
 [data-theme="dark"] {
@@ -52,6 +54,8 @@ https://templatemo.com/tm-599-noir-fashion
     --bg-table-even: #141414;
     --border-tag: rgba(255, 255, 255, 0.15);
 	--bg-sidebar: rgba(0,0,0,0.2);
+    --logo-gradient: linear-gradient(135deg, #ffffff, var(--accent));
+    --toggle-gradient: linear-gradient(135deg, #ffffff, var(--accent));
 }
 
 [data-theme="darkblue"] {
@@ -72,6 +76,8 @@ https://templatemo.com/tm-599-noir-fashion
     --bg-table-even: #0f172a;     /* Baris tabel genap */
     --border-tag: rgba(51, 153, 255, 0.2); /* Border tag */
     --bg-sidebar: rgba(10, 17, 32, 0.6);   /* Overlay sidebar/modal */
+    --logo-gradient: linear-gradient(135deg, #e0e6ed, var(--accent));
+    --toggle-gradient: linear-gradient(135deg, #e0e6ed, var(--accent));
 }
 
 * {
@@ -514,7 +520,7 @@ nav.scrolled {
     font-weight: 900;
     font-size: 28px;
     letter-spacing: 0px;
-    background: linear-gradient(135deg, #000, #ff3366);
+    background: var(--logo-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -529,14 +535,14 @@ nav.scrolled {
 .menu-toggle span {
 	width: 25px;
 	height: 2px;
-	background: linear-gradient(135deg, #000, #ff3366);
+	background: var(--toggle-gradient);
 	margin: 3px 0;
 	transition: 0.3s;
 }
 
 .menu-toggle.active span:nth-child(1) {
 	transform: rotate(45deg) translate(5px, 5px);
-	background: linear-gradient(135deg, #fff, #ff3366);
+	background: var(--toggle-gradient);
 }
 
 .menu-toggle.active span:nth-child(2) {
@@ -545,7 +551,7 @@ nav.scrolled {
 
 .menu-toggle.active span:nth-child(3) {
 	transform: rotate(-45deg) translate(7px, -6px);
-	background: linear-gradient(135deg, #fff, #ff3366);
+	background: var(--toggle-gradient);
 }
 
 .mobile-nav {
@@ -659,6 +665,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
