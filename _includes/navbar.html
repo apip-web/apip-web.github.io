@@ -63,20 +63,32 @@
 
 <script>
 const modal = document.getElementById("themeModal");
+const modalContent = modal.querySelector(".modal-content");
 const themeBtn = document.getElementById("theme-switcher");
 
-// Open Modal
+// Fungsi Buka
 themeBtn.onclick = () => {
-    modal.style.display = "flex";
+    modal.classList.add("active");
+    modalContent.classList.remove("animate-out");
+    modalContent.classList.add("animate-in");
 };
 
-// Close Modal
+// Fungsi Tutup (Dengan Animasi)
 function closeModal() {
-    modal.style.display = "none";
+    modalContent.classList.remove("animate-in");
+    modalContent.classList.add("animate-out");
+
+    // Tunggu animasi selesai (300ms sesuai CSS) baru hilangkan display
+    setTimeout(() => {
+        modal.classList.remove("active");
+    }, 300); 
 }
 
+// Tutup jika klik luar
 window.onclick = (event) => {
-    if (event.target == modal) closeModal();
+    if (event.target == modal) {
+        closeModal();
+    }
 };
 
 // Theme Logic
