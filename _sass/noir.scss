@@ -54,13 +54,35 @@ https://templatemo.com/tm-599-noir-fashion
 	--bg-sidebar: rgba(0,0,0,0.2);
 }
 
+[data-theme="darkblue"] {
+    /* --- Dark Blue Mode (Midnight Version) --- */
+    --primary: #050a15;           /* Warna utama (container) */
+    --accent: #3399ff;            /* Warna aksen biru */
+    --accent-hover: #1177ff;      /* Warna aksen saat hover */
+    --text-main: #e0e6ed;         /* Teks utama */
+    --text-muted: #8492a6;        /* Teks sekunder/redup */
+    --bg-body: #0a1120;           /* Latar belakang halaman */
+    --bg-section: #050a15;        /* Latar belakang seksi/kartu */
+    --modal-bg: #0f172a;          /* Latar belakang modal */
+    --btn-bg: #1e293b;            /* Latar belakang tombol */
+    --hr: #1e293b;                /* Garis pemisah */
+    --bg-code: #1e293b;           /* Latar belakang blok kode */
+    --text-code: #3399ff;         /* Warna teks kode */
+    --bg-nav: rgba(10, 17, 32, 0.8); /* Navigasi transparan biru */
+    --bg-table-even: #0f172a;     /* Baris tabel genap */
+    --border-tag: rgba(51, 153, 255, 0.2); /* Border tag */
+    --bg-sidebar: rgba(10, 17, 32, 0.6);   /* Overlay sidebar/modal */
+}
+
 * {
-    margin: 0; padding: 0; box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html {
-	scroll-behavior: smooth;
-	height: 100%;
+  scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
@@ -637,6 +659,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
