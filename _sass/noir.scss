@@ -152,10 +152,15 @@ ul, ol {
 }
 .animate-slide { animation: slideDown 0.6s ease-out forwards; }
 
-.post-content p {
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+/* ===== Post ===== */
+.post-date {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.post-title {
+  margin-top: 0.2em;
+  margin-bottom: 0.2em;
 }
 
 /* TAG BUTTON */
@@ -180,17 +185,6 @@ ul, ol {
 
 #show-all { margin-top:10px; padding:4px 8px; font-size:12px; cursor:pointer; }
 
-/* ===== Post ===== */
-.post-date {
-  color: #777;
-  font-size: 0.9rem;
-}
-
-.post-title {
-  margin-top: 0.2em;
-  margin-bottom: 0.2em;
-}
-
 .post-author {
   display: flex;
   align-items: center;
@@ -211,6 +205,12 @@ ul, ol {
 
 .post-content {
   margin-top: 1em;
+}
+
+.post-content p {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* ===== Headings ===== */
@@ -503,6 +503,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
