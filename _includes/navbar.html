@@ -47,3 +47,67 @@
             <li><a href="/page/about/">About</a></li>
         </ul>
     </div> 
+
+<div id="themeModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 10px;">Appearance</h3>
+        <p style="font-size: 14px; color: var(--text-muted);">Pilih tema tampilan website</p>
+        <div class="theme-options">
+            <button class="theme-btn" onclick="setTheme('light')">☀️ Light Mode</button>
+            <button class="theme-btn" onclick="setTheme('dark')">🌙 Dark Mode</button>
+            <button class="theme-btn" onclick="setTheme('system')">💻 System Default</button>
+        </div>
+        <button onclick="closeModal()" style="background:none; border:none; color:var(--text-muted); margin-top:15px; cursor:pointer;">Close</button>
+    </div>
+</div>
+
+<script>
+const modal = document.getElementById("themeModal");
+const themeBtn = document.getElementById("theme-switcher");
+
+// Open Modal
+themeBtn.onclick = () => {
+    modal.style.display = "block";
+    // Opsional: Tutup sidebar otomatis saat modal buka
+    document.getElementById("mobileNav").classList.remove("active");
+};
+
+// Close Modal
+function closeModal() {
+    modal.style.display = "none";
+}
+
+window.onclick = (event) => {
+    if (event.target == modal) closeModal();
+};
+
+// Theme Logic
+function setTheme(mode) {
+    if (mode === 'system') {
+        localStorage.removeItem('theme');
+        applySystemTheme();
+    } else {
+        document.documentElement.setAttribute('data-theme', mode);
+        localStorage.setItem('theme', mode);
+    }
+    closeModal();
+}
+
+function applySystemTheme() {
+    if (!localStorage.getItem('theme')) {
+        const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    }
+}
+
+// Init on Load
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+} else {
+    applySystemTheme();
+}
+
+// Watch System Change
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applySystemTheme);
+</script>
