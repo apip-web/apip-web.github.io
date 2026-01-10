@@ -79,15 +79,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function push(path) { if (location.pathname + location.search !== path) history.pushState(null, '', path); }
 
     /* RENDERERS */
-    function renderHome() {
-        STATE = 'home';
-        hideAll();
-        [spaHome, homepage].forEach(el => safe(el, e => {
-            e.style.display = 'block';
-            e.classList.add('animate-slide');
-        }));
-        debug();
-    }
+function renderHome(pushState) {
+    STATE = 'home';
+    hideAll(); // Panggil pembersihan total
+
+    [spaHome, homepage].forEach(el => safe(el, e => {
+        e.style.display = 'block';
+        // Trigger animasi masuk agar smooth
+        void e.offsetWidth; 
+        e.classList.add('animate-slide');
+    }));
+
+    if (pushState) push('/');
+    debug();
+}
 
 // Fungsi pembantu agar kode tidak berulang
 function triggerPageAnimation() {
