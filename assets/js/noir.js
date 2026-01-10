@@ -4,39 +4,31 @@ const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
 
 // Toggle menu dengan hamburger
 menuToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    menuToggle.classList.toggle('active');
-    mobileNav.classList.toggle('active');
+    e.stopPropagation();
+    menuToggle.classList.toggle('active');
+    mobileNav.classList.toggle('active');
 });
 
 // Klik di area menu → tutup menu
 mobileNav.addEventListener('click', () => {
-    menuToggle.classList.remove('active');
-    mobileNav.classList.remove('active');
+    menuToggle.classList.remove('active');
+    mobileNav.classList.remove('active');
 });
 
 // Klik pada link → tutup menu
 mobileNavLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        // Cek apakah link ini menuju ke Home '/'
-        if (link.getAttribute('href') === '/') {
-            // JANGAN panggil remove('active') di sini
-            // Biarkan browser langsung pindah halaman secara alami
-            return; 
-        }
-
-        // Untuk link lain (misal #about atau #contact) tetap tutup manual
-        e.stopPropagation();
-        menuToggle.classList.remove('active');
-        mobileNav.classList.remove('active');
-    });
+    link.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuToggle.classList.remove('active');
+        mobileNav.classList.remove('active');
+    });
 });
 
 // Klik di luar menu → tutup
 document.addEventListener('click', (e) => {
-    const clickOutside = !mobileNav.contains(e.target) && !menuToggle.contains(e.target);
-    if (clickOutside) {
-        menuToggle.classList.remove('active');
-        mobileNav.classList.remove('active');
-    }
+    const clickOutside = !mobileNav.contains(e.target) && !menuToggle.contains(e.target);
+    if (clickOutside) {
+        menuToggle.classList.remove('active');
+        mobileNav.classList.remove('active');
+    }
 });
