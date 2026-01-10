@@ -192,7 +192,6 @@ function renderPaginationButtons(totalPages, container) {
             
             // Panggil router agar URL berubah dan history tersimpan
             router(url.pathname + url.search, true);
-            // window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         container.appendChild(btn);
     }
@@ -207,7 +206,7 @@ function router(path, pushState) {
     const pathname = url.pathname.replace(/\/$/, '');
     const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
     
-    // 🔥 KUNCINYA DI SINI: Update currentPage setiap kali router jalan
+    // KUNCINYA DI SINI: Update currentPage setiap kali router jalan
     const pageParam = url.searchParams.get('page');
     currentPage = parseInt(pageParam) || 1; 
 
