@@ -135,6 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTag(tag) {
         STATE = 'tag';
         currentPage = 1;
+
+const url = new URL(window.location.href);
+if(!url.searchParams.has('page')) currentPage = 1;
+      
         hideAll();
         const tagTitle = document.getElementById('tag-title');
         if (tagTitle) {
@@ -193,43 +197,56 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPaginationButtons(totalPages, pContainer);
     }
 
-    function renderPaginationButtons(totalPages, container) {
-        container.innerHTML = '';
-        if (totalPages <= 1) return;
+function renderPaginationButtons(totalPages, container) {
+    container.innerHTML = '';
+    if (totalPages <= 1) return;
 
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = i;
-            btn.className = `page-num ${i === currentPage ? 'active' : ''}`;
-            btn.onclick = (e) => {
-                e.preventDefault();
-                currentPage = i;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                STATE === 'tag' ? applyPagination() : renderList();
-            };
-            container.appendChild(btn);
-        }
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `page-num ${i === currentPage ? 'active' : ''}`;
+        
+        btn.onclick = (e) => {
+            e.preventDefault();
+            // Ambil URL saat ini
+            const url = new URL(window.location.href);
+            // Set atau Update parameter 'page'
+            url.searchParams.set('page', i);
+            
+            // Panggil router agar URL berubah dan history tersimpan
+            router(url.pathname + url.search, true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        container.appendChild(btn);
     }
+}
 
     /* ROUTER */
-    let LAST_ROUTE_PATH = '';
-    function router(path, pushState) {
-        LAST_ROUTE_PATH = path;
-        if (pushState) history.pushState(null, '', path);
+function router(path, pushState) {
+    LAST_ROUTE_PATH = path;
+    if (pushState) history.pushState(null, '', path);
 
-        const url = new URL(path, location.origin);
-        const pathname = url.pathname.replace(/\/$/, '');
-        const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
-        const tag = url.searchParams.get('tag');
+    const url = new URL(path, location.origin);
+    const pathname = url.pathname.replace(/\/$/, '');
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
+    const tag = url.searchParams.get('tag');
+    
+    // 🔥 TAMBAHKAN INI: Ambil parameter page dari URL
+    const pageParam = url.searchParams.get('page');
+    currentPage = parseInt(pageParam) || 1; 
 
-        if (pathname === '' || pathname === '/' || pathname === '/index.html') return renderHome();
-        if (pathname === cleanBlogPath) return tag ? renderTag(tag) : renderList();
-
-        const post = findPostByPath(pathname);
-        if (post) return renderPost(post, false);
-
-        render404(path);
+    if (pathname === '' || pathname === '/' || pathname === '/index.html') return renderHome();
+    
+    if (pathname === cleanBlogPath) {
+        if (tag) return renderTag(tag);
+        return renderList();
     }
+
+    const post = findPostByPath(pathname);
+    if (post) return renderPost(post, false);
+
+    render404(path);
+}
 
     function findPostByPath(path) {
         const target = path.replace(/\/$/, '').replace('.html', '');
