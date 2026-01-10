@@ -13,6 +13,16 @@
   color: var(--accent);
 }
 
+.theme-btn.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.theme-btn.active:hover {
+  background: var(--accent-hover);
+}
+
 .about-container {
   margin: 0;
   max-height: 400px;
@@ -87,9 +97,9 @@
         <h3 style="margin-bottom: 10px;">Appearance</h3>
         <p style="font-size: 14px; color: var(--text-muted);">Pilih tema tampilan website</p>
         <div class="theme-options">
-            <button class="theme-btn" onclick="setTheme('light')">☀️ Light Mode</button>
-            <button class="theme-btn" onclick="setTheme('dark')">🌙 Dark Mode</button>
-            <button class="theme-btn" onclick="setTheme('darkblue')">🔵 Dark Blue</button>
+            <button class="theme-btn" data-theme-btn="light" onclick="setTheme('light')">☀️ Light Mode</button>
+            <button class="theme-btn" data-theme-btn="dark" onclick="setTheme('dark')">🌙 Dark Mode</button>
+            <button class="theme-btn" data-theme-btn="darkblue" onclick="setTheme('darkblue')">🔵 Dark Blue</button>
         </div>
         <button onclick="closeModal()" style="background:none; border:none; color:var(--text-muted); margin-top:15px; cursor:pointer;">Close</button>
     </div>
@@ -153,21 +163,28 @@ window.onclick = (event) => {
     }
 };
 
+// Helper Kecil
+function updateThemeActive(mode) {
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle(
+      'active',
+      btn.dataset.themeBtn === mode
+    );
+  });
+}
+
 // Theme Logic
 function setTheme(mode) {
-    document.documentElement.setAttribute('data-theme', mode);
-    localStorage.setItem('theme', mode);
-    closeModal();
+  document.documentElement.setAttribute('data-theme', mode);
+  localStorage.setItem('theme', mode);
+  updateThemeActive(mode);
+  closeModal();
 }
 
 // Init on Load
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-} else {
-    // Jika tidak ada tema tersimpan, set default ke 'light' atau 'dark'
-    document.documentElement.setAttribute('data-theme', 'light');
-}
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeActive(savedTheme);
 </script>
 
 <script>
