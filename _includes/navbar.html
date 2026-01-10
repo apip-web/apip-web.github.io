@@ -127,6 +127,7 @@
             <li><span id="theme-switcher">Switch Theme</span></li>
             <li><span id="toggle-debug">Show <code>Debug</code></span></li>
             <li><a href="javascript:void(0)" onclick="openAbout()">About</a></li>
+            <li class="nav-item"><a href="#" id="search-trigger" class="nav-link"><i class="icon-search"></i> Search</a></li>
         </ul>
     </div> 
 
@@ -198,6 +199,19 @@
 </div>
 </div>
 
+<!-- S E A R C H -->
+<div id="search-popup" class="popup-overlay" style="display:none;">
+    <div class="popup-content search-box">
+        <div class="search-header">
+            <input type="text" id="quick-search" placeholder="Cari artikel..." autocomplete="off">
+            <button class="close-popup">&times;</button>
+        </div>
+        <div id="search-results-list">
+            </div>
+    </div>
+</div>
+
+<!-- THEME SWITCHER -->
 <script>
 const modal = document.getElementById("themeModal");
 const modalContent = modal.querySelector(".modal-content");
@@ -252,6 +266,7 @@ document.documentElement.setAttribute('data-theme', savedTheme);
 updateThemeActive(savedTheme);
 </script>
 
+<!-- A B O U T -->
 <script>
 const aboutModal = document.getElementById("aboutModal");
 const aboutContent = aboutModal.querySelector(".modal-content");
@@ -281,4 +296,40 @@ window.onclick = (event) => {
     if (event.target == modal) closeModal(); // Untuk theme modal
     if (event.target == aboutModal) closeAbout(); // Untuk about modal
 };
+</script>
+
+<!-- S E A R C H -->
+<script>
+document.getElementById('search-trigger').addEventListener('click', (e) => {
+    e.preventDefault();
+    togglePopup('search-popup', true); // Gunakan fungsi reusable kamu
+});
+
+const searchInput = document.getElementById('quick-search');
+const resultsArea = document.getElementById('search-results-list');
+
+searchInput.addEventListener('input', () => {
+    const keyword = searchInput.value.toLowerCase();
+    resultsArea.innerHTML = '';
+
+    if (keyword.length < 2) return;
+
+    // Filter berdasarkan post yang sudah diload oleh SPA
+    const filtered = getPosts().filter(p => {
+        const title = p.querySelector('.post-title').innerText.toLowerCase();
+        return title.includes(keyword);
+    });
+
+    filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'search-item';
+        item.innerHTML = `<span>${p.querySelector('.post-title').innerText}</span>`;
+        
+        item.onclick = () => {
+            togglePopup('search-popup', false);
+            router(p.dataset.url, true); // Panggil router SPA agar navigasi mulus
+        };
+        resultsArea.appendChild(item);
+    });
+});
 </script>
