@@ -18,6 +18,14 @@ mobileNav.addEventListener('click', () => {
 // Klik pada link → tutup menu
 mobileNavLinks.forEach(link => {
     link.addEventListener('click', (e) => {
+        // Cek apakah link ini menuju ke Home '/'
+        if (link.getAttribute('href') === '/') {
+            // JANGAN panggil remove('active') di sini
+            // Biarkan browser langsung pindah halaman secara alami
+            return; 
+        }
+
+        // Untuk link lain (misal #about atau #contact) tetap tutup manual
         e.stopPropagation();
         menuToggle.classList.remove('active');
         mobileNav.classList.remove('active');
