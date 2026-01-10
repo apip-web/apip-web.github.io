@@ -318,7 +318,7 @@ ul, ol {
 }
 
 .post-tags .tag:hover {
-  background:#d1d5db;
+  background: var(--accent-hover);
   color: #1a1a1a;
 }
 
@@ -668,6 +668,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
