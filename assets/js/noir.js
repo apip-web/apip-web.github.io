@@ -4,7 +4,7 @@ const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
 
 // Toggle menu dengan hamburger
 menuToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
+    // e.stopPropagation();
     menuToggle.classList.toggle('active');
     mobileNav.classList.toggle('active');
 });
