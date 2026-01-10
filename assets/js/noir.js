@@ -18,7 +18,7 @@ mobileNav.addEventListener('click', () => {
 // Klik pada link → tutup menu
 mobileNavLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-        e.stopPropagation();
+        // e.stopPropagation();
         menuToggle.classList.remove('active');
         mobileNav.classList.remove('active');
     });
