@@ -95,25 +95,6 @@
   margin-bottom: 5px;
   line-height: 1;
 }
-
-/* Pastikan ini ada agar popup bisa muncul saat class .active ditambah */
-#search-popup.active {
-    display: flex !important;
-}
-
-/* Base style untuk overlay */
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 10000; /* Pastikan paling atas */
-    display: none; /* Default sembunyi */
-    align-items: center;
-    justify-content: center;
-}
 </style>
 
 <nav id="navbar">
@@ -219,14 +200,20 @@
 </div>
 
 <!-- S E A R C H -->
-<div id="search-popup" class="popup-overlay" style="display:none;">
-    <div class="popup-content search-box">
-        <div class="search-header">
-            <input type="text" id="quick-search" placeholder="Cari artikel..." autocomplete="off">
-            <button class="close-popup">&times;</button>
+<div id="search-popup" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 10px;">Quick Search</h3>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 15px;">Cari artikel di blog Noir</p>
+        
+        <div class="search-header" style="margin-bottom: 20px;">
+            <input type="text" id="quick-search" placeholder="Ketik judul artikel..." 
+                   style="width: 100%; padding: 12px; background: var(--bg-body); border: 1px solid var(--hr); color: var(--text-main); border-radius: 8px; outline: none;">
         </div>
-        <div id="search-results-list">
+        
+        <div id="search-results-list" style="max-height: 250px; overflow-y: auto;">
             </div>
+
+        <button onclick="closeSearch()" style="background:none; border:1px solid var(--border-tag); color:var(--text-muted); margin-top:20px; cursor:pointer; padding: 5px 15px;">Close</button>
     </div>
 </div>
 
@@ -319,71 +306,83 @@ window.onclick = (event) => {
 
 <!-- S E A R C H -->
 <script>
-const searchPopup = document.getElementById("search-popup");
-const searchContent = searchPopup.querySelector(".popup-content");
+// Ambil elemen
+const searchModal = document.getElementById("search-popup");
+const searchContent = searchModal.querySelector(".modal-content");
 const searchInput = document.getElementById('quick-search');
 const resultsArea = document.getElementById('search-results-list');
 
-// Fungsi Buka
 function openSearch() {
-    searchPopup.classList.add("active");
+    searchModal.classList.add("active");
     searchContent.classList.remove("animate-out");
     searchContent.classList.add("animate-in");
     
-    // Auto focus ke input
-    setTimeout(() => searchInput.focus(), 100);
+    // Reset dan Focus
+    searchInput.value = '';
+    resultsArea.innerHTML = '';
+    setTimeout(() => searchInput.focus(), 200);
 
-    // Tutup sidebar mobile jika terbuka
+    // Tutup sidebar mobile
     if(document.getElementById('mobileNav')) {
         document.getElementById('menuToggle').classList.remove('active');
         document.getElementById('mobileNav').classList.remove('active');
     }
 }
 
-// Fungsi Tutup
 function closeSearch() {
     searchContent.classList.remove("animate-in");
     searchContent.classList.add("animate-out");
     setTimeout(() => {
-        searchPopup.classList.remove("active");
-        searchInput.value = ''; // Reset input
-        resultsArea.innerHTML = ''; // Bersihkan hasil
+        searchModal.classList.remove("active");
     }, 300);
 }
 
-// Update Trigger di Navbar (Ganti event listener-nya)
+// Pasang Klik ke Link
 document.getElementById('open-search').onclick = (e) => {
     e.preventDefault();
     openSearch();
 };
 
-// Update Tombol Close di dalam Popup
-document.querySelector('.close-popup').onclick = closeSearch;
-
-// Update Window Click (Tambahkan ini agar bisa tutup klik luar)
-window.addEventListener('click', (event) => {
-    if (event.target == searchPopup) closeSearch();
-});
-
-// Logika Filter (Quick Search)
+// Logika Search yang beneran jalan
 searchInput.addEventListener('input', () => {
     const keyword = searchInput.value.toLowerCase();
     resultsArea.innerHTML = '';
+
     if (keyword.length < 2) return;
 
-    const filtered = getPosts().filter(p => {
-        return p.querySelector('.post-title').innerText.toLowerCase().includes(keyword);
+    // Ambil data posts dari DOM
+    const posts = Array.from(document.querySelectorAll('.post'));
+    const filtered = posts.filter(p => {
+        const title = p.querySelector('.post-title').innerText.toLowerCase();
+        return title.includes(keyword);
     });
 
+    if (filtered.length === 0) {
+        resultsArea.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Gak ketemu, Pip...</p>';
+        return;
+    }
+
     filtered.forEach(p => {
+        const title = p.querySelector('.post-title').innerText;
+        const url = p.dataset.url;
+        
         const item = document.createElement('div');
-        item.className = 'search-item';
-        item.innerHTML = `<span>${p.querySelector('.post-title').innerText}</span>`;
+        item.style.cssText = "padding: 10px; border-bottom: 1px solid var(--hr); cursor: pointer; transition: 0.2s;";
+        item.innerHTML = `<span style="color: var(--text-main); font-size: 14px;">${title}</span>`;
+        
+        item.onmouseover = () => item.style.background = "var(--accent)";
+        item.onmouseout = () => item.style.background = "transparent";
+        
         item.onclick = () => {
             closeSearch();
-            router(p.dataset.url, true);
+            router(url, true);
         };
         resultsArea.appendChild(item);
     });
+});
+
+// Tambahkan ke window click agar bisa tutup klik luar
+window.addEventListener('click', (event) => {
+    if (event.target == searchModal) closeSearch();
 });
 </script>
