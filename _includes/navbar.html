@@ -95,6 +95,25 @@
   margin-bottom: 5px;
   line-height: 1;
 }
+
+/* Pastikan ini ada agar popup bisa muncul saat class .active ditambah */
+#search-popup.active {
+    display: flex !important;
+}
+
+/* Base style untuk overlay */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 10000; /* Pastikan paling atas */
+    display: none; /* Default sembunyi */
+    align-items: center;
+    justify-content: center;
+}
 </style>
 
 <nav id="navbar">
@@ -333,7 +352,7 @@ function closeSearch() {
 }
 
 // Update Trigger di Navbar (Ganti event listener-nya)
-document.getElementById('search-trigger').onclick = (e) => {
+document.getElementById('open-search').onclick = (e) => {
     e.preventDefault();
     openSearch();
 };
