@@ -192,7 +192,7 @@ function renderPaginationButtons(totalPages, container) {
             
             // Panggil router agar URL berubah dan history tersimpan
             router(url.pathname + url.search, true);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         container.appendChild(btn);
     }
