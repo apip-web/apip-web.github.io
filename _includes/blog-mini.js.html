@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const debugBox = document.getElementById('spa-debug');
     const listTitle = document.querySelector('.list-title');
     const spaHome = document.getElementById('spa-home');
-    const BLOG_PATH = '/blog/?page=1';
+    const BLOG_PATH = '/blog/';
     let STATE = '';
     let currentPage = 1;
     const itemsPerPage = 2; // Saya ubah ke 5 agar lebih proporsional
@@ -219,33 +219,39 @@ function router(path, pushState) {
     if (pushState) history.pushState(null, '', path);
 
     const url = new URL(path, location.origin);
-    const pathname = url.pathname.replace(/\/$/, '');
-    const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
-    
-    // 🔥 KUNCINYA DI SINI: Update currentPage setiap kali router jalan
-    const pageParam = url.searchParams.get('page');
-    currentPage = parseInt(pageParam) || 1; 
+    // Hapus slash di akhir untuk konsistensi, tapi hati-hati dengan string kosong
+    let pathname = url.pathname.replace(/\/$/, '');
+    if (pathname === '') pathname = '/'; 
 
-    const tag = url.searchParams.get('tag');
+    const cleanBlogPath = BLOG_PATH.replace(/\/$/, '') || '/blog';
 
-    if (pathname === '' || pathname === '/' || pathname === '/index.html') return renderHome();
-    
-    if (pathname === cleanBlogPath) {
-        // Jika masuk ke /blog/ tanpa parameter, arahkan ke ?page=1
-        if (!url.searchParams.has('page') && !tag) {
+    // 1. Prioritas Utama: Homepage
+    if (pathname === '/' || pathname === '/index.html') {
+        return renderHome(false);
+    }
+
+    // 2. Prioritas Kedua: Blog (List atau Tag)
+    if (pathname === cleanBlogPath || pathname === '/blog') {
+        const tag = url.searchParams.get('tag');
+        const page = url.searchParams.get('page');
+
+        // Jika ke /blog tanpa param, paksa ke ?page=1
+        if (!tag && !page) {
             const newPath = cleanBlogPath + '/?page=1';
             history.replaceState(null, '', newPath);
             return router(newPath, false);
         }
-        
+
         if (tag) return renderTag(tag);
         return renderList();
     }
 
+    // 3. Prioritas Ketiga: Postingan Tunggal
     const post = findPostByPath(pathname);
     if (post) return renderPost(post, false);
 
-    render404(path);
+    // 4. Terakhir: Baru 404
+    render404(path, false);
 }
 
     function findPostByPath(path) {
