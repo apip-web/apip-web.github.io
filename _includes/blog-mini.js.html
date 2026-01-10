@@ -143,7 +143,12 @@ function renderList() {
     el.classList.add('animate-slide');
   });
 
-  getPosts().forEach(p => p.style.display = 'block');
+  // HAPUS baris getPosts().forEach(p => p.style.display = 'block'); 
+  // Karena baris tersebut menampilkan SEMUA post sekaligus.
+  
+  // PANGGIL fungsi ini agar post disaring dan tombol muncul
+  applyPagination(); 
+  
   debug();
 }
 
@@ -166,6 +171,7 @@ function renderTag(tag){
   });
 
   filterByTag(tag, false);
+  applyPagination();
   debug();
 }
 
@@ -211,17 +217,30 @@ function renderTag(tag){
   }
 
 // P A G I N A T I O N //
-  function applyPagination() {
-  const allPosts = getPosts();
-  const totalPages = Math.ceil(allPosts.length / itemsPerPage);
+function applyPagination() {
   const pContainer = document.getElementById('pagination-container');
-
   if (!pContainer) return;
 
-  // 1. Sembunyikan semua dulu
-  allPosts.forEach(p => p.style.display = 'none');
+  // Ambil post yang sedang aktif (berdasarkan STATE)
+  // Jika di mode Tag, hanya ambil post yang lolos filter tag
+  let allPosts;
+  if (STATE === 'tag') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTag = urlParams.get('tag');
+    allPosts = getPosts().filter(p => {
+        const tags = (p.dataset.tags || '').split(',');
+        return tags.includes(currentTag);
+    });
+  } else {
+    allPosts = getPosts();
+  }
 
-  // 2. Tampilkan hanya yang masuk range halaman aktif
+  const totalPages = Math.ceil(allPosts.length / itemsPerPage);
+
+  // 1. Sembunyikan SEMUA post dulu (reset)
+  getPosts().forEach(p => p.style.display = 'none');
+
+  // 2. Tampilkan hanya yang masuk range halaman aktif dari list yang sudah difilter
   const start = (currentPage - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   
@@ -229,7 +248,7 @@ function renderTag(tag){
     p.style.display = 'block';
   });
 
-  // 3. Render tombol angka
+  // 3. Render tombol
   renderPaginationButtons(totalPages, pContainer);
 }
 
