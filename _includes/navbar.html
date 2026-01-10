@@ -13,6 +13,62 @@
   color: var(--accent);
   transform: translateY(-3px);
 }
+
+.modal-body {
+    padding: 10px 0;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+.about-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.about-logo .logo-svg {
+    width: 60px;
+    height: 60px;
+}
+
+.about-info-table {
+    width: 100%;
+    margin-top: 15px;
+    border-top: 1px solid var(--hr);
+}
+
+.about-info-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--hr);
+    font-size: 0.9rem;
+}
+
+.about-info-table td:first-child {
+    font-weight: bold;
+    color: var(--accent);
+    width: 100px;
+}
+
+/* Tombol close di pojok modal */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--hr);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: var(--accent);
+}
 </style>
 
 <nav id="navbar">
@@ -61,6 +117,34 @@
     </div>
 </div>
 
+<div id="aboutModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>About Noir</h3>
+            <button class="close-btn" onclick="closeAbout()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="about-logo">
+                <svg class="logo-svg" viewBox="0 0 100 100">
+                    <polygon class="logo-shape" points="50,10 20,50 50,90 80,50" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                    <circle class="logo-dot" cx="50" cy="50" r="5" fill="url(#logoGrad)"/>
+                </svg>
+            </div>
+            <p><strong>Noir Project</strong> adalah eksperimen desain antarmuka yang fokus pada kecepatan, tipografi tajam, dan fleksibilitas tema.</p>
+            <table class="about-info-table">
+                <tr>
+                    <td>Version</td>
+                    <td>2.0.4</td>
+                </tr>
+                <tr>
+                    <td>Framework</td>
+                    <td>Vanilla JS / CSS3</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
 const modal = document.getElementById("themeModal");
 const modalContent = modal.querySelector(".modal-content");
@@ -106,4 +190,35 @@ if (savedTheme) {
     // Jika tidak ada tema tersimpan, set default ke 'light' atau 'dark'
     document.documentElement.setAttribute('data-theme', 'light');
 }
+</script>
+
+<script>
+const aboutModal = document.getElementById("aboutModal");
+const aboutContent = aboutModal.querySelector(".modal-content");
+
+function openAbout() {
+    aboutModal.classList.add("active");
+    aboutContent.classList.remove("animate-out");
+    aboutContent.classList.add("animate-in");
+    
+    // Tutup sidebar otomatis jika sedang terbuka (khusus mobile)
+    if(typeof menuToggle !== 'undefined') {
+        menuToggle.classList.remove('active');
+        mobileNav.classList.remove('active');
+    }
+}
+
+function closeAbout() {
+    aboutContent.classList.remove("animate-in");
+    aboutContent.classList.add("animate-out");
+    setTimeout(() => {
+        aboutModal.classList.remove("active");
+    }, 300);
+}
+
+// Tambahkan ke event click window yang sudah ada
+window.onclick = (event) => {
+    if (event.target == modal) closeModal(); // Untuk theme modal
+    if (event.target == aboutModal) closeAbout(); // Untuk about modal
+};
 </script>
