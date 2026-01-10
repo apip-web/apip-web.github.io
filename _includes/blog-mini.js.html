@@ -145,32 +145,42 @@ function renderPost(post, pushState) {
 }
 
     /* PAGINATION LOGIC */
-    function applyPagination() {
-        const pContainer = document.getElementById('pagination-container');
-        if (!pContainer) return;
+function applyPagination() {
+    const pContainer = document.getElementById('pagination-container');
+    if (!pContainer) return;
 
-        let activePosts = [];
-        if (STATE === 'tag') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const tag = urlParams.get('tag');
-            activePosts = getPosts().filter(p => (p.dataset.tags || '').split(',').includes(tag));
-        } else {
-            activePosts = getPosts();
-        }
+    // Ambil tag dari URL saat ini
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTag = urlParams.get('tag');
 
-        const totalPages = Math.ceil(activePosts.length / itemsPerPage);
-        
-        // Reset ke hal 1 jika halaman yang diminta tidak ada (misal setelah filter)
-        if (currentPage > totalPages) currentPage = 1;
+    let activePosts = [];
 
-        getPosts().forEach(p => p.style.display = 'none');
-
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        activePosts.slice(start, end).forEach(p => p.style.display = 'block');
-
-        renderPaginationButtons(totalPages, pContainer);
+    if (currentTag) {
+        // Jika ada tag, saring post berdasarkan tag tersebut
+        activePosts = getPosts().filter(p => {
+            const tags = (p.dataset.tags || '').split(',');
+            return tags.includes(currentTag);
+        });
+    } else {
+        // Jika tidak ada tag, ambil semua post (halaman blog utama)
+        activePosts = getPosts();
     }
+
+    const totalPages = Math.ceil(activePosts.length / itemsPerPage);
+
+    // Sembunyikan semua post dulu
+    getPosts().forEach(p => p.style.display = 'none');
+
+    // Tampilkan hanya yang masuk range halaman aktif dari hasil saringan (activePosts)
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    
+    activePosts.slice(start, end).forEach(p => {
+        p.style.display = 'block';
+    });
+
+    renderPaginationButtons(totalPages, pContainer);
+}
 
 function renderPaginationButtons(totalPages, container) {
     container.innerHTML = '';
@@ -183,13 +193,15 @@ function renderPaginationButtons(totalPages, container) {
         
         btn.onclick = (e) => {
             e.preventDefault();
-            // Ambil URL saat ini
             const url = new URL(window.location.href);
-            // Set atau Update parameter 'page'
+            
+            // Set halaman baru di URL
             url.searchParams.set('page', i);
             
-            // Panggil router agar URL berubah dan history tersimpan
+            // Panggil router: Ini akan otomatis menjalankan renderTag atau renderList
+            // tergantung apakah ada parameter ?tag di URL tersebut.
             router(url.pathname + url.search, true);
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         container.appendChild(btn);
