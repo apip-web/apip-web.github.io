@@ -1,3 +1,34 @@
+<style>
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 30px 0;
+}
+
+.page-num {
+  background: transparent;
+  border: 1px solid var(--hr);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.page-num.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.page-num:hover:not(.active) {
+  border-color: var(--text-main);
+  color: var(--text-main);
+}
+</style>
+
 {% include homepage.html %}
 
 <h1 id="tag-title">All Posts</h1>
@@ -26,6 +57,8 @@
   </article>
   {% endfor %}
 </div>
+
+<div id="pagination-container" class="pagination"></div>
 
 <button id="show-all">All tags</button>
 
@@ -77,6 +110,9 @@ function hideAll() {
     if (a) a.style.display = '';
     if (ex) ex.style.display = 'block';
   });
+
+const pContainer = document.getElementById('pagination-container');
+  if (pContainer) pContainer.innerHTML = ''; // Bersihkan pagination saat pindah state
 }
 
   function push(path) { if(location.pathname+location.search!==path) history.pushState(null,'',path); }
@@ -94,12 +130,14 @@ function hideAll() {
   }
 
   // tampilkan tag-title dan show-all hanya di list/tag
-function renderList(){
+let currentPage = 1;
+const itemsPerPage = 5; // Atur jumlah post per halaman
+
+function renderList() {
   STATE = 'list';
   hideAll();
 
   safe(listTitle, el => el.style.display = 'block');
-
   safe(postsWrap, el => {
     el.style.display = 'block';
     el.classList.add('animate-slide');
@@ -171,6 +209,48 @@ function renderTag(tag){
       return cleanPostUrl.endsWith(target)||target.endsWith(cleanPostUrl);
     });
   }
+
+// P A G I N A T I O N //
+  function applyPagination() {
+  const allPosts = getPosts();
+  const totalPages = Math.ceil(allPosts.length / itemsPerPage);
+  const pContainer = document.getElementById('pagination-container');
+
+  if (!pContainer) return;
+
+  // 1. Sembunyikan semua dulu
+  allPosts.forEach(p => p.style.display = 'none');
+
+  // 2. Tampilkan hanya yang masuk range halaman aktif
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  
+  allPosts.slice(start, end).forEach(p => {
+    p.style.display = 'block';
+  });
+
+  // 3. Render tombol angka
+  renderPaginationButtons(totalPages, pContainer);
+}
+
+function renderPaginationButtons(totalPages, container) {
+  container.innerHTML = '';
+  if (totalPages <= 1) return; // Jangan munculkan jika cuma 1 halaman
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = `page-num ${i === currentPage ? 'active' : ''}`;
+    
+    btn.onclick = () => {
+      currentPage = i;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderList(); // Render ulang list untuk halaman ini
+    };
+    
+    container.appendChild(btn);
+  }
+}
 
   /* ROUTER */
 let LAST_ROUTE_PATH = '';
