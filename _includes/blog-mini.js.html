@@ -111,9 +111,8 @@ function renderList() {
 
 function renderTag(tag) {
     STATE = 'tag';
-    currentPage = 1;
-    hideAll();
-    
+    hideAll(); // hideAll harus membersihkan display semua post
+
     safe(document.getElementById('tag-title'), el => {
         el.style.display = 'block';
         el.textContent = `Showing all posts under "${tag}"`;
@@ -121,8 +120,11 @@ function renderTag(tag) {
     safe(document.getElementById('show-all'), el => el.style.display = 'inline-block');
     safe(postsWrap, el => el.style.display = 'block');
 
-    applyPagination();
-    triggerPageAnimation(); // Animasikan seluruh container (termasuk tag-title di dalamnya)
+    // JANGAN tulis currentPage = 1 di sini! 
+    // Biarkan currentPage diatur oleh router dari URL (?page=2)
+
+    applyPagination(); 
+    triggerPageAnimation();
     debug();
 }
 
@@ -204,15 +206,23 @@ function router(path, pushState) {
     const url = new URL(path, location.origin);
     const pathname = url.pathname.replace(/\/$/, '');
     const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
-    const tag = url.searchParams.get('tag');
     
-    // 🔥 TAMBAHKAN INI: Ambil parameter page dari URL
+    // 🔥 KUNCINYA DI SINI: Update currentPage setiap kali router jalan
     const pageParam = url.searchParams.get('page');
     currentPage = parseInt(pageParam) || 1; 
+
+    const tag = url.searchParams.get('tag');
 
     if (pathname === '' || pathname === '/' || pathname === '/index.html') return renderHome();
     
     if (pathname === cleanBlogPath) {
+        // Jika masuk ke /blog/ tanpa parameter, arahkan ke ?page=1
+        if (!url.searchParams.has('page') && !tag) {
+            const newPath = cleanBlogPath + '/?page=1';
+            history.replaceState(null, '', newPath);
+            return router(newPath, false);
+        }
+        
         if (tag) return renderTag(tag);
         return renderList();
     }
