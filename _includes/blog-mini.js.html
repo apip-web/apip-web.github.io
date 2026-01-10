@@ -70,344 +70,207 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const homepage  = document.querySelector('.homepage');
-  const btnBlog   = document.getElementById('open-blog');
-  const postsWrap = document.getElementById('posts');
-  const page404   = document.getElementById('page-404');
-  const debugBox  = document.getElementById('spa-debug');
-  const listTitle = document.querySelector('.list-title');
-  const spaHome   = document.getElementById('spa-home');
-  const BLOG_PATH = '/blog/';
-  let STATE = '';
+    const homepage = document.querySelector('.homepage');
+    const btnBlog = document.getElementById('open-blog');
+    const postsWrap = document.getElementById('posts');
+    const page404 = document.getElementById('page-404');
+    const debugBox = document.getElementById('spa-debug');
+    const listTitle = document.querySelector('.list-title');
+    const spaHome = document.getElementById('spa-home');
+    const BLOG_PATH = '/blog/';
+    let STATE = '';
+    let currentPage = 1;
+    const itemsPerPage = 5; // Saya ubah ke 5 agar lebih proporsional
 
-  const safe = (el, fn) => el && fn(el);
-  const getPosts = () => [...document.querySelectorAll('.post')];
+    const safe = (el, fn) => el && fn(el);
+    const getPosts = () => [...document.querySelectorAll('.post')];
 
-  /* CORE */
-function hideAll() {
-  [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
-    e.style.display = 'none';
-    e.classList.remove('animate-slide');
-    void e.offsetWidth;
-  }));
+    /* CORE */
+    function hideAll() {
+        [spaHome, homepage, postsWrap, page404].forEach(el => safe(el, e => {
+            e.style.display = 'none';
+            e.classList.remove('animate-slide');
+        }));
 
-  // 🔥 RESET SEMUA HEADER / TOOL
-  safe(listTitle, el => el.style.display = 'none');
+        safe(listTitle, el => el.style.display = 'none');
+        safe(document.getElementById('tag-title'), el => el.style.display = 'none');
+        safe(document.getElementById('show-all'), el => el.style.display = 'none');
 
-  const tagTitleEl = document.getElementById('tag-title');
-  if (tagTitleEl) tagTitleEl.style.display = 'none';
-
-  const showAllBtn = document.getElementById('show-all');
-  if (showAllBtn) showAllBtn.style.display = 'none';
-
-  getPosts().forEach(p=>{
-    const c = p.querySelector('.post-content');
-    const a = p.querySelector('.post-title a');
-    const ex = p.querySelector('.post-excerpt');
-
-    p.style.display = 'none';
-    if (c) c.style.display = 'none';
-    if (a) a.style.display = '';
-    if (ex) ex.style.display = 'block';
-  });
-
-const pContainer = document.getElementById('pagination-container');
-  if (pContainer) pContainer.innerHTML = ''; // Bersihkan pagination saat pindah state
-}
-
-  function push(path) { if(location.pathname+location.search!==path) history.pushState(null,'',path); }
-
-  /* RENDERERS */
-  function renderHome(pushState){
-    STATE='home';
-    hideAll();
-    [spaHome, homepage].forEach(el=>safe(el,e=>{
-      e.style.display='block';
-      e.classList.add('animate-slide');
-    }));
-    if(pushState) push('/');
-    debug();
-  }
-
-  // tampilkan tag-title dan show-all hanya di list/tag
-let currentPage = 1;
-const itemsPerPage = 2; // Atur jumlah post per halaman
-
-function renderList() {
-  STATE = 'list';
-  hideAll();
-
-  safe(listTitle, el => el.style.display = 'block');
-  safe(postsWrap, el => {
-    el.style.display = 'block';
-    el.classList.add('animate-slide');
-  });
-
-  // Selalu jalankan pagination di list
-  applyPagination(); 
-  debug();
-}
-
-function renderTag(tag){
-  STATE = 'tag';
-  currentPage = 1; // Reset ke hal 1 setiap kali ganti tag
-  hideAll();
-
-  const tagTitle = document.getElementById('tag-title');
-  if(tagTitle){
-    tagTitle.style.display = 'block';
-    tagTitle.textContent = `Showing all posts under "${tag}"`;
-  }
-
-  safe(postsWrap, el => {
-    el.style.display = 'block';
-    el.classList.add('animate-slide');
-  });
-
-  // Jalankan pagination (ia akan otomatis memfilter tag di dalamnya)
-  applyPagination();
-  
-  safe(document.getElementById('show-all'), el => el.style.display = 'inline-block');
-  debug();
-}
-
-  function renderPost(post,pushState){
-    STATE='post';
-    hideAll();
-    safe(listTitle,el=>el.style.display='none');
-    safe(postsWrap,el=>{
-      el.style.display='block';
-      el.classList.add('animate-slide');
-    });
-    post.style.display='block';
-    const c=post.querySelector('.post-content');
-    const a=post.querySelector('.post-title a');
-    const ex=post.querySelector('.post-excerpt');
-    if(c) c.style.display='block';
-    if(a) a.style.display='none';
-    if(ex) ex.style.display='none';
-    if(pushState) push(post.dataset.url);
-    debug();
-  }
-
-  function render404(path,pushState){
-    STATE='404';
-    hideAll();
-    safe(page404,el=>el.style.display='block');
-    if(pushState) push(path);
-    debug();
-  }
-
-  /* PATH FINDER */
-  function findPostByPath(path){
-    const posts=getPosts();
-    const target=path.replace(/\/$/,'').replace('.html','');
-    const cleanBlogPath=BLOG_PATH.replace(/\/$/,'').replace('.html','');
-    if(target===cleanBlogPath||target==='') return null;
-    return posts.find(p=>{
-      const postUrl=p.dataset.url;
-      if(!postUrl) return false;
-      const cleanPostUrl=postUrl.replace(/\/$/,'').replace('.html','');
-      return cleanPostUrl.endsWith(target)||target.endsWith(cleanPostUrl);
-    });
-  }
-
-// P A G I N A T I O N //
-function applyPagination() {
-  const pContainer = document.getElementById('pagination-container');
-  if (!pContainer) return;
-
-  // 1. Dapatkan daftar post yang sesuai dengan STATE saat ini
-  let activePosts = [];
-  
-  if (STATE === 'tag') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tag = urlParams.get('tag');
-    activePosts = getPosts().filter(p => {
-      const tags = (p.dataset.tags || '').split(',');
-      return tags.includes(tag);
-    });
-  } else {
-    // Jika di mode list biasa, ambil semua
-    activePosts = getPosts();
-  }
-
-  // 2. Hitung total halaman berdasarkan post yang aktif saja
-  const totalPages = Math.ceil(activePosts.length / itemsPerPage);
-
-  // 3. Sembunyikan SEMUA post dulu
-  getPosts().forEach(p => p.style.display = 'none');
-
-  // 4. Tampilkan post yang masuk range halaman aktif
-  const start = (currentPage - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  
-  const currentItems = activePosts.slice(start, end);
-  currentItems.forEach(p => p.style.display = 'block');
-
-  // 5. Render tombol (Jangan munculkan jika list kosong atau cuma 1 hal)
-  renderPaginationButtons(totalPages, pContainer);
-}
-
-  // 3. Render tombol
-  renderPaginationButtons(totalPages, pContainer);
-}
-
-function renderPaginationButtons(totalPages, container) {
-  container.innerHTML = '';
-  if (totalPages <= 1) return; // Jangan munculkan jika cuma 1 halaman
-
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = `page-num ${i === currentPage ? 'active' : ''}`;
-    
-    btn.onclick = () => {
-      currentPage = i;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      renderList(); // Render ulang list untuk halaman ini
-    };
-    
-    container.appendChild(btn);
-  }
-}
-
-  /* ROUTER */
-let LAST_ROUTE_PATH = '';
-function router(path, pushState){
-  LAST_ROUTE_PATH = path;
-  if(debugBox) debugBox.innerHTML = '';
-
-  if(pushState){
-    history.pushState(null,'',path);
-  }
-
-  const url = new URL(path, location.origin);
-  const pathname = url.pathname.replace(/\/$/, '');
-  const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
-  const tag = url.searchParams.get('tag');
-
-  if(pathname === '' || pathname === '/' || pathname === '/index.html'){
-    return renderHome();
-  }
-
-  if(pathname === cleanBlogPath){
-    if(tag){
-      return renderTag(tag);
-    }
-    return renderList();
-  }
-
-  const post = findPostByPath(pathname);
-  if(post){
-    return renderPost(post, false);
-  }
-
-  render404(path, false);
-}
-
-  /* TAG FILTER */
-  function filterByTag(tag,pushState=false){
-    const title=document.getElementById('tag-title');
-    getPosts().forEach(post=>{
-      const tags=(post.dataset.tags||'').split(',');
-      post.style.display = (!tag || tags.includes(tag)) ? 'block':'none';
-    });
-    if(tag){
-      title.textContent=`Showing all posts under "${tag}"`;
-      if(pushState) push(`/blog?tag=${encodeURIComponent(tag)}`);
-    }else{
-      title.textContent='All Posts';
-      if(pushState) push('/blog');
-    }
-  }
-
-  /* EVENT LISTENERS */
-  document.addEventListener('click',e=>{
-    const a=e.target.closest('a');
-    if(a){
-      const href=a.getAttribute('href');
-      if(href && !href.startsWith('#')){
-        try{
-          const url=new URL(href,location.origin);
-          if(url.origin===location.origin){
-            e.preventDefault();
-            router(url.pathname+url.search,true);
-          }
-        }catch(err){}
-      }
-    }
-
-const tagBtn = e.target.closest('.tag');
-if(tagBtn){
-  e.preventDefault();
-  const tag = tagBtn.dataset.tag;
-  router(`/blog?tag=${encodeURIComponent(tag)}`, true);
-}
-  });
-
-  const showAllBtn=document.getElementById('show-all');
-  if(showAllBtn){
-    showAllBtn.addEventListener('click', e=>{
-  e.preventDefault();
-  router('/blog', true);
-});
-  }
-
-if(btnBlog){
-  btnBlog.addEventListener('click', e => {
-    e.preventDefault();
-    router(BLOG_PATH, true);
-  });
-}
-
-  window.addEventListener('popstate',()=>{router(location.pathname+location.search,false);});
-
-  /* DEBUG & COPY */
-  function debug(){
-    if(!debugBox) return;
-    let stateClass=(STATE==='404')?'badge-error':'badge-state';
-    debugBox.innerHTML+=`
-  <div class="log-entry">
-    <span class="badge badge-route">Routing</span> Path: ${LAST_ROUTE_PATH}
-  </div>
-  <div class="log-entry">
-    <span class="badge ${stateClass}">State</span> ${STATE}
-  </div>
-  <div class="log-entry">
-    <span class="badge badge-success">URL</span> ${location.pathname+location.search}
-  </div>`;
-    debugBox.scrollTop=debugBox.scrollHeight;
-  }
-
-  if(debugBox){
-    debugBox.addEventListener('click',()=>{
-      const logs=debugBox.querySelectorAll('.log-entry');
-      let markdownText='';
-      logs.forEach(log=>{
-        const rawText=log.innerText.replace(/\s+/g,' ').trim();
-        const routingMatch=rawText.match(/Routing\s+(Path:\s+\S+)/i);
-        const stateMatch=rawText.match(/State\s+(\S+)/i);
-        const urlMatch=rawText.match(/URL\s+(\S+)/i);
-        if(routingMatch) markdownText+=`**ROUTING** \`${routingMatch[1]}\` \n`;
-        if(stateMatch) markdownText+=`**STATE** \`${stateMatch[1]}\` \n`;
-        if(urlMatch) markdownText+=`**URL** \`${urlMatch[1]}\` \n`;
-        markdownText+='\n';
-      });
-      if(markdownText.trim()){
-        navigator.clipboard.writeText(markdownText.trim()).then(()=>{
-          const msg=document.createElement('div');
-          msg.style.cssText="color:#10b981;font-size:10px;margin-top:5px;";
-          msg.innerHTML='<i>✓ Copied (Routing, State, URL) as Markdown!</i>';
-          debugBox.appendChild(msg);
-          debugBox.scrollTop=debugBox.scrollHeight;
-          setTimeout(()=>msg.remove(),2000);
+        getPosts().forEach(p => {
+            p.style.display = 'none';
+            safe(p.querySelector('.post-content'), c => c.style.display = 'none');
+            safe(p.querySelector('.post-title a'), a => a.style.display = '');
+            safe(p.querySelector('.post-excerpt'), ex => ex.style.display = 'block');
         });
-      }
-    });
-  }
 
-  /* INIT */
-  router(location.pathname+location.search,false);
+        const pContainer = document.getElementById('pagination-container');
+        if (pContainer) pContainer.innerHTML = '';
+    }
+
+    function push(path) { if (location.pathname + location.search !== path) history.pushState(null, '', path); }
+
+    /* RENDERERS */
+    function renderHome() {
+        STATE = 'home';
+        hideAll();
+        [spaHome, homepage].forEach(el => safe(el, e => {
+            e.style.display = 'block';
+            e.classList.add('animate-slide');
+        }));
+        debug();
+    }
+
+    function renderList() {
+        STATE = 'list';
+        hideAll();
+        safe(listTitle, el => el.style.display = 'block');
+        safe(postsWrap, el => {
+            el.style.display = 'block';
+            el.classList.add('animate-slide');
+        });
+        applyPagination();
+        debug();
+    }
+
+    function renderTag(tag) {
+        STATE = 'tag';
+        currentPage = 1;
+        hideAll();
+        const tagTitle = document.getElementById('tag-title');
+        if (tagTitle) {
+            tagTitle.style.display = 'block';
+            tagTitle.textContent = `Showing all posts under "${tag}"`;
+        }
+        safe(postsWrap, el => {
+            el.style.display = 'block';
+            el.classList.add('animate-slide');
+        });
+        applyPagination();
+        safe(document.getElementById('show-all'), el => el.style.display = 'inline-block');
+        debug();
+    }
+
+    function renderPost(post, pushState) {
+        STATE = 'post';
+        hideAll();
+        safe(postsWrap, el => {
+            el.style.display = 'block';
+            el.classList.add('animate-slide');
+        });
+        post.style.display = 'block';
+        safe(post.querySelector('.post-content'), c => c.style.display = 'block');
+        safe(post.querySelector('.post-title a'), a => a.style.display = 'none');
+        safe(post.querySelector('.post-excerpt'), ex => ex.style.display = 'none');
+        if (pushState) push(post.dataset.url);
+        debug();
+    }
+
+    /* PAGINATION LOGIC */
+    function applyPagination() {
+        const pContainer = document.getElementById('pagination-container');
+        if (!pContainer) return;
+
+        let activePosts = [];
+        if (STATE === 'tag') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tag = urlParams.get('tag');
+            activePosts = getPosts().filter(p => (p.dataset.tags || '').split(',').includes(tag));
+        } else {
+            activePosts = getPosts();
+        }
+
+        const totalPages = Math.ceil(activePosts.length / itemsPerPage);
+        
+        // Reset ke hal 1 jika halaman yang diminta tidak ada (misal setelah filter)
+        if (currentPage > totalPages) currentPage = 1;
+
+        getPosts().forEach(p => p.style.display = 'none');
+
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        activePosts.slice(start, end).forEach(p => p.style.display = 'block');
+
+        renderPaginationButtons(totalPages, pContainer);
+    }
+
+    function renderPaginationButtons(totalPages, container) {
+        container.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className = `page-num ${i === currentPage ? 'active' : ''}`;
+            btn.onclick = (e) => {
+                e.preventDefault();
+                currentPage = i;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                STATE === 'tag' ? applyPagination() : renderList();
+            };
+            container.appendChild(btn);
+        }
+    }
+
+    /* ROUTER */
+    let LAST_ROUTE_PATH = '';
+    function router(path, pushState) {
+        LAST_ROUTE_PATH = path;
+        if (pushState) history.pushState(null, '', path);
+
+        const url = new URL(path, location.origin);
+        const pathname = url.pathname.replace(/\/$/, '');
+        const cleanBlogPath = BLOG_PATH.replace(/\/$/, '');
+        const tag = url.searchParams.get('tag');
+
+        if (pathname === '' || pathname === '/' || pathname === '/index.html') return renderHome();
+        if (pathname === cleanBlogPath) return tag ? renderTag(tag) : renderList();
+
+        const post = findPostByPath(pathname);
+        if (post) return renderPost(post, false);
+
+        render404(path);
+    }
+
+    function findPostByPath(path) {
+        const target = path.replace(/\/$/, '').replace('.html', '');
+        return getPosts().find(p => {
+            const postUrl = p.dataset.url;
+            if (!postUrl) return false;
+            const cleanPostUrl = postUrl.replace(/\/$/, '').replace('.html', '');
+            return cleanPostUrl.endsWith(target) || target.endsWith(cleanPostUrl);
+        });
+    }
+
+    function render404(path) {
+        STATE = '404'; hideAll();
+        safe(page404, el => el.style.display = 'block');
+        debug();
+    }
+
+    /* EVENTS */
+    document.addEventListener('click', e => {
+        const a = e.target.closest('a');
+        if (a && a.origin === location.origin && !a.getAttribute('href').startsWith('#')) {
+            e.preventDefault();
+            router(a.pathname + a.search, true);
+        }
+        const tagBtn = e.target.closest('.tag');
+        if (tagBtn) {
+            e.preventDefault();
+            router(`/blog/?tag=${encodeURIComponent(tagBtn.dataset.tag)}`, true);
+        }
+    });
+
+    safe(document.getElementById('show-all'), btn => btn.onclick = () => router('/blog/', true));
+    safe(btnBlog, btn => btn.onclick = () => router(BLOG_PATH, true));
+    window.onpopstate = () => router(location.pathname + location.search, false);
+
+    function debug() {
+        if (!debugBox) return;
+        debugBox.innerHTML += `<div class="log-entry"><span class="badge">State</span> ${STATE} | ${location.pathname}</div>`;
+        debugBox.scrollTop = debugBox.scrollHeight;
+    }
+
+    router(location.pathname + location.search, false);
 });
 </script>
