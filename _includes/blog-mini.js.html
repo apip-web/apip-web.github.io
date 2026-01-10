@@ -85,8 +85,6 @@ function renderHome(pushState) {
 
     [spaHome, homepage].forEach(el => safe(el, e => {
         e.style.display = 'block';
-        // Trigger animasi masuk agar smooth
-        void e.offsetWidth; 
         e.classList.add('animate-slide');
     }));
 
