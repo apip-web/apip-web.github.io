@@ -89,58 +89,60 @@ document.addEventListener('DOMContentLoaded', () => {
         debug();
     }
 
-    function renderList() {
-        STATE = 'list';
-        hideAll();
-        safe(listTitle, el => el.style.display = 'block');
-        safe(postsWrap, el => {
-            el.style.display = 'block';
-            el.classList.add('animate-slide');
-        });
-        applyPagination();
-        debug();
-    }
+// Fungsi pembantu agar kode tidak berulang
+function triggerPageAnimation() {
+    safe(postsWrap, el => {
+        el.classList.remove('animate-slide');
+        void el.offsetWidth; // Force restart animasi
+        el.classList.add('animate-slide');
+    });
+}
 
-    function renderTag(tag) {
-        STATE = 'tag';
-        currentPage = 1;
+function renderList() {
+    STATE = 'list';
+    hideAll();
+    safe(listTitle, el => el.style.display = 'block');
+    safe(postsWrap, el => el.style.display = 'block');
+    
+    applyPagination();
+    triggerPageAnimation(); // Animasikan seluruh container
+    debug();
+}
 
-const url = new URL(window.location.href);
-if(!url.searchParams.has('page')) currentPage = 1;
-      
-        hideAll();
-        const tagTitle = document.getElementById('tag-title');
-        if (tagTitle) {
-            tagTitle.style.display = 'block';
-            tagTitle.textContent = `Showing all posts under "${tag}"`;
-        }
-        safe(postsWrap, el => {
-            el.style.display = 'block';
-            el.classList.add('animate-slide');
-        });
-        applyPagination();
-        safe(document.getElementById('show-all'), el => el.style.display = 'inline-block');
-        debug();
-    }
+function renderTag(tag) {
+    STATE = 'tag';
+    currentPage = 1;
+    hideAll();
+    
+    safe(document.getElementById('tag-title'), el => {
+        el.style.display = 'block';
+        el.textContent = `Showing all posts under "${tag}"`;
+    });
+    safe(document.getElementById('show-all'), el => el.style.display = 'inline-block');
+    safe(postsWrap, el => el.style.display = 'block');
 
-  function renderPost(post,pushState){
-    STATE='post';
-    hideAll();
-    safe(listTitle,el=>el.style.display='none');
-    safe(postsWrap,el=>{
-      el.style.display='block';
-      el.classList.add('animate-slide');
-    });
-    post.style.display='block';
-    const c=post.querySelector('.post-content');
-    const a=post.querySelector('.post-title a');
-    const ex=post.querySelector('.post-excerpt');
-    if(c) c.style.display='block';
-    if(a) a.style.display='none';
-    if(ex) ex.style.display='none';
-    if(pushState) push(post.dataset.url);
-    debug();
-  }
+    applyPagination();
+    triggerPageAnimation(); // Animasikan seluruh container (termasuk tag-title di dalamnya)
+    debug();
+}
+
+function renderPost(post, pushState) {
+    STATE = 'post';
+    hideAll();
+
+    safe(postsWrap, el => el.style.display = 'block');
+    
+    // Tampilkan detail post
+    post.style.display = 'block';
+    safe(post.querySelector('.post-content'), c => c.style.display = 'block');
+    safe(post.querySelector('.post-title a'), a => a.style.display = 'none');
+    safe(post.querySelector('.post-excerpt'), ex => ex.style.display = 'none');
+
+    triggerPageAnimation(); // Animasikan seluruh container post detail
+    
+    if (pushState) push(post.dataset.url);
+    debug();
+}
 
     /* PAGINATION LOGIC */
     function applyPagination() {
