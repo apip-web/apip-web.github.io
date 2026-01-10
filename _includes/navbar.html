@@ -300,34 +300,69 @@ window.onclick = (event) => {
 
 <!-- S E A R C H -->
 <script>
-document.getElementById('search-trigger').addEventListener('click', (e) => {
-    e.preventDefault();
-    togglePopup('search-popup', true); // Gunakan fungsi reusable kamu
-});
-
+const searchPopup = document.getElementById("search-popup");
+const searchContent = searchPopup.querySelector(".popup-content");
 const searchInput = document.getElementById('quick-search');
 const resultsArea = document.getElementById('search-results-list');
 
+// Fungsi Buka
+function openSearch() {
+    searchPopup.classList.add("active");
+    searchContent.classList.remove("animate-out");
+    searchContent.classList.add("animate-in");
+    
+    // Auto focus ke input
+    setTimeout(() => searchInput.focus(), 100);
+
+    // Tutup sidebar mobile jika terbuka
+    if(document.getElementById('mobileNav')) {
+        document.getElementById('menuToggle').classList.remove('active');
+        document.getElementById('mobileNav').classList.remove('active');
+    }
+}
+
+// Fungsi Tutup
+function closeSearch() {
+    searchContent.classList.remove("animate-in");
+    searchContent.classList.add("animate-out");
+    setTimeout(() => {
+        searchPopup.classList.remove("active");
+        searchInput.value = ''; // Reset input
+        resultsArea.innerHTML = ''; // Bersihkan hasil
+    }, 300);
+}
+
+// Update Trigger di Navbar (Ganti event listener-nya)
+document.getElementById('search-trigger').onclick = (e) => {
+    e.preventDefault();
+    openSearch();
+};
+
+// Update Tombol Close di dalam Popup
+document.querySelector('.close-popup').onclick = closeSearch;
+
+// Update Window Click (Tambahkan ini agar bisa tutup klik luar)
+window.addEventListener('click', (event) => {
+    if (event.target == searchPopup) closeSearch();
+});
+
+// Logika Filter (Quick Search)
 searchInput.addEventListener('input', () => {
     const keyword = searchInput.value.toLowerCase();
     resultsArea.innerHTML = '';
-
     if (keyword.length < 2) return;
 
-    // Filter berdasarkan post yang sudah diload oleh SPA
     const filtered = getPosts().filter(p => {
-        const title = p.querySelector('.post-title').innerText.toLowerCase();
-        return title.includes(keyword);
+        return p.querySelector('.post-title').innerText.toLowerCase().includes(keyword);
     });
 
     filtered.forEach(p => {
         const item = document.createElement('div');
         item.className = 'search-item';
         item.innerHTML = `<span>${p.querySelector('.post-title').innerText}</span>`;
-        
         item.onclick = () => {
-            togglePopup('search-popup', false);
-            router(p.dataset.url, true); // Panggil router SPA agar navigasi mulus
+            closeSearch();
+            router(p.dataset.url, true);
         };
         resultsArea.appendChild(item);
     });
