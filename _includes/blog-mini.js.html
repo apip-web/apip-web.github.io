@@ -143,17 +143,14 @@ function renderList() {
     el.classList.add('animate-slide');
   });
 
-  // HAPUS baris getPosts().forEach(p => p.style.display = 'block'); 
-  // Karena baris tersebut menampilkan SEMUA post sekaligus.
-  
-  // PANGGIL fungsi ini agar post disaring dan tombol muncul
+  // Selalu jalankan pagination di list
   applyPagination(); 
-  
   debug();
 }
 
 function renderTag(tag){
   STATE = 'tag';
+  currentPage = 1; // Reset ke hal 1 setiap kali ganti tag
   hideAll();
 
   const tagTitle = document.getElementById('tag-title');
@@ -162,16 +159,15 @@ function renderTag(tag){
     tagTitle.textContent = `Showing all posts under "${tag}"`;
   }
 
-  const showAllBtn = document.getElementById('show-all');
-  if(showAllBtn) showAllBtn.style.display = 'inline-block';
-
   safe(postsWrap, el => {
     el.style.display = 'block';
     el.classList.add('animate-slide');
   });
 
-  filterByTag(tag, false);
+  // Jalankan pagination (ia akan otomatis memfilter tag di dalamnya)
   applyPagination();
+  
+  safe(document.getElementById('show-all'), el => el.style.display = 'inline-block');
   debug();
 }
 
@@ -221,32 +217,37 @@ function applyPagination() {
   const pContainer = document.getElementById('pagination-container');
   if (!pContainer) return;
 
-  // Ambil post yang sedang aktif (berdasarkan STATE)
-  // Jika di mode Tag, hanya ambil post yang lolos filter tag
-  let allPosts;
+  // 1. Dapatkan daftar post yang sesuai dengan STATE saat ini
+  let activePosts = [];
+  
   if (STATE === 'tag') {
     const urlParams = new URLSearchParams(window.location.search);
-    const currentTag = urlParams.get('tag');
-    allPosts = getPosts().filter(p => {
-        const tags = (p.dataset.tags || '').split(',');
-        return tags.includes(currentTag);
+    const tag = urlParams.get('tag');
+    activePosts = getPosts().filter(p => {
+      const tags = (p.dataset.tags || '').split(',');
+      return tags.includes(tag);
     });
   } else {
-    allPosts = getPosts();
+    // Jika di mode list biasa, ambil semua
+    activePosts = getPosts();
   }
 
-  const totalPages = Math.ceil(allPosts.length / itemsPerPage);
+  // 2. Hitung total halaman berdasarkan post yang aktif saja
+  const totalPages = Math.ceil(activePosts.length / itemsPerPage);
 
-  // 1. Sembunyikan SEMUA post dulu (reset)
+  // 3. Sembunyikan SEMUA post dulu
   getPosts().forEach(p => p.style.display = 'none');
 
-  // 2. Tampilkan hanya yang masuk range halaman aktif dari list yang sudah difilter
+  // 4. Tampilkan post yang masuk range halaman aktif
   const start = (currentPage - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   
-  allPosts.slice(start, end).forEach(p => {
-    p.style.display = 'block';
-  });
+  const currentItems = activePosts.slice(start, end);
+  currentItems.forEach(p => p.style.display = 'block');
+
+  // 5. Render tombol (Jangan munculkan jika list kosong atau cuma 1 hal)
+  renderPaginationButtons(totalPages, pContainer);
+}
 
   // 3. Render tombol
   renderPaginationButtons(totalPages, pContainer);
