@@ -26,14 +26,14 @@ https://templatemo.com/tm-599-noir-fashion
     --btn-bg: #eeeeee;
     --hr: #dddddd;
     --bg-code: #f0f0f0;
-    --text-code: #d11149;
+    --text-code: var(--text-main);
     --bg-nav: rgba(255, 255, 255, 0.8);
     --bg-table-even: #f9f9f9;
     --border-tag: rgba(0, 0, 0, 0.1);
 	--bg-sidebar: rgba(255, 255, 255, 0.2);
     --font-size: 16px;
-    --logo-gradient: linear-gradient(135deg, #1a1a1a, var(--accent));
-    --toggle-gradient: linear-gradient(135deg, #1a1a1a, var(--accent));
+    --logo-gradient: linear-gradient(135deg, var(--text-main), var(--accent));
+    --toggle-gradient: linear-gradient(135deg, var(--text-main), var(--accent));
 	--logo-primary: #1a1a1a;
     --logo-accent: #ff3366;
 }
@@ -43,7 +43,7 @@ https://templatemo.com/tm-599-noir-fashion
     --primary: #0a0a0a;
     --accent: #ff3366;
     --accent-hover: #ff1149;
-    --text-main: #ffffff;
+    --text-main: #f8f8f8;
     --text-muted: #888888;
     --bg-body: #0f0f12;
     --bg-section: #0a0a0a;
@@ -51,13 +51,13 @@ https://templatemo.com/tm-599-noir-fashion
     --btn-bg: #333333;
     --hr: #222222;
     --bg-code: #2a2a2a;
-    --text-code: #f8f8f8;
+    --text-code: var(--text-main);
     --bg-nav: rgba(0, 0, 0, 0.5);
     --bg-table-even: #141414;
     --border-tag: rgba(255, 255, 255, 0.15);
 	--bg-sidebar: rgba(0,0,0,0.2);
-    --logo-gradient: linear-gradient(135deg, #ffffff, var(--accent));
-    --toggle-gradient: linear-gradient(135deg, #ffffff, var(--accent));
+    --logo-gradient: linear-gradient(135deg, var(--text-main), var(--accent));
+    --toggle-gradient: linear-gradient(135deg, var(--text-main), var(--accent));
 	--logo-primary: #ffffff;
     --logo-accent: #ff3366;
 }
@@ -75,13 +75,13 @@ https://templatemo.com/tm-599-noir-fashion
     --btn-bg: #1e293b;            /* Latar belakang tombol */
     --hr: #1e293b;                /* Garis pemisah */
     --bg-code: #1e293b;           /* Latar belakang blok kode */
-    --text-code: #3399ff;         /* Warna teks kode */
+    --text-code: var(--text-main);         /* Warna teks kode */
     --bg-nav: rgba(10, 17, 32, 0.8); /* Navigasi transparan biru */
     --bg-table-even: #0f172a;     /* Baris tabel genap */
     --border-tag: rgba(51, 153, 255, 0.2); /* Border tag */
     --bg-sidebar: rgba(10, 17, 32, 0.6);   /* Overlay sidebar/modal */
-    --logo-gradient: linear-gradient(135deg, #e0e6ed, var(--accent));
-    --toggle-gradient: linear-gradient(135deg, #e0e6ed, var(--accent));
+    --logo-gradient: linear-gradient(135deg, var(--text-main), var(--accent));
+    --toggle-gradient: linear-gradient(135deg, var(--text-main), var(--accent));
 	--logo-primary: #e0e6ed;
     --logo-accent: #3399ff;
 }
@@ -676,6 +676,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
