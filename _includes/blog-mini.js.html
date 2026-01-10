@@ -282,11 +282,59 @@ function router(path, pushState) {
     safe(btnBlog, btn => btn.onclick = () => router(BLOG_PATH, true));
     window.onpopstate = () => router(location.pathname + location.search, false);
 
-    function debug() {
-        if (!debugBox) return;
-        debugBox.innerHTML += `<div class="log-entry"><span class="badge">State</span> ${STATE} | ${location.pathname}</div>`;
-        debugBox.scrollTop = debugBox.scrollHeight;
-    }
+function debug() {
+    if (!debugBox) return;
+    let stateClass = (STATE === '404') ? 'badge-error' : 'badge-state';
+    
+    debugBox.innerHTML += `
+        <div class="log-entry">
+            <span class="badge badge-route">Routing</span> Path: ${LAST_ROUTE_PATH}
+        </div>
+        <div class="log-entry">
+            <span class="badge ${stateClass}">State</span> ${STATE}
+        </div>
+        <div class="log-entry">
+            <span class="badge badge-success">URL</span> ${location.pathname + location.search}
+        </div>
+    `;
+    debugBox.scrollTop = debugBox.scrollHeight;
+}
+
+if (debugBox) {
+    debugBox.style.cursor = "pointer"; // Kasih tahu kalau bisa diklik
+    debugBox.addEventListener('click', () => {
+        const logs = debugBox.querySelectorAll('.log-entry');
+        let markdownText = '';
+
+        logs.forEach(log => {
+            const rawText = log.innerText.replace(/\s+/g, ' ').trim();
+            // Regex untuk menangkap data dari log
+            const routingMatch = rawText.match(/Routing\s+(Path:\s+\S+)/i);
+            const stateMatch = rawText.match(/State\s+(\S+)/i);
+            const urlMatch = rawText.match(/URL\s+(\S+)/i);
+
+            if (routingMatch) markdownText += `**ROUTING** \`${routingMatch[1]}\` \n`;
+            if (stateMatch) markdownText += `**STATE** \`${stateMatch[1]}\` \n`;
+            if (urlMatch) markdownText += `**URL** \`${urlMatch[1]}\` \n`;
+            
+            // Beri jarak antar entry
+            if (urlMatch) markdownText += '---\n';
+        });
+
+        if (markdownText.trim()) {
+            navigator.clipboard.writeText(markdownText.trim()).then(() => {
+                const msg = document.createElement('div');
+                msg.style.cssText = "color:#10b981;font-size:10px;margin-top:5px;font-weight:bold;";
+                msg.innerHTML = '<i>✓ Copied (Routing, State, URL) as Markdown!</i>';
+                debugBox.appendChild(msg);
+                debugBox.scrollTop = debugBox.scrollHeight;
+                setTimeout(() => msg.remove(), 2000);
+            }).catch(err => {
+                console.error('Gagal copy: ', err);
+            });
+        }
+    });
+}
 
     router(location.pathname + location.search, false);
 });
