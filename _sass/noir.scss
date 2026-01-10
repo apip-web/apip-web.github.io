@@ -34,6 +34,8 @@ https://templatemo.com/tm-599-noir-fashion
     --font-size: 16px;
     --logo-gradient: linear-gradient(135deg, #1a1a1a, var(--accent));
     --toggle-gradient: linear-gradient(135deg, #1a1a1a, var(--accent));
+	--logo-primary: #1a1a1a;
+    --logo-accent: #ff3366;
 }
 
 [data-theme="dark"] {
@@ -56,6 +58,8 @@ https://templatemo.com/tm-599-noir-fashion
 	--bg-sidebar: rgba(0,0,0,0.2);
     --logo-gradient: linear-gradient(135deg, #ffffff, var(--accent));
     --toggle-gradient: linear-gradient(135deg, #ffffff, var(--accent));
+	--logo-primary: #ffffff;
+    --logo-accent: #ff3366;
 }
 
 [data-theme="darkblue"] {
@@ -78,6 +82,8 @@ https://templatemo.com/tm-599-noir-fashion
     --bg-sidebar: rgba(10, 17, 32, 0.6);   /* Overlay sidebar/modal */
     --logo-gradient: linear-gradient(135deg, #e0e6ed, var(--accent));
     --toggle-gradient: linear-gradient(135deg, #e0e6ed, var(--accent));
+	--logo-primary: #e0e6ed;
+    --logo-accent: #3399ff;
 }
 
 * {
@@ -511,6 +517,19 @@ nav.scrolled {
 	margin-right: 10px;
 }
 
+.logo-shape {
+    fill: none;
+    /* Kita buat efek gradasi melalui filter atau cukup gunakan warna aksen */
+    stroke: var(--logo-accent); 
+    stroke-width: 3;
+    transition: stroke 0.3s ease;
+}
+
+.logo-dot {
+    fill: var(--logo-primary);
+    transition: fill 0.3s ease;
+}
+
 #navbar .logo-link .logo-text {
     font-family: 'Roboto Flex', sans-serif;
     font-weight: 900;
@@ -661,6 +680,7 @@ footer {
 	color: var(--text-muted);
 	font-size: 14px;
 }
+
 
 
 
