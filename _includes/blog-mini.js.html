@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const debugBox = document.getElementById('spa-debug');
     const listTitle = document.querySelector('.list-title');
     const spaHome = document.getElementById('spa-home');
-    const BLOG_PATH = '/blog';
+    const BLOG_PATH = '/blog/';
     let STATE = '';
     let currentPage = 1;
     const itemsPerPage = 2; // Saya ubah ke 5 agar lebih proporsional
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderHome() {
         STATE = 'home';
         hideAll();
-        [spaHome, homepage].forEach(el => safe(el, e => {
+        [homepage].forEach(el => safe(el, e => {
             e.style.display = 'block';
             e.classList.add('animate-slide');
         }));
