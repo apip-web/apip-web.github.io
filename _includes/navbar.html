@@ -350,42 +350,52 @@ searchInput.addEventListener('input', () => {
 
     if (keyword.length < 2) return;
 
-    // Ambil data posts dari DOM
+// Ambil semua elemen post
     const posts = Array.from(document.querySelectorAll('.post'));
+    
     const filtered = posts.filter(p => {
         const title = p.querySelector('.post-title').innerText.toLowerCase();
-        return title.includes(keyword);
+        
+        // AMBIL SEMUA TEKS DI DALAM KONTEN ARTIKEL
+        // Kita ambil dari .entry-content atau .post-content
+        const content = p.querySelector('.entry-content')?.innerText.toLowerCase() || "";
+        
+        // Ambil juga tag kalau ada
+        const tags = p.dataset.tags ? p.dataset.tags.toLowerCase() : "";
+
+        // Cek apakah keyword ada di judul, konten, atau tag
+        return title.includes(keyword) || 
+               content.includes(keyword) || 
+               tags.includes(keyword);
     });
 
-    if (filtered.length === 0) {
-        resultsArea.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:10px;">Gak ketemu, Pip...</p>';
-        return;
-    }
-
-    filtered.forEach(p => {
+filtered.forEach(p => {
         const title = p.querySelector('.post-title').innerText;
         const targetUrl = p.getAttribute('data-url');
         
+        // Ambil potongan teks untuk preview (excerpt)
+        const fullContent = p.querySelector('.entry-content')?.innerText || "";
+        const snippet = fullContent.substring(0, 80) + "..."; // Ambil 80 karakter pertama
+
         const item = document.createElement('div');
         item.className = 'search-item';
-        item.style.cssText = "padding: 10px; border-bottom: 1px solid var(--hr); cursor: pointer; transition: 0.2s;";
-        item.innerHTML = `<span style="color: var(--text-main); font-size: 14px;">${title}</span>`;
+        item.style.cssText = "padding: 15px; border-bottom: 1px solid var(--hr); cursor: pointer; transition: 0.2s;";
         
-        item.onmouseover = () => item.style.background = "var(--accent)";
-        item.onmouseout = () => item.style.background = "transparent";
+        // Tampilkan Judul + Snippet
+        item.innerHTML = `
+            <div style="color: var(--accent); font-weight: bold; font-size: 14px; margin-bottom: 4px;">${title}</div>
+            <div style="color: var(--text-muted); font-size: 12px; line-height: 1.4;">${snippet}</div>
+        `;
         
         item.onclick = () => {
             if (targetUrl) {
                 closeSearch();
-                console.log("Navigasi ke:", targetUrl);
                 router(targetUrl, true);
-            } else {
-                console.error("URL tidak ditemukan di dataset post!");
             }
         };
         resultsArea.appendChild(item);
     });
-}); // <--- TADI KAMU LUPA TUTUP BAGIAN INI, PIP!
+});
 
 // Tambahkan ke window click agar bisa tutup klik luar
 window.addEventListener('click', (event) => {
