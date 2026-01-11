@@ -358,28 +358,26 @@ searchInput.addEventListener('input', () => {
     });
 
     if (filtered.length === 0) {
-        resultsArea.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Gak ketemu, Pip...</p>';
+        resultsArea.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:10px;">Gak ketemu, Pip...</p>';
         return;
     }
 
-filtered.forEach(p => {
+    filtered.forEach(p => {
         const title = p.querySelector('.post-title').innerText;
-        // AMBIL URL DARI ATRIBUT DATA-URL SECARA EKSPLISIT
         const targetUrl = p.getAttribute('data-url');
         
         const item = document.createElement('div');
-        item.className = 'search-item'; // Pakai class saja biar rapi, atau style.cssText kamu
+        item.className = 'search-item';
         item.style.cssText = "padding: 10px; border-bottom: 1px solid var(--hr); cursor: pointer; transition: 0.2s;";
         item.innerHTML = `<span style="color: var(--text-main); font-size: 14px;">${title}</span>`;
         
         item.onmouseover = () => item.style.background = "var(--accent)";
         item.onmouseout = () => item.style.background = "transparent";
         
-        // BAGIAN INI YANG KRUSIAL, PIP!
         item.onclick = () => {
             if (targetUrl) {
                 closeSearch();
-                console.log("Navigasi ke:", targetUrl); // Buat cek di console
+                console.log("Navigasi ke:", targetUrl);
                 router(targetUrl, true);
             } else {
                 console.error("URL tidak ditemukan di dataset post!");
@@ -387,6 +385,7 @@ filtered.forEach(p => {
         };
         resultsArea.appendChild(item);
     });
+}); // <--- TADI KAMU LUPA TUTUP BAGIAN INI, PIP!
 
 // Tambahkan ke window click agar bisa tutup klik luar
 window.addEventListener('click', (event) => {
