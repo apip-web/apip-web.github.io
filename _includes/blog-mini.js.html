@@ -232,6 +232,9 @@ function router(path, pushState) {
     render404(path);
 }
 
+// supaya bisa dipanggil oleh search
+window.router = router;
+
     function findPostByPath(path) {
         const target = path.replace(/\/$/, '').replace('.html', '');
         return getPosts().find(p => {
